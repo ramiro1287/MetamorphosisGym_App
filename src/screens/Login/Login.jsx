@@ -173,15 +173,15 @@ export default function Login() {
         >
           Al usar esta aplicación, aceptás nuestros{" "}
           <Text
-            style={{ textDecorationLine: "underline" }}
-            onPress={() => Linking.openURL("https://example.com/terminos")}
+            style={{ textDecorationLine: "underline", fontSize: 18 }}
+            onPress={() => Linking.openURL(`${BASE_SERVER_URL}/static/docs/MetamorphosisGym_TyCs.pdf`)}
           >
             Términos & Condiciones
-          </Text>{" "}
-          y{" "}
+          </Text>
+          {" "}y{" "}
           <Text
-            style={{ textDecorationLine: "underline" }}
-            onPress={() => Linking.openURL("https://example.com/politicas")}
+            style={{ textDecorationLine: "underline", fontSize: 18 }}
+            onPress={() => Linking.openURL(`${BASE_SERVER_URL}/static/docs/MetamorphosisGym_TyCs.pdf`)}
           >
             Políticas de Privacidad
           </Text>.
