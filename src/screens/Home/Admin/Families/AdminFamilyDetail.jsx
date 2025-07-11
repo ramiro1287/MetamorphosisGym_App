@@ -16,7 +16,7 @@ import {
   defaultTextDark, defaultTextLight,
   secondTextDark, secondTextLight,
   secondBackgroundDark, secondBackgroundLight,
-  inputErrorDark,
+  inputErrorDark, inputErrorLight,
 } from "../../../../constants/UI/colors";
 
 export default function AdminFamilyDetail() {

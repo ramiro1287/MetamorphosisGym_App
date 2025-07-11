@@ -367,7 +367,7 @@ export default function AdminUserPaymentDetail() {
       flex: 1,
       padding: 10,
       borderRadius: 20,
-      backgroundColor: isDarkMode ? mainBackgroundDark : "#FFB583",
+      backgroundColor: isDarkMode ? mainBackgroundDark : mainBackgroundLight,
       marginTop: 10,
       borderRightWidth: 3,
       borderLeftWidth: 3,
@@ -548,7 +548,7 @@ export default function AdminUserPaymentDetail() {
             key={discount.id}
             style={[
               styles.penaltyCard,
-              penalty.enabled ? { borderColor: buttonTextConfirmDark } : { borderColor: inputErrorDark },
+              discount.enabled ? { borderColor: buttonTextConfirmDark } : { borderColor: inputErrorDark },
             ]}
           >
             <Text style={styles.cardRowTitle}>{index + 1}) {discount.discount.description}</Text>

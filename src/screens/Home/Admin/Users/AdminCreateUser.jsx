@@ -31,6 +31,7 @@ export default function AdminCreateUser() {
     role: TraineeRole,
     plan_id: null,
     phone: "",
+    country: "AR",
   });
   const [idNumberError, setIdNumberError] = useState("");
   const [firstNameError, setFirstNameError] = useState("");
@@ -69,13 +70,15 @@ export default function AdminCreateUser() {
       setLastNameError("Ingresar apellido");
       hasError = true;
     }
-    
+
     if (form.role === TraineeRole && !form.plan_id) {
       setPlanError("Un cliente debe tener un plan");
       hasError = true;
     }
 
     if (hasError) return;
+
+    if (form.phone === "") form.phone = null;
 
     const confirm = await showConfirmModalAlert(
       "¿Estás seguro de crear el nuevo usuario?"
@@ -206,6 +209,21 @@ export default function AdminCreateUser() {
           />
         </View>
         <View style={styles.cardInputContainer}>
+          <Text style={styles.cardInputLabel}>País del Teléfono:</Text>
+          <RNPickerSelect
+            value={form.country}
+            onValueChange={(v) => handleChange("country", v)}
+            items={Object.entries(gymInfo.countries || {}).map(([key, value]) => ({
+              label: value,
+              value: key,
+              color: defaultTextLight,
+            }))}
+            style={styles.pickerSelect}
+            useNativeAndroidPickerStyle={false}
+            placeholder={{}}
+          />
+        </View>
+        <View style={styles.cardInputContainer}>
           <Text style={styles.cardInputLabel}>Rol:</Text>
           <RNPickerSelect
             value={form.role}
@@ -239,7 +257,7 @@ export default function AdminCreateUser() {
         </View>
         {planError && (<Text style={styles.errorText}>{planError}</Text>)}
         <View style={styles.cardInputContainer}>
-          <Text style={styles.cardInputLabel}>¿Está retirado?</Text>
+          <Text style={styles.cardInputLabel}>¿Es jubilado?</Text>
           <Switch
             value={form.is_retired}
             onValueChange={(v) => handleChange("is_retired", v)}

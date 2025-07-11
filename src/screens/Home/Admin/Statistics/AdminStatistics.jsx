@@ -225,19 +225,19 @@ export default function AdminStatistics() {
         </View>
         <View style={styles.rowContainer}>
           <Text style={styles.label}>Ganancias</Text>
-          <Text style={[styles.value, { color: buttonTextConfirmDark }]}>
+          <Text style={styles.value}>
             $ {earnings?.payments_completed_total}
           </Text>
         </View>
         <View style={styles.rowContainer}>
           <Text style={styles.label}>Pendientes</Text>
-          <Text style={[styles.value, { color: "#FFFF00" }]}>
+          <Text style={styles.value}>
             $ {earnings?.payments_pending_total}
           </Text>
         </View>
         <View style={styles.rowContainer}>
           <Text style={styles.label}>Cancelados</Text>
-          <Text style={[styles.value, { color: errorButtonTextDark }]}>
+          <Text style={styles.value}>
             $ {earnings?.payments_canceled_total}
           </Text>
         </View>
@@ -282,7 +282,7 @@ export default function AdminStatistics() {
           payments.map((payment) => (
             <TouchableOpacity
               key={payment.id}
-              style={styles.cardContainer}
+              style={[styles.cardContainer, { marginBottom: 15 }]}
               onPress={() => handlePaymentDetail(payment)}
             >
               <View style={styles.cardRowContainer}>

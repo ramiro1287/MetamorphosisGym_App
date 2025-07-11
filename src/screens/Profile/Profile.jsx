@@ -11,7 +11,6 @@ import { showConfirmModalAlert } from "../../components/Alerts/ConfirmModalAlert
 import ScrollContainer from "../../components/Containers/ScrollContainer";
 import { AdminRole, CoachRole, StatusDeleted } from "../../constants/users";
 import {
-  shadowCardDark, shadowCardLight,
   iconDark, iconLight,
   defaultTextDark, defaultTextLight,
   secondTextDark, secondTextLight,
