@@ -1,5 +1,13 @@
 import React, { useContext, useState } from "react";
-import { View, Text, StyleSheet, Platform  } from "react-native";
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  Platform, 
+  Modal, 
+  Pressable,
+  Dimensions 
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import TouchableButton from "../../components/Buttons/TouchableButton";
@@ -17,8 +25,11 @@ import {
   secondBackgroundDark, secondBackgroundLight,
 } from "../../constants/UI/colors";
 
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
 export default function Profile() {
   const [showPicker, setShowPicker] = useState(false);
+  const [tempDate, setTempDate] = useState(null);
   const {
     user,
     refreshUser,
@@ -39,22 +50,47 @@ export default function Profile() {
     });
   };
 
-  const onChange = async (event, selectedDate) => {
-    if (event.type === "dismissed") {
-      setShowPicker(false);
-      return;
-    }
+  const openDatePicker = () => {
+    setTempDate(user.birth_date ? new Date(user.birth_date) : new Date());
+    setShowPicker(true);
+  };
 
+  const closeDatePicker = () => {
+    setShowPicker(false);
+    setTempDate(null);
+  };
+
+  const onDateChange = (event, selectedDate) => {
+    if (Platform.OS === 'android') {
+      setShowPicker(false);
+      if (event.type === 'set' && selectedDate) {
+        confirmDateChange(selectedDate);
+      }
+    } else {
+      // iOS - just update temp date
+      if (selectedDate) {
+        setTempDate(selectedDate);
+      }
+    }
+  };
+
+  const confirmDateChange = async (date) => {
     const confirm = await showConfirmModalAlert(
       "¿Estás seguro de cambiar tu fecha de nacimiento?"
     );
     if (!confirm) {
-      if (Platform.OS === "android") setShowPicker(false);
+      closeDatePicker();
       return;
     }
 
-    handleChangeBirthDate(selectedDate);
-    if (Platform.OS === "android") setShowPicker(false);
+    handleChangeBirthDate(date);
+    closeDatePicker();
+  };
+
+  const handleIOSConfirm = () => {
+    if (tempDate) {
+      confirmDateChange(tempDate);
+    }
   };
 
   const handleChangeBirthDate = async (date) => {
@@ -117,150 +153,274 @@ export default function Profile() {
     profileCard: {
       backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
       borderRadius: 20,
-      padding: 20,
+      padding: screenWidth > 375 ? 25 : 20, // Responsive padding
       alignItems: "center",
       width: "100%",
+      maxWidth: 500, // Maximum width for larger screens
+      alignSelf: 'center',
     },
     avatar: {
-      width: 100,
-      height: 100,
-      borderRadius: 50,
+      width: screenWidth > 375 ? 120 : 100,
+      height: screenWidth > 375 ? 120 : 100,
+      borderRadius: screenWidth > 375 ? 60 : 50,
       marginBottom: 10,
     },
     userName: {
-      fontSize: 24,
+      fontSize: screenWidth > 375 ? 26 : 24,
       fontWeight: "bold",
       color: isDarkMode ? defaultTextDark : defaultTextLight,
+      textAlign: 'center',
     },
     userId: {
-      fontSize: 16,
+      fontSize: screenWidth > 375 ? 18 : 16,
       color: isDarkMode ? secondTextDark : secondTextLight,
       marginBottom: 20,
+      textAlign: 'center',
     },
     infoRow: {
       flexDirection: "row",
       justifyContent: "space-between",
       width: "100%",
-      marginBottom: 10,
+      marginBottom: screenWidth > 375 ? 15 : 12,
       alignItems: "flex-start",
-      flexWrap: "wrap",
+      minHeight: 25,
     },
     label: {
       color: isDarkMode ? secondTextDark : secondTextLight,
-      fontSize: 18,
+      fontSize: screenWidth > 375 ? 18 : 16,
+      flex: 1,
+      paddingRight: 10,
     },
     value: {
       color: isDarkMode ? defaultTextDark : defaultTextLight,
-      fontSize: 18,
-      flex: 1,
+      fontSize: screenWidth > 375 ? 18 : 16,
+      flex: 2,
       textAlign: "right",
     },
     headerRow: {
       flexDirection: "row",
       justifyContent: "flex-end",
       width: "100%",
+      marginBottom: 10,
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalContent: {
+      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
+      borderRadius: 20,
+      padding: 20,
+      width: screenWidth * 0.9,
+      maxWidth: 400,
+      alignItems: 'center',
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      marginBottom: 20,
+      textAlign: 'center',
+    },
+    modalButtons: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      width: '100%',
+      marginTop: 20,
+    },
+    modalButton: {
+      paddingHorizontal: 30,
+      paddingVertical: 12,
+      borderRadius: 10,
+      minWidth: 100,
+      alignItems: 'center',
+    },
+    cancelButton: {
+      backgroundColor: '#6c757d',
+    },
+    confirmButton: {
+      backgroundColor: '#007bff',
+    },
+    buttonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    iconTouchArea: {
+      padding: 5,
+      marginLeft: 5,
+    },
+    labelWithIcon: {
+      flexDirection: "row",
+      alignItems: "center",
     },
   });
 
-  return (
-    <ScrollContainer style={{ padding: 25 }}>
+  const DatePickerModal = () => (
+    <Modal
+      visible={showPicker}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={closeDatePicker}
+    >
+      <View style={styles.modalOverlay}>
+        <Pressable 
+          style={styles.modalOverlay} 
+          onPress={closeDatePicker}
+        >
+          <Pressable style={styles.modalContent} onPress={() => {}}>
+            <Text style={styles.modalTitle}>
+              Seleccionar fecha de nacimiento
+            </Text>
+            
+            <DateTimePicker
+              value={tempDate || new Date()}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={onDateChange}
+              maximumDate={new Date()}
+              style={{
+                width: screenWidth * 0.8,
+                maxWidth: 320,
+              }}
+            />
+            
+            {Platform.OS === 'ios' && (
+              <View style={styles.modalButtons}>
+                <Pressable 
+                  style={[styles.modalButton, styles.cancelButton]}
+                  onPress={closeDatePicker}
+                >
+                  <Text style={styles.buttonText}>Cancelar</Text>
+                </Pressable>
+                
+                <Pressable 
+                  style={[styles.modalButton, styles.confirmButton]}
+                  onPress={handleIOSConfirm}
+                >
+                  <Text style={styles.buttonText}>Confirmar</Text>
+                </Pressable>
+              </View>
+            )}
+          </Pressable>
+        </Pressable>
+      </View>
+    </Modal>
+  );
 
-        <View style={styles.profileCard}>
-          <View style={styles.headerRow}>
+  return (
+    <ScrollContainer style={{ padding: screenWidth > 375 ? 25 : 20 }}>
+      <View style={styles.profileCard}>
+        <View style={styles.headerRow}>
+          <Pressable 
+            style={styles.iconTouchArea}
+            onPress={() => setIsDarkMode(!isDarkMode)}
+          >
             <Icon
               name={isDarkMode ? "light-mode" : "dark-mode"}
               size={30}
               color={isDarkMode ? iconDark : iconLight}
-              onPress={() => setIsDarkMode(!isDarkMode)}
-              style={{ marginRight: 10 }}
             />
+          </Pressable>
+          <Pressable 
+            style={styles.iconTouchArea}
+            onPress={handleButtonLogout}
+          >
             <Icon
               name="power-settings-new"
               size={30}
               color={isDarkMode ? iconDark : iconLight}
-              onPress={handleButtonLogout}
-              style={{ marginLeft: 10 }}
             />
-          </View>
-          <Icon
-            name="account-circle"
-            size={120}
-            color={isDarkMode ? iconDark : iconLight}
-          />
-          <Text style={styles.userName}>{user.first_name} {user.last_name}</Text>
-          <Text style={styles.userId}>{user.id_number}</Text>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Rol</Text>
-            <Text style={styles.value}>{formatRole(user.role)}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Estado</Text>
-            <Text style={styles.value}>{formatStatus(user.status)}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Plan</Text>
-            <Text style={styles.value}>{user.plan ? user.plan?.name : "N/A"}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Jubilado</Text>
-            <Text style={styles.value}>{user.is_retired ? "Si" : "No"}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Teléfono</Text>
-            <Text style={styles.value}>{user.phone ? user.phone : "N/A"}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Familia</Text>
-            <Text style={styles.value}>{user.family ? user.family?.name : "N/A"}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <View style={{ flexDirection: "row" }}>
-              <Text style={styles.label}>Dirección</Text>
-              <Icon
-                name="edit"
-                size={25}
-                color={isDarkMode ? iconDark : iconLight}
-                onPress={handleChangeAddress}
-                style={{ marginLeft: 5 }}
-              />
-            </View>
-            <Text style={styles.value} numberOfLines={2} ellipsizeMode="tail">
-              {user.address ? `${user.address?.address} ${user.address?.city} ${user.address?.state}` : "N/A"}
-            </Text>
-          </View>
-          <View style={styles.infoRow}>
-            <View style={{ flexDirection: "row" }}>
-              <Text style={styles.label}>Nacimiento</Text>
-              <Icon
-                name="edit"
-                size={25}
-                color={isDarkMode ? iconDark : iconLight}
-                onPress={() => setShowPicker(true)}
-                style={{ marginLeft: 5 }}
-              />
-            </View>
-            <Text style={styles.value} numberOfLines={2} ellipsizeMode="tail">
-              {user.birth_date ? formatDate(user.birth_date) : "N/A"}
-            </Text>
-          </View>
-
-          {showPicker && (
-            <DateTimePicker
-              value={user.birth_date ? new Date(user.birth_date) : new Date()}
-              mode="date"
-              display="spinner"
-              onChange={onChange}
-              maximumDate={new Date()}
-            />
-          )}
-
-          <TouchableButton
-            title="Cambiar contraseña"
-            onPress={handleChangePassword}
-            style={{ marginTop: 15 }}
-          />
+          </Pressable>
         </View>
 
+        <Icon
+          name="account-circle"
+          size={screenWidth > 375 ? 140 : 120}
+          color={isDarkMode ? iconDark : iconLight}
+        />
+        
+        <Text style={styles.userName}>{user.first_name} {user.last_name}</Text>
+        <Text style={styles.userId}>{user.id_number}</Text>
+        
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Rol</Text>
+          <Text style={styles.value}>{formatRole(user.role)}</Text>
+        </View>
+        
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Estado</Text>
+          <Text style={styles.value}>{formatStatus(user.status)}</Text>
+        </View>
+        
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Plan</Text>
+          <Text style={styles.value}>{user.plan ? user.plan?.name : "N/A"}</Text>
+        </View>
+        
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Jubilado</Text>
+          <Text style={styles.value}>{user.is_retired ? "Si" : "No"}</Text>
+        </View>
+        
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Teléfono</Text>
+          <Text style={styles.value}>{user.phone ? user.phone : "N/A"}</Text>
+        </View>
+        
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Familia</Text>
+          <Text style={styles.value}>{user.family ? user.family?.name : "N/A"}</Text>
+        </View>
+        
+        <View style={styles.infoRow}>
+          <View style={styles.labelWithIcon}>
+            <Text style={styles.label}>Dirección</Text>
+            <Pressable 
+              style={styles.iconTouchArea}
+              onPress={handleChangeAddress}
+            >
+              <Icon
+                name="edit"
+                size={22}
+                color={isDarkMode ? iconDark : iconLight}
+              />
+            </Pressable>
+          </View>
+          <Text style={styles.value} numberOfLines={2} ellipsizeMode="tail">
+            {user.address ? `${user.address?.address} ${user.address?.city} ${user.address?.state}` : "N/A"}
+          </Text>
+        </View>
+        
+        <View style={styles.infoRow}>
+          <View style={styles.labelWithIcon}>
+            <Text style={styles.label}>Nacimiento</Text>
+            <Pressable 
+              style={styles.iconTouchArea}
+              onPress={openDatePicker}
+            >
+              <Icon
+                name="edit"
+                size={22}
+                color={isDarkMode ? iconDark : iconLight}
+              />
+            </Pressable>
+          </View>
+          <Text style={styles.value} numberOfLines={2} ellipsizeMode="tail">
+            {user.birth_date ? formatDate(user.birth_date) : "N/A"}
+          </Text>
+        </View>
+
+        <TouchableButton
+          title="Cambiar contraseña"
+          onPress={handleChangePassword}
+          style={{ marginTop: 20, width: '100%' }}
+        />
+      </View>
+
+      <DatePickerModal />
     </ScrollContainer>
   );
 }
