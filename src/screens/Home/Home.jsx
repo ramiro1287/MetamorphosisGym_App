@@ -93,13 +93,14 @@ export default function Home() {
   if (loading) return <LoadingScreen />;
 
   const styles = StyleSheet.create({
-    container: { padding: 20, gap: 20 },
+    container: { padding: 25, gap: 15 },
     welcomeText: {
       fontSize: 26,
       fontWeight: "bold",
       color: isDarkMode ? defaultTextDark : defaultTextLight,
     },
     card: {
+      width: "100%",
       backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
       borderRadius: 16,
       padding: 16,
@@ -108,22 +109,6 @@ export default function Home() {
       fontSize: 20,
       fontWeight: "bold",
       marginBottom: 12,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-    },
-    info: {
-      fontSize: 16,
-      marginBottom: 6,
-      color: isDarkMode ? secondTextDark : secondTextLight,
-    },
-    status: {
-      fontSize: 18,
-      fontWeight: "600",
-      marginBottom: 4,
-    },
-    price: {
-      fontSize: 24,
-      fontWeight: "bold",
-      marginVertical: 8,
       color: isDarkMode ? defaultTextDark : defaultTextLight,
     },
     noDataText: {
@@ -137,6 +122,24 @@ export default function Home() {
       marginBottom: 30,
       gap: 20,
     },
+    infoRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      width: "100%",
+      marginBottom: 10,
+      alignItems: "flex-start",
+      flexWrap: "wrap",
+    },
+    label: {
+      color: isDarkMode ? secondTextDark : secondTextLight,
+      fontSize: 18,
+    },
+    value: {
+      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      fontSize: 18,
+      flex: 1,
+      textAlign: "right",
+    },
   });
 
   return (
@@ -148,23 +151,39 @@ export default function Home() {
           <Text style={styles.cardTitle}>Última cuota</Text>
           {payments.length ? (
             <>
-              <Text
-                style={[
-                  styles.status,
-                  { color: payments[0].status !== PayStatusCompleted ? inputErrorDark : buttonTextConfirmDark }
-                ]}
-              >
-                {formatPaymentStatus(payments[0].status)}
-              </Text>
-              <Text style={styles.price}>${getFinalAmount(payments[0])}</Text>
-              <Text style={styles.info}>
-                Mes: {getMonth(payments[0].created_at)} {new Date(payments[0].created_at).getFullYear()}
-              </Text>
-              <TouchableButton
-                title="Ver cuotas"
-                icon={<Icon name="credit-card" size={22} color={isDarkMode ? defaultTextLight : defaultTextDark} />}
-                onPress={() => navigation.navigate("TraineePayments")}
-              />
+              <View style={styles.infoRow}>
+                <Text style={styles.label}>Precio</Text>
+                <Text style={[
+                  styles.value,
+                  { fontSize: 22, fontWeight: "bold" }
+                ]}>
+                  ${getFinalAmount(payments[0])}
+                </Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.label}>Estado</Text>
+                <Text
+                  style={[
+                    styles.value,
+                    { color: payments[0].status !== PayStatusCompleted ? inputErrorDark : buttonTextConfirmDark }
+                  ]}
+                >
+                  {formatPaymentStatus(payments[0].status)}
+                </Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.label}>Mes</Text>
+                <Text style={styles.value}>
+                  {getMonth(payments[0].created_at)} {new Date(payments[0].created_at).getFullYear()}
+                </Text>
+              </View>
+              <View style={{ flex: 1, alignItems: "flex-end" }}>
+                <TouchableButton
+                  title="Ver cuotas"
+                  icon={<Icon name="credit-card" size={22} color={isDarkMode ? defaultTextLight : defaultTextDark} />}
+                  onPress={() => navigation.navigate("TraineePayments")}
+                />
+              </View>
             </>
           ) : (
             <Text style={styles.noDataText}>Sin cuotas disponibles</Text>
@@ -175,14 +194,25 @@ export default function Home() {
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Plan de entrenamiento</Text>
         {trainingPlans.length ? (
-           <>
-            <Text style={styles.info}>Entrenador: {trainingPlans[0].coach}</Text>
-            <Text style={styles.info}>Vence: {formatDate(trainingPlans[0].expiration_date)}</Text>
-            <TouchableButton
-              title="Ver plan"
-              icon={<Icon name="clipboard" size={22} color={isDarkMode ? defaultTextLight : defaultTextDark} />}
-              onPress={() => navigation.navigate("TraineePlans")}
-            />
+          <>
+            <View key={plan.id} style={styles.infoRow}>
+              <Text style={styles.label}>Entrenador</Text>
+              <Text style={styles.value}>{trainingPlans[0].coach}</Text>
+            </View>
+            <View key={plan.id} style={styles.infoRow}>
+              <Text style={styles.label}>Vence</Text>
+              <Text style={styles.value}>
+                {formatDate(trainingPlans[0].expiration_date)}
+              </Text>
+            </View>
+
+            <View style={{ flex: 1, alignItems: "flex-end" }}>
+              <TouchableButton
+                title="Ver plan"
+                icon={<Icon name="clipboard" size={22} color={isDarkMode ? defaultTextLight : defaultTextDark} />}
+                onPress={() => navigation.navigate("TraineePlans")}
+              />
+            </View>
           </>
         ) : (
           <Text style={styles.noDataText}>Sin plan asignado</Text>
@@ -193,9 +223,12 @@ export default function Home() {
         <Text style={styles.cardTitle}>Planes y Precios</Text>
         {gymInfo?.plans?.length ? (
           gymInfo.plans.map(plan => (
-            <Text key={plan.id} style={styles.info}>
-              {plan.name}: ${plan.price}
-            </Text>
+            <View key={plan.id} style={styles.infoRow}>
+              <Text style={styles.label}>{plan.name}</Text>
+              <Text style={styles.value}>
+                ${plan.price}
+              </Text>
+            </View>
           ))
         ) : (
           <Text style={styles.noDataText}>No hay planes disponibles</Text>
