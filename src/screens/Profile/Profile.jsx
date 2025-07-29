@@ -27,6 +27,71 @@ import {
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
+
+const DatePickerModal = React.memo(({ showPicker, closeDatePicker, styles, screenWidth, handleConfirm, isDarkMode, onDateChange, tempDate, user }) => {
+    const isAndroid = Platform.OS === 'android';
+    
+    return (
+      <Modal
+        visible={showPicker}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={closeDatePicker}
+        statusBarTranslucent={true}
+      >
+        <View style={styles.modalOverlay}>
+          <Pressable 
+            style={styles.modalOverlay} 
+            onPress={closeDatePicker}
+          >
+            <Pressable style={styles.modalContent} onPress={() => {}}>
+              <Text style={styles.modalTitle}>
+                Seleccionar fecha de nacimiento
+              </Text>
+              
+              {/* Wrap DateTimePicker in a container to prevent auto-close on Android */}
+              <View style={{ 
+                width: screenWidth * 0.8,
+                maxWidth: 320,
+                alignItems: 'center',
+              }}>
+                <DateTimePicker
+                  value={tempDate || (user.birth_date ? new Date(user.birth_date) : new Date())}
+                  mode="date"
+                  display="spinner"
+                  onChange={onDateChange}
+                  maximumDate={new Date()}
+                  minimumDate={new Date(1900, 0, 1)}
+                  textColor={isDarkMode ? defaultTextDark : defaultTextLight}
+                  style={{
+                    width: '100%',
+                    height: isAndroid ? 200 : 'auto',
+                  }}
+                />
+              </View>
+              
+              <View style={styles.modalButtons}>
+                <Pressable 
+                  style={[styles.modalButton, styles.cancelButton]}
+                  onPress={closeDatePicker}
+                >
+                  <Text style={styles.buttonText}>Cancelar</Text>
+                </Pressable>
+                
+                <Pressable 
+                  style={[styles.modalButton, styles.confirmButton]}
+                  onPress={handleConfirm}
+                >
+                  <Text style={styles.buttonText}>Confirmar</Text>
+                </Pressable>
+              </View>
+            </Pressable>
+          </Pressable>
+        </View>
+      </Modal>
+    );
+});
+
 export default function Profile() {
   const [showPicker, setShowPicker] = useState(false);
   const [tempDate, setTempDate] = useState(null);
@@ -264,71 +329,6 @@ export default function Profile() {
     },
   });
 
-  const DatePickerModal = () => {
-    const isAndroid = Platform.OS === 'android';
-    console.log('dasdasdasd');
-    
-    return (
-      <Modal
-        visible={showPicker}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={closeDatePicker}
-        statusBarTranslucent={true}
-      >
-        <View style={styles.modalOverlay}>
-          <Pressable 
-            style={styles.modalOverlay} 
-            onPress={closeDatePicker}
-          >
-            <Pressable style={styles.modalContent} onPress={() => {}}>
-              <Text style={styles.modalTitle}>
-                Seleccionar fecha de nacimiento
-              </Text>
-              
-              {/* Wrap DateTimePicker in a container to prevent auto-close on Android */}
-              <View style={{ 
-                width: screenWidth * 0.8,
-                maxWidth: 320,
-                alignItems: 'center',
-              }}>
-                <DateTimePicker
-                  value={tempDate || (user.birth_date ? new Date(user.birth_date) : new Date())}
-                  mode="date"
-                  display="spinner"
-                  onChange={onDateChange}
-                  maximumDate={new Date()}
-                  minimumDate={new Date(1900, 0, 1)}
-                  textColor={isDarkMode ? defaultTextDark : defaultTextLight}
-                  style={{
-                    width: '100%',
-                    height: isAndroid ? 200 : 'auto',
-                  }}
-                />
-              </View>
-              
-              <View style={styles.modalButtons}>
-                <Pressable 
-                  style={[styles.modalButton, styles.cancelButton]}
-                  onPress={closeDatePicker}
-                >
-                  <Text style={styles.buttonText}>Cancelar</Text>
-                </Pressable>
-                
-                <Pressable 
-                  style={[styles.modalButton, styles.confirmButton]}
-                  onPress={handleConfirm}
-                >
-                  <Text style={styles.buttonText}>Confirmar</Text>
-                </Pressable>
-              </View>
-            </Pressable>
-          </Pressable>
-        </View>
-      </Modal>
-    );
-  };
-
   return (
     <ScrollContainer style={{ padding: screenWidth > 375 ? 25 : 20 }}>
       <View style={styles.profileCard}>
@@ -439,7 +439,7 @@ export default function Profile() {
         />
       </View>
 
-      <DatePickerModal />
+      <DatePickerModal {...{ showPicker, closeDatePicker, styles, screenWidth, handleConfirm, isDarkMode, onDateChange, tempDate, user }} />
     </ScrollContainer>
   );
 }
