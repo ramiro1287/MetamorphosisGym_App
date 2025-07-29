@@ -61,35 +61,30 @@ export default function Profile() {
   };
 
   const onDateChange = (event, selectedDate) => {
-    if (Platform.OS === 'android') {
-      setShowPicker(false);
-      if (event.type === 'set' && selectedDate) {
-        confirmDateChange(selectedDate);
-      }
-    } else {
-      // iOS - just update temp date
-      if (selectedDate) {
-        setTempDate(selectedDate);
-      }
+    // Only update temp date, don't do anything else
+    if (selectedDate) {
+      setTempDate(selectedDate);
     }
   };
 
-  const confirmDateChange = async (date) => {
-    const confirm = await showConfirmModalAlert(
-      "¿Estás seguro de cambiar tu fecha de nacimiento?"
-    );
-    if (!confirm) {
-      closeDatePicker();
-      return;
-    }
-
-    handleChangeBirthDate(date);
-    closeDatePicker();
-  };
-
-  const handleIOSConfirm = () => {
+  const handleConfirm = async () => {
     if (tempDate) {
-      confirmDateChange(tempDate);
+      setShowPicker(false);
+      // Use setTimeout to ensure modal closes before showing alert
+      setTimeout(async () => {
+        try {
+          const confirm = await showConfirmModalAlert(
+            "¿Estás seguro de cambiar tu fecha de nacimiento?"
+          );
+          if (confirm) {
+            await handleChangeBirthDate(tempDate);
+          }
+        } catch (error) {
+          console.log('Error in handleConfirm:', error);
+        } finally {
+          setTempDate(null);
+        }
+      }, 200);
     }
   };
 
@@ -256,38 +251,62 @@ export default function Profile() {
       flexDirection: "row",
       alignItems: "center",
     },
+    pickerContainer: {
+      width: screenWidth * 0.8,
+      maxWidth: 320,
+      height: 200,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    datePicker: {
+      width: '100%',
+      height: 200,
+    },
   });
 
-  const DatePickerModal = () => (
-    <Modal
-      visible={showPicker}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={closeDatePicker}
-    >
-      <View style={styles.modalOverlay}>
-        <Pressable 
-          style={styles.modalOverlay} 
-          onPress={closeDatePicker}
-        >
-          <Pressable style={styles.modalContent} onPress={() => {}}>
-            <Text style={styles.modalTitle}>
-              Seleccionar fecha de nacimiento
-            </Text>
-            
-            <DateTimePicker
-              value={tempDate || new Date()}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={onDateChange}
-              maximumDate={new Date()}
-              style={{
+  const DatePickerModal = () => {
+    const isAndroid = Platform.OS === 'android';
+    console.log('dasdasdasd');
+    
+    return (
+      <Modal
+        visible={showPicker}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={closeDatePicker}
+        statusBarTranslucent={true}
+      >
+        <View style={styles.modalOverlay}>
+          <Pressable 
+            style={styles.modalOverlay} 
+            onPress={closeDatePicker}
+          >
+            <Pressable style={styles.modalContent} onPress={() => {}}>
+              <Text style={styles.modalTitle}>
+                Seleccionar fecha de nacimiento
+              </Text>
+              
+              {/* Wrap DateTimePicker in a container to prevent auto-close on Android */}
+              <View style={{ 
                 width: screenWidth * 0.8,
                 maxWidth: 320,
-              }}
-            />
-            
-            {Platform.OS === 'ios' && (
+                alignItems: 'center',
+              }}>
+                <DateTimePicker
+                  value={tempDate || (user.birth_date ? new Date(user.birth_date) : new Date())}
+                  mode="date"
+                  display="spinner"
+                  onChange={onDateChange}
+                  maximumDate={new Date()}
+                  minimumDate={new Date(1900, 0, 1)}
+                  textColor={isDarkMode ? defaultTextDark : defaultTextLight}
+                  style={{
+                    width: '100%',
+                    height: isAndroid ? 200 : 'auto',
+                  }}
+                />
+              </View>
+              
               <View style={styles.modalButtons}>
                 <Pressable 
                   style={[styles.modalButton, styles.cancelButton]}
@@ -298,17 +317,17 @@ export default function Profile() {
                 
                 <Pressable 
                   style={[styles.modalButton, styles.confirmButton]}
-                  onPress={handleIOSConfirm}
+                  onPress={handleConfirm}
                 >
                   <Text style={styles.buttonText}>Confirmar</Text>
                 </Pressable>
               </View>
-            )}
+            </Pressable>
           </Pressable>
-        </Pressable>
-      </View>
-    </Modal>
-  );
+        </View>
+      </Modal>
+    );
+  };
 
   return (
     <ScrollContainer style={{ padding: screenWidth > 375 ? 25 : 20 }}>
