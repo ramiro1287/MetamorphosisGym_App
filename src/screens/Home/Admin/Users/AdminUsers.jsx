@@ -17,7 +17,7 @@ import {
   defaultTextDark, defaultTextLight,
   secondBackgroundDark, secondBackgroundLight,
   secondTextDark, secondTextLight,
-  buttonTextConfirmDark, errorButtonTextDark,
+  errorButtonTextDark,
 } from "../../../../constants/UI/colors";
 import debounce from "lodash.debounce";
 import { StatusActive } from "../../../../constants/users";

@@ -1,3 +1,4 @@
+
 import React, { useContext, useState, useCallback } from "react";
 import { useFocusEffect } from '@react-navigation/native';
 import { Text, StyleSheet, View, TouchableOpacity } from "react-native";
@@ -6,6 +7,7 @@ import { GymContext } from "../../../../context/GymContext";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError } from "../../../../components/Toast/Toast";
+import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import {
   defaultTextDark, defaultTextLight,
   secondBackgroundDark, secondBackgroundLight,
@@ -45,6 +47,17 @@ export default function AdminFamilies() {
       ]
     });
   };
+
+  const handleCreateFamily = () => {
+    navigation.reset({
+      index: 1,
+      routes: [
+        { name: "Home" },
+        { name: "AdminFamilies" },
+        { name: "AdminFamilyCreate" }
+      ]
+    });
+  };
  
   const styles = StyleSheet.create({
     titleText: {
@@ -77,11 +90,22 @@ export default function AdminFamilies() {
       fontSize: 20,
       color: isDarkMode ? defaultTextDark : defaultTextLight,
     },
+    createButton: {
+      alignSelf: "flex-end",
+      marginBottom: 20,
+      paddingVertical: 2,
+      paddingHorizontal: 5,
+    },
   });
 
   return (
     <View style={{ flex: 1, paddingHorizontal: 25 }}>
       <Text style={styles.titleText}>Familias</Text>
+      <TouchableButton
+        title="Nueva Familia"
+        onPress={handleCreateFamily}
+        style={styles.createButton}
+      />
       <ScrollContainer>
         {families.length ? families.map((family) => (
           <TouchableOpacity

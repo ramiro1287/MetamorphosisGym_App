@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   View,
   Linking,
-  Image
+  Image,
+  Keyboard
 } from "react-native";
 import { saveToken } from "../../services/authService";
 import { BaseServerUrl } from "../../constants/environment";
@@ -53,6 +54,7 @@ export default function Login() {
 
     if (hasError) return;
 
+    Keyboard.dismiss()
     setLoading(true);
     try {
       const response = await fetch(`${BaseServerUrl}/auth/login/`, {

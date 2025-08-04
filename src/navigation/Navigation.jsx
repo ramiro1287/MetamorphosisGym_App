@@ -1,3 +1,4 @@
+
 import React, { useContext } from "react";
 import { StatusBar } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -27,6 +28,7 @@ import AdminUserPlans from "../screens/Home/Admin/Users/AdminUserPlans";
 import AdminFamilies from "../screens/Home/Admin/Families/AdminFamilies";
 import AdminFamilyDetail from "../screens/Home/Admin/Families/AdminFamilyDetail";
 import AdminFamilyAdd from "../screens/Home/Admin/Families/AdminFamilyAdd";
+import AdminFamilyCreate from "../screens/Home/Admin/Families/AdminFamilyCreate";
 // Admin Payments Screens
 import AdminUserPayments from "../screens/Home/Admin/Payments/AdminUserPayments";
 import AdminUserPaymentDetail from "../screens/Home/Admin/Payments/AdminUserPaymentDetail";
@@ -70,9 +72,10 @@ export default function Navigation() {
         <Stack.Screen name="AdminCreateUser" component={AdminCreateUser} />
         <Stack.Screen name="AdminUserPlans" component={AdminUserPlans} />
         {/* Admin Families Screens */}
-            <Stack.Screen name="AdminFamilies" component={AdminFamilies} />
+        <Stack.Screen name="AdminFamilies" component={AdminFamilies} />
         <Stack.Screen name="AdminFamilyDetail" component={AdminFamilyDetail} />
         <Stack.Screen name="AdminFamilyAdd" component={AdminFamilyAdd} />
+        <Stack.Screen name="AdminFamilyCreate" component={AdminFamilyCreate} />
         {/* Admin Payments Screens */}
         <Stack.Screen name="AdminUserPayments" component={AdminUserPayments} />
         <Stack.Screen name="AdminUserPaymentDetail" component={AdminUserPaymentDetail} />
