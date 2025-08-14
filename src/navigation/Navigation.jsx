@@ -39,11 +39,15 @@ import AdminUserTrainingPlanDetail from "../screens/Home/Admin/TrainingPlans/Adm
 // Admin Statistics Screens
 import AdminStatistics from "../screens/Home/Admin/Statistics/AdminStatistics";
 
-
 // ------------------------------------------------- Profile Screens
 import Profile from "../screens/Profile/Profile";
 import ChangePassword from "../screens/Profile/ChangePassword";
 import ChangeAddress from "../screens/Profile/ChangeAddress";
+
+// ------------------------------------------------- Notifications Screens
+import Notifications from "../screens/Notifications/Notifications";
+import AdminAnnouncements from "../screens/Notifications/Admin/AdminAnnouncements";
+import AdminAnnouncementCreate from "../screens/Notifications/Admin/AdminAnnouncementCreate";
 
 const Stack = createStackNavigator();
 
@@ -90,6 +94,11 @@ export default function Navigation() {
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="ChangePassword" component={ChangePassword} />
         <Stack.Screen name="ChangeAddress" component={ChangeAddress} />
+
+        {/* Notifications */}
+        <Stack.Screen name="Notifications" component={Notifications} />
+        <Stack.Screen name="AdminAnnouncements" component={AdminAnnouncements} />
+        <Stack.Screen name="AdminAnnouncementCreate" component={AdminAnnouncementCreate} />
       </Stack.Navigator>
       <Toast config={getToastConfig(isDarkMode)} />
     </NavigationContainer>

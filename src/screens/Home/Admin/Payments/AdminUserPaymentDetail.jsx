@@ -530,10 +530,7 @@ export default function AdminUserPaymentDetail() {
               title={penalty.enabled ? "Desactivar" : "Activar"}
               onPress={() => handleUpdatePenalty(null, penalty.id, penalty.enabled)}
               style={styles.penaltybutton}
-              textButtonStyle={{
-                fontSize: 16,
-                color: penalty.enabled ? inputErrorDark : buttonTextConfirmDark
-              }}
+              textButtonStyle={{ fontSize: 16 }}
             />
           </View>
         ))}
@@ -569,10 +566,7 @@ export default function AdminUserPaymentDetail() {
               title={discount.enabled ? "Desactivar" : "Activar"}
               onPress={() => handleUpdateDiscount(null, discount.id, discount.enabled)}
               style={styles.penaltybutton}
-              textButtonStyle={{
-                fontSize: 16,
-                color: discount.enabled ? inputErrorDark : buttonTextConfirmDark
-              }}
+              textButtonStyle={{ fontSize: 16 }}
             />
           </View>
         ))}

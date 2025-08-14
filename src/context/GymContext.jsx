@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { refreshAccessToken, logout, fetchWithAuth } from "../services/authService";
 
@@ -9,6 +9,7 @@ export const GymProvider = ({ children }) => {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [gymInfo, setGymInfo] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
   useEffect(() => {
     const loadTheme = async () => {
@@ -71,6 +72,31 @@ export const GymProvider = ({ children }) => {
     setIsAuthLoading(false);
   };
 
+  const getHasUnreadNotifications = useCallback(async () => {
+    try {
+      const response = await fetchWithAuth("/notifications/unread/");
+      if (response.ok) {
+        const { data } = await response.json();
+        setHasUnreadNotifications(data.has_unread);
+      }
+    } catch (error) {
+      toastError("Error", "Error de conexión");
+    }
+  }, []);
+
+  useEffect(() => {
+    let intervalId;
+
+    if (user) {
+      getHasUnreadNotifications();
+      intervalId = setInterval(getHasUnreadNotifications, 60000);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [user, getHasUnreadNotifications]);
+
   useEffect(() => {
     checkAuth();
   }, []);
@@ -96,6 +122,8 @@ export const GymProvider = ({ children }) => {
         gymInfo, getGymInfo,
         isDarkMode, setIsDarkMode,
         isAuthLoading,
+        hasUnreadNotifications,
+        getHasUnreadNotifications,
       }}
     >
       {children}
