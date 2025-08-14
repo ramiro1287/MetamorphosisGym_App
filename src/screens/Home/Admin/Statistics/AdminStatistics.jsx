@@ -8,13 +8,13 @@ import { Text, StyleSheet, View, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import { MonthsMap } from "../../../../constants/payments"
-import { toastError } from "../../../../components/Toast/Toast";
+import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
+import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
 import {
   iconDark, iconLight,
   defaultTextDark, defaultTextLight,
   secondBackgroundDark, secondBackgroundLight,
   secondTextDark, secondTextLight,
-  buttonTextConfirmDark, errorButtonTextDark,
 } from "../../../../constants/UI/colors";
 import {
   PayStatusCompleted, PayStatusPending,
@@ -131,6 +131,36 @@ export default function AdminStatistics() {
       });
   };
 
+  const handleNotifyUser = async (paymentId) => {
+    const confirm = await showConfirmModalAlert(
+      "¿Quieres notificar la falta de pago de esta cuota?"
+    );
+    if (!confirm) return;
+
+    try {
+      const response = await fetchWithAuth(
+        "/admin/notifications/notify/",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            notif_key: "PAYMENT_REMINDER",
+            payment_id: paymentId
+          }),
+        }
+      );
+      if (response.ok) {
+        toastSuccess("Notificacion enviada");
+      } else if (response.status === 400) {
+        const { data } = await response.json();
+        toastError("", data.error_detail);
+        return;
+      }
+    } catch (error) {
+      toastError("Error", "Error de conexión");
+    }
+  };
+
   const styles = StyleSheet.create({
     titleText: {
       fontSize: 22,
@@ -176,13 +206,19 @@ export default function AdminStatistics() {
         color: isDarkMode ? defaultTextDark : defaultTextLight,
         paddingVertical: 10,
         paddingHorizontal: 10,
-        borderBottomWidth: 1,
+        borderWidth: 1,
+        borderRadius: 20,
+        paddingVertical: 5,
+        paddingHorizontal: 10,
         borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
       },
       inputAndroid: {
-        fontSize: 22,
+        fontSize: 18,
         color: isDarkMode ? defaultTextDark : defaultTextLight,
-        borderBottomWidth: 1,
+        borderWidth: 1,
+        borderRadius: 20,
+        paddingVertical: 5,
+        paddingHorizontal: 10,
         borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
       },
     },
@@ -292,6 +328,15 @@ export default function AdminStatistics() {
               <View style={styles.cardRowContainer}>
                 <Text style={styles.cardRowTitle}>Monto a pagar:</Text>
                 <Text style={styles.cardRowText}>${getFinalAmount(payment)}</Text>
+                {paymentStatus === PayStatusPending && (
+                  <Icon
+                    name="forward-to-inbox"
+                    size={25}
+                    color={isDarkMode ? iconDark : iconLight}
+                    onPress={() => handleNotifyUser(payment.id)}
+                    style={{ marginLeft: 5 }}
+                  />
+                )}
               </View>
             </TouchableOpacity>
           ))

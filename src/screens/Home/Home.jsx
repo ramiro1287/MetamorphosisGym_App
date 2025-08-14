@@ -259,6 +259,11 @@ export default function Home() {
                 icon={<Icon name="bar-chart-2" size={22} color={isDarkMode ? defaultTextLight : defaultTextDark} />}
                 onPress={() => navigation.navigate("AdminStatistics")}
               />
+              <TouchableButton
+                title="Anuncios"
+                icon={<Icon name="message-square" size={22} color={isDarkMode ? defaultTextLight : defaultTextDark} />}
+                onPress={() => navigation.navigate("AdminAnnouncements")}
+              />
             </>
           )}
         </View>
