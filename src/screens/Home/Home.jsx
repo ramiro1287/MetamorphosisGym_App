@@ -193,13 +193,13 @@ export default function Home() {
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Plan de entrenamiento</Text>
-        {trainingPlans.length ? (
-          <>
-            <View key={plan.id} style={styles.infoRow}>
+        {trainingPlans.length ? trainingPlans.map((plan) => (
+          <View key={plan.id}>
+            <View style={styles.infoRow}>
               <Text style={styles.label}>Entrenador</Text>
               <Text style={styles.value}>{trainingPlans[0].coach}</Text>
             </View>
-            <View key={plan.id} style={styles.infoRow}>
+            <View style={styles.infoRow}>
               <Text style={styles.label}>Vence</Text>
               <Text style={styles.value}>
                 {formatDate(trainingPlans[0].expiration_date)}
@@ -213,8 +213,8 @@ export default function Home() {
                 onPress={() => navigation.navigate("TraineePlans")}
               />
             </View>
-          </>
-        ) : (
+          </View>
+        )) : (
           <Text style={styles.noDataText}>Sin plan asignado</Text>
         )}
       </View>
@@ -248,6 +248,11 @@ export default function Home() {
                 title="Familias"
                 icon={<Icon name="home" size={22} color={isDarkMode ? defaultTextLight : defaultTextDark} />}
                 onPress={() => navigation.navigate("AdminFamilies")}
+              />
+              <TouchableButton
+                title="Ejercicios"
+                icon={<Icon name="activity" size={22} color={isDarkMode ? defaultTextLight : defaultTextDark} />}
+                onPress={() => navigation.navigate("AdminExercises")}
               />
               <TouchableButton
                 title="Planes Mensuales"

@@ -36,6 +36,7 @@ import AdminUserPaymentDetail from "../screens/Home/Admin/Payments/AdminUserPaym
 import AdminUserTrainingPlans from "../screens/Home/Admin/TrainingPlans/AdminUserTrainingPlans";
 import AdminUserTrainingPlanCreate from "../screens/Home/Admin/TrainingPlans/AdminUserTrainingPlanCreate";
 import AdminUserTrainingPlanDetail from "../screens/Home/Admin/TrainingPlans/AdminUserTrainingPlanDetail";
+import AdminExercises from "../screens/Home/Admin/TrainingPlans/AdminExercises";
 // Admin Statistics Screens
 import AdminStatistics from "../screens/Home/Admin/Statistics/AdminStatistics";
 
@@ -87,6 +88,7 @@ export default function Navigation() {
         <Stack.Screen name="AdminUserTrainingPlans" component={AdminUserTrainingPlans} />
         <Stack.Screen name="AdminUserTrainingPlanCreate" component={AdminUserTrainingPlanCreate} />
         <Stack.Screen name="AdminUserTrainingPlanDetail" component={AdminUserTrainingPlanDetail} />
+        <Stack.Screen name="AdminExercises" component={AdminExercises} />
         {/* Admin Statistics Screens */}
         <Stack.Screen name="AdminStatistics" component={AdminStatistics} />
 

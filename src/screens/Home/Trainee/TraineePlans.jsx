@@ -215,7 +215,7 @@ export default function TraineePlans() {
                 {selectedExercise?.exercise.name}
               </Text>
               <Text style={styles.exerciseDetail}>
-                Tipo: {formatExerciseType(selectedExercise?.exercise.type)}
+                Grupo muscular: {formatExerciseType(selectedExercise?.exercise.type)}
               </Text>
               <Text style={styles.exerciseDetail}>
                 Series: {selectedExercise?.sets ? selectedExercise?.sets : "N/A"}
