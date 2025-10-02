@@ -6,9 +6,9 @@ import {
   StyleSheet,
   View,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { GymContext } from "../../../../context/GymContext";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../../../services/authService";
@@ -22,52 +22,64 @@ import {
   secondTextDark, secondTextLight,
 } from "../../../../constants/UI/colors";
 
+const PAGE_SIZE = 10;
+
 export default function AdminUserTrainingPlans() {
   const [trainingPlans, setTrainingPlans] = useState([]);
-  const [nextPage, setNextPage] = useState(null);
+  const [nextUrl, setNextUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+
   const { isDarkMode } = useContext(GymContext);
   const navigation = useNavigation();
   const route = useRoute();
   const { idNumber, fullName } = route.params || {};
 
-  useFocusEffect(
-    useCallback(() => {
-      loadTrainingPlans();
-    }, [])
-  );
+  const buildQuery = () => {
+    const q = new URLSearchParams();
+    q.append("page_size", String(PAGE_SIZE));
+    return q.toString();
+  };
 
-  const loadTrainingPlans = async (url = `/admin/training-plans/list/${idNumber}/`) => {
+  const fetchPage = async ({ url, append = false } = {}) => {
     try {
-      const response = await fetchWithAuth(url);
-      if (response.ok) {
-        const { data } = await response.json();
-        if (url === `/admin/training-plans/list/${idNumber}/`) {
-          setTrainingPlans(data.results);
-        } else {
-          setTrainingPlans(prev => [...prev, ...data.results]);
-        }
-        setNextPage(data.next);
-      }
-    } catch (error) {
+      const base = `/admin/training-plans/list/${idNumber}/`;
+      const finalUrl = url ?? `${base}?${buildQuery()}`;
+
+      const response = await fetchWithAuth(finalUrl);
+      if (!response.ok) throw new Error("Network");
+
+      const { data } = await response.json();
+      setNextUrl(data.next ?? null);
+      setTrainingPlans(prev => (append ? [...prev, ...data.results] : data.results));
+    } catch (err) {
       toastError("Error", "Error de conexión");
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      let isMounted = true;
+      (async () => {
+        setLoading(true);
+        try { if (isMounted) await fetchPage({ append: false }); }
+        finally { if (isMounted) setLoading(false); }
+      })();
+      return () => { isMounted = false; };
+    }, [idNumber])
+  );
+
   const handleLoadMore = async () => {
-    if (nextPage && !loadingMore) {
-      setLoadingMore(true);
-      await loadTrainingPlans(nextPage);
-      setLoadingMore(false);
-    }
+    if (loadingMore || !nextUrl) return;
+    setLoadingMore(true);
+    try { await fetchPage({ url: nextUrl, append: true }); }
+    finally { setLoadingMore(false); }
   };
 
   const formatDate = (isoString) => {
     if (!isoString) return "Sin vencimiento";
     const date = new Date(isoString);
-    return new Intl.DateTimeFormat("es-AR", {
-      day: "2-digit", month: "2-digit", year: "numeric"
-    }).format(date);
+    return new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
   };
 
   const handlePlanDetail = (planId) => {
@@ -84,15 +96,11 @@ export default function AdminUserTrainingPlans() {
   };
 
   const handleCreateTrainingPlan = () => {
-    let activePlan = false;
-    trainingPlans.map((plan) => {
-      if (plan.status === PlanStatusActive) activePlan = true;
-    });
+    const activePlan = trainingPlans.some(p => p.status === PlanStatusActive);
     if (activePlan) {
       toastInfo("Ya existe un plan activo");
       return;
     }
-
     navigation.reset({
       index: 4,
       routes: [
@@ -118,7 +126,6 @@ export default function AdminUserTrainingPlans() {
       padding: 15,
       width: "100%",
       marginBottom: 20,
-      borderRadius: 20,
       borderRightWidth: 3,
       borderLeftWidth: 3,
       borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
@@ -153,49 +160,45 @@ export default function AdminUserTrainingPlans() {
   return (
     <View style={{ flex: 1, paddingHorizontal: 25 }}>
       <Text style={styles.titleText}>Planes de {fullName}</Text>
-      <TouchableButton
-        title="Agregar plan"
-        onPress={handleCreateTrainingPlan}
-        style={styles.addButton}
-      />
+      <TouchableButton title="Agregar plan" onPress={handleCreateTrainingPlan} style={styles.addButton} />
+
       <ScrollContainer
-        onScroll={({ nativeEvent }) => {
-          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-          const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
-          if (isCloseToBottom) {
-            handleLoadMore();
-          }
-        }}
-        scrollEventThrottle={400}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        loadingMore={loadingMore}
+        ListFooterComponent={loadingMore ? <LoadingScreen /> : null}
       >
-        {trainingPlans.length !== 0 ? trainingPlans.map((plan) => (
-          <TouchableOpacity
-            key={plan.id}
-            style={[
-              styles.cardContainer,
-              plan.status === PlanStatusActive && { borderColor: buttonTextConfirmDark }
-            ]}
-            onPress={() => handlePlanDetail(plan.id)}
-          >
-            <View style={styles.cardRowContainer}>
-              <Text style={styles.cardRowTitle}>Entrenador:</Text>
-              <Text style={styles.cardRowText}>{plan.coach}</Text>
-            </View>
-            <View style={styles.cardRowContainer}>
-              <Text style={styles.cardRowTitle}>Fecha de expiración:</Text>
-              <Text style={styles.cardRowText}>{formatDate(plan.expiration_date)}</Text>
-            </View>
-            {plan.description && (
+        {loading && !trainingPlans.length ? (
+          <ActivityIndicator />
+        ) : trainingPlans.length ? (
+          trainingPlans.map((plan) => (
+            <TouchableOpacity
+              key={plan.id}
+              style={[
+                styles.cardContainer,
+                plan.status === PlanStatusActive && { borderColor: buttonTextConfirmDark }
+              ]}
+              onPress={() => handlePlanDetail(plan.id)}
+            >
               <View style={styles.cardRowContainer}>
-                <Text style={styles.cardRowTitle}>Anotaciones:</Text>
-                <Text style={styles.cardRowText}>{plan.description}</Text>
+                <Text style={styles.cardRowTitle}>Entrenador:</Text>
+                <Text style={styles.cardRowText}>{plan.coach}</Text>
               </View>
-            )}
-          </TouchableOpacity>
-        )) : (
+              <View style={styles.cardRowContainer}>
+                <Text style={styles.cardRowTitle}>Fecha de expiración:</Text>
+                <Text style={styles.cardRowText}>{formatDate(plan.expiration_date)}</Text>
+              </View>
+              {plan.description ? (
+                <View style={styles.cardRowContainer}>
+                  <Text style={styles.cardRowTitle}>Anotaciones:</Text>
+                  <Text style={styles.cardRowText}>{plan.description}</Text>
+                </View>
+              ) : null}
+            </TouchableOpacity>
+          ))
+        ) : (
           <Text style={styles.titleText}>Sin planes...</Text>
         )}
-        {loadingMore && (<LoadingScreen />)}
       </ScrollContainer>
     </View>
   );

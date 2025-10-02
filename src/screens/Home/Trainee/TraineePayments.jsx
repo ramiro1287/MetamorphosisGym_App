@@ -5,6 +5,7 @@ import {
   StyleSheet,
   View,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { GymContext } from "../../../context/GymContext";
@@ -24,46 +25,58 @@ import {
   secondTextDark, secondTextLight,
 } from "../../../constants/UI/colors";
 
+const PAGE_SIZE = 10;
+
 export default function TraineePayments() {
   const [payments, setPayments] = useState([]);
-  const [nextPage, setNextPage] = useState(null);
+  const [nextUrl, setNextUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+
   const { isDarkMode } = useContext(GymContext);
   const navigation = useNavigation();
 
-  useFocusEffect(
-    useCallback(() => {
-      loadPayments();
-    }, [])
-  );
+  const buildQuery = () => {
+    const q = new URLSearchParams();
+    q.append("page_size", String(PAGE_SIZE));
+    return q.toString();
+  };
 
-  const loadPayments = async (url = "/payments/list/") => {
+  const fetchPage = async ({ url, append = false } = {}) => {
     try {
-      const response = await fetchWithAuth(url);
-      if (response.ok) {
-        const { data } = await response.json();
-        if (url === "/payments/list/") {
-          setPayments(data.results);
-        } else {
-          setPayments(prev => [...prev, ...data.results]);
-        }
-        setNextPage(data.next);
-      }
+      const base = "/payments/list/";
+      const finalUrl = url ?? `${base}?${buildQuery()}`;
+
+      const response = await fetchWithAuth(finalUrl);
+      if (!response.ok) throw new Error("Network");
+
+      const { data } = await response.json(); // { results, next, previous, count }
+      setNextUrl(data.next ?? null);
+      setPayments(prev => (append ? [...prev, ...data.results] : data.results));
     } catch (error) {
       toastError("Error", "Error de conexión");
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        setLoading(true);
+        try { await fetchPage({ append: false }); }
+        finally { setLoading(false); }
+      })();
+    }, [])
+  );
+
   const handleLoadMore = async () => {
-    if (nextPage && !loadingMore) {
-      setLoadingMore(true);
-      await loadPayments(nextPage);
-      setLoadingMore(false);
-    }
-  };  
+    if (loadingMore || !nextUrl) return;
+    setLoadingMore(true);
+    try { await fetchPage({ url: nextUrl, append: true }); }
+    finally { setLoadingMore(false); }
+  };
 
   const formatPaymentStatus = (status) => {
-    if (status === PayStatusPending) return "Pendinete";
+    if (status === PayStatusPending) return "Pendiente";
     if (status === PayStatusCompleted) return "Pagada";
     if (status === PayStatusCanceled) return "Cancelada";
     if (status === PayStatusProcessing) return "Procesando";
@@ -71,15 +84,15 @@ export default function TraineePayments() {
   };
 
   const getFinalAmount = (payment) => {
-    const discounts_sum = parseFloat(payment.discounts_sum);
-    const penalties_sum = parseFloat(payment.penalties_sum);
-    const final_price = parseFloat(payment.total_amount) + penalties_sum - discounts_sum;
-    return final_price.toFixed(2);
+    const discounts_sum = parseFloat(payment.discounts_sum) || 0;
+    const penalties_sum = parseFloat(payment.penalties_sum) || 0;
+    const total = parseFloat(payment.total_amount) || 0;
+    return (total + penalties_sum - discounts_sum).toFixed(2);
   };
 
   const getMonth = (stringDate) => {
     const date = new Date(stringDate);
-    return MonthsMap[date.getMonth() + 1]
+    return MonthsMap[date.getMonth() + 1];
   };
 
   const handlePaymentDetail = (paymentId) => {
@@ -124,51 +137,56 @@ export default function TraineePayments() {
   return (
     <View style={{ flex: 1 }}>
       <Text style={styles.titleText}>Lista de cuotas</Text>
+
       <ScrollContainer
         style={{ paddingHorizontal: 25 }}
-        onScroll={({ nativeEvent }) => {
-          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-          const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
-          if (isCloseToBottom) {
-            handleLoadMore();
-          }
-        }}
-        scrollEventThrottle={400}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        loadingMore={loadingMore}
+        ListFooterComponent={loadingMore ? <LoadingScreen /> : null}
       >
-        {payments.length !== 0 ? payments.map((payment) => (
-          <TouchableOpacity
-            key={payment.id}
-            style={styles.cardContainer}
-            onPress={() => handlePaymentDetail(payment.id)}
-          >
-            <View style={styles.cardRowContainer}>
-              <Text style={styles.cardRowTitle}>Estado:</Text>
-              <Text
-                style={[
-                  styles.cardRowText,
-                  [PayStatusCompleted, PayStatusCanceled].includes(payment.status) ? { color: buttonTextConfirmDark } : { color: inputErrorDark }
-                ]}
-              >
-                {formatPaymentStatus(payment.status)}
-              </Text>
-            </View>
-            <View style={styles.cardRowContainer}>
-              <Text style={styles.cardRowTitle}>Valor de la cuota:</Text>
-              <Text style={styles.cardRowText}>${payment.total_amount}</Text>
-            </View>
-            <View style={styles.cardRowContainer}>
-              <Text style={styles.cardRowTitle}>Monto a pagar:</Text>
-              <Text style={styles.cardRowText}>${getFinalAmount(payment)}</Text>
-            </View>
-            <View style={styles.cardRowContainer}>
-              <Text style={styles.cardRowTitle}>Mes correspondiente:</Text>
-              <Text style={styles.cardRowText}>{getMonth(payment.created_at)}</Text>
-            </View>
-          </TouchableOpacity>
-        )) : (
+        {loading && !payments.length ? (
+          <ActivityIndicator />
+        ) : payments.length ? (
+          payments.map((payment) => (
+            <TouchableOpacity
+              key={payment.id}
+              style={styles.cardContainer}
+              onPress={() => handlePaymentDetail(payment.id)}
+            >
+              <View style={styles.cardRowContainer}>
+                <Text style={styles.cardRowTitle}>Estado:</Text>
+                <Text
+                  style={[
+                    styles.cardRowText,
+                    [PayStatusCompleted, PayStatusCanceled].includes(payment.status)
+                      ? { color: buttonTextConfirmDark }
+                      : { color: inputErrorDark },
+                  ]}
+                >
+                  {formatPaymentStatus(payment.status)}
+                </Text>
+              </View>
+
+              <View style={styles.cardRowContainer}>
+                <Text style={styles.cardRowTitle}>Valor de la cuota:</Text>
+                <Text style={styles.cardRowText}>${payment.total_amount}</Text>
+              </View>
+
+              <View style={styles.cardRowContainer}>
+                <Text style={styles.cardRowTitle}>Monto a pagar:</Text>
+                <Text style={styles.cardRowText}>${getFinalAmount(payment)}</Text>
+              </View>
+
+              <View style={styles.cardRowContainer}>
+                <Text style={styles.cardRowTitle}>Mes correspondiente:</Text>
+                <Text style={styles.cardRowText}>{getMonth(payment.created_at)}</Text>
+              </View>
+            </TouchableOpacity>
+          ))
+        ) : (
           <Text style={styles.titleText}>Sin cuotas...</Text>
         )}
-        {loadingMore && (<LoadingScreen />)}
       </ScrollContainer>
     </View>
   );

@@ -4,7 +4,7 @@ import RNPickerSelect from "react-native-picker-select";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { GymContext } from "../../../../context/GymContext";
 import { fetchWithAuth } from "../../../../services/authService";
-import { Text, StyleSheet, View, TouchableOpacity } from "react-native";
+import { Text, StyleSheet, View, TouchableOpacity, ActivityIndicator } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import { MonthsMap } from "../../../../constants/payments"
@@ -17,9 +17,10 @@ import {
   secondTextDark, secondTextLight,
 } from "../../../../constants/UI/colors";
 import {
-  PayStatusCompleted, PayStatusPending,
-  PayStatusCanceled,
+  PayStatusCompleted, PayStatusPending, PayStatusCanceled,
 } from "../../../../constants/payments";
+
+const PAGE_SIZE = 10;
 
 export default function AdminStatistics() {
   const route = useRoute();
@@ -33,23 +34,22 @@ export default function AdminStatistics() {
   const [paymentStatus, setPaymentStatus] = useState(paymentStatusParam);
   const [queryDate, setQueryDate] = useState(new Date(queryDateParam));
   const [showPicker, setShowPicker] = useState(false);
-  const [nextPage, setNextPage] = useState(null);
-  const [loadingMore, setLoadingMore] = useState(false);
+
+  const [nextUrl, setNextUrl] = useState(null);
+  const [loading, setLoading] = useState(false);       // primera carga / recarga
+  const [loadingMore, setLoadingMore] = useState(false); // paginación
 
   const navigation = useNavigation();
   const { isDarkMode } = useContext(GymContext);
 
-  useFocusEffect(
-    useCallback(() => {
-      getEarnings();
-    }, [queryDate])
-  );
-
-  useFocusEffect(
-    useCallback(() => {
-      getPayments();
-    }, [paymentStatus, queryDate])
-  );
+  // ---- helpers
+  const buildPaymentsQuery = () => {
+    const q = new URLSearchParams();
+    q.append("date", queryDate.toISOString());
+    q.append("status", paymentStatus);
+    q.append("page_size", String(PAGE_SIZE));
+    return q.toString();
+  };
 
   const getEarnings = async () => {
     try {
@@ -60,103 +60,99 @@ export default function AdminStatistics() {
         const { data } = await response.json();
         setEarnings(data);
       }
-    } catch (error) {
+    } catch {
       toastError("Error", "Error de conexión");
     }
   };
 
-  const getPayments = async (url = "/admin/payments/") => {
+  // Trae página (primera o next)
+  const getPayments = async ({ url, append = false } = {}) => {
     try {
-      const query = new URLSearchParams();
-      query.append("date", queryDate.toISOString());
-      query.append("status", paymentStatus);
-      const response = await fetchWithAuth(`${url}?${query.toString()}`);
-      if (response.ok) {
-        const { data } = await response.json();
-        setPayments(data.results);
-        if (url === "/admin/payments/") {
-          setPayments(data.results);
-        } else {
-          setPayments(prev => [...prev, ...data.results]);
-        }
-        setNextPage(data.next);
-      }
-    } catch (error) {
+      const base = "/admin/payments/";
+      const finalUrl = url ?? `${base}?${buildPaymentsQuery()}`;
+
+      const response = await fetchWithAuth(finalUrl);
+      if (!response.ok) throw new Error("Network");
+
+      const { data } = await response.json(); // { results, next, ... }
+      setNextUrl(data.next ?? null);
+      setPayments(prev => (append ? [...prev, ...data.results] : data.results));
+    } catch {
       toastError("Error", "Error de conexión");
     }
   };
+
+  // Carga de earnings cuando cambia la fecha
+  useFocusEffect(
+    useCallback(() => {
+      getEarnings();
+    }, [queryDate])
+  );
+
+  // Primera carga + recarga cuando cambian filtros (status/fecha)
+  useFocusEffect(
+    useCallback(() => {
+      let isMounted = true;
+      (async () => {
+        setLoading(true);
+        try { if (isMounted) await getPayments({ append: false }); }
+        finally { if (isMounted) setLoading(false); }
+      })();
+      return () => { isMounted = false; };
+    }, [paymentStatus, queryDate])
+  );
 
   const handleLoadMore = async () => {
-    if (nextPage && !loadingMore) {
-      setLoadingMore(true);
-      await getPayments(nextPage);
-      setLoadingMore(false);
-    }
+    if (loadingMore || !nextUrl) return;
+    setLoadingMore(true);
+    try { await getPayments({ url: nextUrl, append: true }); }
+    finally { setLoadingMore(false); }
   };
 
-  const onChange = async (event, selectedDate) => {
+  const onChange = (event, selectedDate) => {
     if (event.type === "dismissed") {
       setShowPicker(false);
       return;
     }
-
     setQueryDate(selectedDate);
     setShowPicker(false);
   };
 
   const getFinalAmount = (payment) => {
-    const discounts_sum = parseFloat(payment.discounts_sum);
-    const penalties_sum = parseFloat(payment.penalties_sum);
-    const final_price = parseFloat(payment.total_amount) + penalties_sum - discounts_sum;
+    const discounts_sum = parseFloat(payment.discounts_sum) || 0;
+    const penalties_sum = parseFloat(payment.penalties_sum) || 0;
+    const final_price = (parseFloat(payment.total_amount) || 0) + penalties_sum - discounts_sum;
     return final_price.toFixed(2);
   };
 
   const handlePaymentDetail = (payment) => {
     navigation.reset({
-        index: 4,
-        routes: [
-          { name: "Home" },
-          {
-            name: "AdminStatistics",
-            params: {
-              queryDateParam: queryDate.toISOString(),
-              paymentStatusParam: paymentStatus
-            }
-          },
-          {
-            name: "AdminUserPaymentDetail",
-            params: { paymentId: payment.id, fullName: payment.user_fullname }
-          },
-        ]
-      });
+      index: 4,
+      routes: [
+        { name: "Home" },
+        { name: "AdminStatistics", params: { queryDateParam: queryDate.toISOString(), paymentStatusParam: paymentStatus } },
+        { name: "AdminUserPaymentDetail", params: { paymentId: payment.id, fullName: payment.user_fullname } },
+      ]
+    });
   };
 
   const handleNotifyUser = async (paymentId) => {
-    const confirm = await showConfirmModalAlert(
-      "¿Quieres notificar la falta de pago de esta cuota?"
-    );
+    const confirm = await showConfirmModalAlert("¿Quieres notificar la falta de pago de esta cuota?");
     if (!confirm) return;
 
     try {
-      const response = await fetchWithAuth(
-        "/admin/notifications/notify/",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            notif_key: "PAYMENT_REMINDER",
-            payment_id: paymentId
-          }),
-        }
-      );
+      const response = await fetchWithAuth("/admin/notifications/notify/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notif_key: "PAYMENT_REMINDER", payment_id: paymentId }),
+      });
       if (response.ok) {
-        toastSuccess("Notificacion enviada");
+        toastSuccess("Notificación enviada");
       } else if (response.status === 400) {
         const { data } = await response.json();
         toastError("", data.error_detail);
-        return;
       }
-    } catch (error) {
+    } catch {
       toastError("Error", "Error de conexión");
     }
   };
@@ -204,8 +200,6 @@ export default function AdminStatistics() {
       inputIOS: {
         fontSize: 18,
         color: isDarkMode ? defaultTextDark : defaultTextLight,
-        paddingVertical: 10,
-        paddingHorizontal: 10,
         borderWidth: 1,
         borderRadius: 20,
         paddingVertical: 5,
@@ -246,6 +240,7 @@ export default function AdminStatistics() {
   return (
     <View style={{ flex: 1, padding: 20, paddingHorizontal: 40 }}>
       <Text style={styles.titleText}>Estadísticas</Text>
+
       <View style={styles.cardContainer}>
         <View style={styles.rowContainer}>
           <Text style={styles.label}>
@@ -259,23 +254,18 @@ export default function AdminStatistics() {
             style={{ marginLeft: 5 }}
           />
         </View>
+
         <View style={styles.rowContainer}>
           <Text style={styles.label}>Ganancias</Text>
-          <Text style={styles.value}>
-            $ {earnings?.payments_completed_total}
-          </Text>
+          <Text style={styles.value}>$ {earnings?.payments_completed_total}</Text>
         </View>
         <View style={styles.rowContainer}>
           <Text style={styles.label}>Pendientes</Text>
-          <Text style={styles.value}>
-            $ {earnings?.payments_pending_total}
-          </Text>
+          <Text style={styles.value}>$ {earnings?.payments_pending_total}</Text>
         </View>
         <View style={styles.rowContainer}>
           <Text style={styles.label}>Cancelados</Text>
-          <Text style={styles.value}>
-            $ {earnings?.payments_canceled_total}
-          </Text>
+          <Text style={styles.value}>$ {earnings?.payments_canceled_total}</Text>
         </View>
       </View>
 
@@ -304,17 +294,16 @@ export default function AdminStatistics() {
           placeholder={{}}
         />
       </View>
+
       <ScrollContainer
-        onScroll={({ nativeEvent }) => {
-          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-          const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
-          if (isCloseToBottom) {
-            handleLoadMore();
-          }
-        }}
-        scrollEventThrottle={400}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        loadingMore={loadingMore}
+        ListFooterComponent={loadingMore ? <ActivityIndicator /> : null}
       >
-        {payments.length ? (
+        {loading && !payments.length ? (
+          <ActivityIndicator />
+        ) : payments.length ? (
           payments.map((payment) => (
             <TouchableOpacity
               key={payment.id}
