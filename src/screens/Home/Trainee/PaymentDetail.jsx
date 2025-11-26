@@ -65,7 +65,7 @@ export default function PaymentDetail() {
 
   const getMonth = (stringDate) => {
     const date = new Date(stringDate);
-    return MonthsMap[date.getMonth() + 1]
+    return MonthsMap[date.getUTCMonth() + 1]
   };
 
   const formatDate = (isoString) => {

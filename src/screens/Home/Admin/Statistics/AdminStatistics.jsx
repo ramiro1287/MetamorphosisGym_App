@@ -244,7 +244,7 @@ export default function AdminStatistics() {
       <View style={styles.cardContainer}>
         <View style={styles.rowContainer}>
           <Text style={styles.label}>
-            Ingresos {MonthsMap[queryDate.getMonth() + 1]} {queryDate.getFullYear()}
+            Ingresos {MonthsMap[queryDate.getUTCMonth() + 1]} {queryDate.getFullYear()}
           </Text>
           <Icon
             name="edit-calendar"

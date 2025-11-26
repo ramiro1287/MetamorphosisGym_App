@@ -79,7 +79,7 @@ export default function Home() {
 
   const getMonth = (dateString) => {
     const date = new Date(dateString);
-    return MonthsMap[date.getMonth() + 1];
+    return MonthsMap[date.getUTCMonth() + 1];
   };
 
   const formatDate = (iso) => {
