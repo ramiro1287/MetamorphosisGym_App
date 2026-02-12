@@ -41,6 +41,11 @@ export const GymProvider = ({ children }) => {
       const response = await fetchWithAuth("/users/me/");
       if (response.ok) {
         const { data } = await response.json();
+        if (data.status === 'DEL') {
+          console.warn("Usuario inactivo. Cerrar Sesión.");
+          handleLogout();
+          return;
+        }
         setUser(data);
       } else {
         handleLogout();
