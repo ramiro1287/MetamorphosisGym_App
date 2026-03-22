@@ -15,15 +15,12 @@ import { toastError } from "../../../components/Toast/Toast";
 import LoadingScreen from "../../../components/Loading/LoadingScreen";
 import {
   PayStatusCanceled, PayStatusCompleted,
-  PayStatusPending, PayStatusProcessing,
-  MonthsMap,
 } from "../../../constants/payments";
 import {
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
   buttonTextConfirmDark, inputErrorDark,
-  secondTextDark, secondTextLight,
 } from "../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../constants/UI/theme";
+import { formatPaymentStatus, getFinalAmount, getMonth } from "../../../utils/formatters";
 
 const PAGE_SIZE = 10;
 
@@ -35,6 +32,9 @@ export default function TraineePayments() {
 
   const { isDarkMode } = useContext(GymContext);
   const navigation = useNavigation();
+
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   const buildQuery = () => {
     const q = new URLSearchParams();
@@ -75,68 +75,19 @@ export default function TraineePayments() {
     finally { setLoadingMore(false); }
   };
 
-  const formatPaymentStatus = (status) => {
-    if (status === PayStatusPending) return "Pendiente";
-    if (status === PayStatusCompleted) return "Pagada";
-    if (status === PayStatusCanceled) return "Cancelada";
-    if (status === PayStatusProcessing) return "Procesando";
-    return "Error";
-  };
-
-  const getFinalAmount = (payment) => {
-    const discounts_sum = parseFloat(payment.discounts_sum) || 0;
-    const penalties_sum = parseFloat(payment.penalties_sum) || 0;
-    const total = parseFloat(payment.total_amount) || 0;
-    return (total + penalties_sum - discounts_sum).toFixed(2);
-  };
-
-  const getMonth = (stringDate) => {
-    const date = new Date(stringDate);
-    return MonthsMap[date.getUTCMonth() + 1];
-  };
-
   const handlePaymentDetail = (paymentId) => {
     navigation.navigate("PaymentDetail", { paymentId });
   };
 
   const styles = StyleSheet.create({
     titleText: {
-      fontSize: 22,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
       marginBottom: 20,
-      alignSelf: "center",
-    },
-    cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderRadius: 20,
-      padding: 15,
-      width: "100%",
-      marginBottom: 20,
-    },
-    cardRowContainer: {
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "center",
-      flexWrap: "wrap",
-    },
-    cardRowTitle: {
-      fontSize: 16,
-      color: isDarkMode ? secondTextDark : secondTextLight,
-      marginRight: 6,
-      flexShrink: 1,
-    },
-    cardRowText: {
-      fontSize: 18,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginLeft: 6,
-      flex: 1,
-      flexShrink: 1,
     },
   });
 
   return (
     <View style={{ flex: 1 }}>
-      <Text style={styles.titleText}>Lista de cuotas</Text>
+      <Text style={[common.titleText, styles.titleText]}>Lista de cuotas</Text>
 
       <ScrollContainer
         style={{ paddingHorizontal: 25 }}
@@ -151,14 +102,14 @@ export default function TraineePayments() {
           payments.map((payment) => (
             <TouchableOpacity
               key={payment.id}
-              style={styles.cardContainer}
+              style={common.cardContainer}
               onPress={() => handlePaymentDetail(payment.id)}
             >
-              <View style={styles.cardRowContainer}>
-                <Text style={styles.cardRowTitle}>Estado:</Text>
+              <View style={common.cardRowContainer}>
+                <Text style={common.cardRowTitle}>Estado:</Text>
                 <Text
                   style={[
-                    styles.cardRowText,
+                    common.cardRowText,
                     [PayStatusCompleted, PayStatusCanceled].includes(payment.status)
                       ? { color: buttonTextConfirmDark }
                       : { color: inputErrorDark },
@@ -168,24 +119,24 @@ export default function TraineePayments() {
                 </Text>
               </View>
 
-              <View style={styles.cardRowContainer}>
-                <Text style={styles.cardRowTitle}>Valor de la cuota:</Text>
-                <Text style={styles.cardRowText}>${payment.total_amount}</Text>
+              <View style={common.cardRowContainer}>
+                <Text style={common.cardRowTitle}>Valor de la cuota:</Text>
+                <Text style={common.cardRowText}>${payment.total_amount}</Text>
               </View>
 
-              <View style={styles.cardRowContainer}>
-                <Text style={styles.cardRowTitle}>Monto a pagar:</Text>
-                <Text style={styles.cardRowText}>${getFinalAmount(payment)}</Text>
+              <View style={common.cardRowContainer}>
+                <Text style={common.cardRowTitle}>Monto a pagar:</Text>
+                <Text style={common.cardRowText}>${getFinalAmount(payment)}</Text>
               </View>
 
-              <View style={styles.cardRowContainer}>
-                <Text style={styles.cardRowTitle}>Mes correspondiente:</Text>
-                <Text style={styles.cardRowText}>{getMonth(payment.created_at)}</Text>
+              <View style={common.cardRowContainer}>
+                <Text style={common.cardRowTitle}>Mes correspondiente:</Text>
+                <Text style={common.cardRowText}>{getMonth(payment.created_at)}</Text>
               </View>
             </TouchableOpacity>
           ))
         ) : (
-          <Text style={styles.titleText}>Sin cuotas...</Text>
+          <Text style={[common.titleText, styles.titleText]}>Sin cuotas...</Text>
         )}
       </ScrollContainer>
     </View>

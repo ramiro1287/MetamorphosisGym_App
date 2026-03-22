@@ -1,7 +1,6 @@
 import React, { useContext, useState } from "react";
 import {
   Text,
-  StyleSheet,
   View,
   TextInput,
   Switch,
@@ -15,12 +14,8 @@ import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
 import { CoachRole, TraineeRole } from "../../../../constants/users";
-import {
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  buttonTextConfirmDark, inputErrorDark,
-  errorButtonTextDark, inputErrorLight,
-} from "../../../../constants/UI/colors";
+import { defaultTextLight, buttonTextConfirmDark, errorButtonTextDark } from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 
 export default function AdminCreateUser() {
   const [form, setForm] = useState({
@@ -40,6 +35,8 @@ export default function AdminCreateUser() {
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   const { isDarkMode, gymInfo } = useContext(GymContext);
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   const handleChange = (key, value) => {
     if (key === "id_number") setIdNumberError("");
@@ -109,66 +106,15 @@ export default function AdminCreateUser() {
     }
   };
 
-  const styles = StyleSheet.create({
-    titleText: {
-      fontSize: 22,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginBottom: 15,
-      alignSelf: "center",
-    },
-    cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderRadius: 20,
-      padding: 20,
-      paddingTop: 0,
-      width: "80%",
-    },
-    cardInputContainer: {
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "center",
-      marginTop: 15,
-    },
-    cardInputLabel: {
-      fontSize: 18,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginRight: 10,
-    },
-    cardInput: {
-      flex:1,
-      fontSize: 18,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      borderBottomWidth: 1,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-    },
-    pickerSelect: {
-      inputIOS: {
-        fontSize: 18,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
-        paddingVertical: 10,
-        paddingHorizontal: 10,
-        borderWidth: 1,
-        borderRadius: 20,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      },
-      inputAndroid: {
-        fontSize: 18,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
-        borderWidth: 1,
-        borderRadius: 20,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      },
-    },
-    errorText: {
-      color: isDarkMode ? inputErrorDark : inputErrorLight,
-      marginBottom: 8,
-      fontSize: 16,
-    },
-  });
+  const styles = {
+    titleText: { ...common.titleText, marginBottom: 15 },
+    cardContainer: common.formCardContainer,
+    cardInputContainer: common.formInputContainer,
+    cardInputLabel: common.formInputLabel,
+    cardInput: common.formInput,
+    pickerSelect: common.pickerSelect,
+    errorText: common.errorText,
+  };
 
   return (
     <ScrollContainer>
@@ -179,7 +125,7 @@ export default function AdminCreateUser() {
           <TextInput
             style={styles.cardInput}
             value={form.id_number}
-            onChangeText={(t) => handleChange("id_number", t)}
+            onChangeText={(v) => handleChange("id_number", v)}
             keyboardType="numeric"
             inputMode="numeric"
             maxLength={10}
@@ -191,7 +137,7 @@ export default function AdminCreateUser() {
           <TextInput
             style={styles.cardInput}
             value={form.first_name}
-            onChangeText={(t) => handleChange("first_name", t)}
+            onChangeText={(v) => handleChange("first_name", v)}
           />
         </View>
         {firstNameError && (<Text style={styles.errorText}>{firstNameError}</Text>)}
@@ -200,7 +146,7 @@ export default function AdminCreateUser() {
           <TextInput
             style={styles.cardInput}
             value={form.last_name}
-            onChangeText={(t) => handleChange("last_name", t)}
+            onChangeText={(v) => handleChange("last_name", v)}
           />
         </View>
         {lastNameError && (<Text style={styles.errorText}>{lastNameError}</Text>)}
@@ -209,9 +155,9 @@ export default function AdminCreateUser() {
           <TextInput
             style={styles.cardInput}
             value={form.phone}
-            onChangeText={(t) => handleChange("phone", t)}
+            onChangeText={(v) => handleChange("phone", v)}
             placeholder="Sin teléfono"
-            placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+            placeholderTextColor={t.text}
           />
         </View>
         <View style={styles.cardInputContainer}>
@@ -267,12 +213,9 @@ export default function AdminCreateUser() {
           <Switch
             value={form.is_retired}
             onValueChange={(v) => handleChange("is_retired", v)}
-            trackColor={{
-              false: isDarkMode ? defaultTextDark : defaultTextLight,
-              true: isDarkMode ? defaultTextDark : defaultTextLight
-            }}
+            trackColor={{ false: t.text, true: t.text }}
             thumbColor={form.is_retired ? buttonTextConfirmDark : errorButtonTextDark}
-            ios_backgroundColor={isDarkMode ? defaultTextDark : defaultTextLight}
+            ios_backgroundColor={t.text}
             style={{ transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }] }}
           />
         </View>

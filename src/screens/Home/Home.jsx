@@ -10,17 +10,10 @@ import { GymContext } from "../../context/GymContext";
 import { fetchWithAuth } from "../../services/authService";
 import { toastError } from "../../components/Toast/Toast";
 import { TraineeRole, AdminRole } from "../../constants/users";
-import {
-  PayStatusCanceled, PayStatusCompleted,
-  PayStatusPending, PayStatusProcessing,
-  MonthsMap,
-} from "../../constants/payments";
-import {
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  buttonTextConfirmDark, inputErrorDark,
-  secondTextDark, secondTextLight,
-} from "../../constants/UI/colors";
+import { PayStatusCompleted } from "../../constants/payments";
+import { buttonTextConfirmDark, inputErrorDark } from "../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../constants/UI/theme";
+import { formatDate, formatPaymentStatus, getFinalAmount, getMonth } from "../../utils/formatters";
 
 export default function Home() {
   const [trainingPlans, setTrainingPlans] = useState([]);
@@ -60,48 +53,21 @@ export default function Home() {
     }
   };
 
-  const formatPaymentStatus = (status) => {
-    const map = {
-      [PayStatusPending]: "Pendiente",
-      [PayStatusCompleted]: "Pagada",
-      [PayStatusCanceled]: "Cancelada",
-      [PayStatusProcessing]: "Procesando"
-    };
-    return map[status] || "Error";
-  };
-
-  const getFinalAmount = (payment) => {
-    const final = parseFloat(payment.total_amount) +
-      parseFloat(payment.penalties_sum) -
-      parseFloat(payment.discounts_sum);
-    return final.toFixed(2);
-  };
-
-  const getMonth = (dateString) => {
-    const date = new Date(dateString);
-    return MonthsMap[date.getUTCMonth() + 1];
-  };
-
-  const formatDate = (iso) => {
-    if (!iso) return "Sin vencimiento";
-    const date = new Date(iso);
-    return new Intl.DateTimeFormat("es-AR", {
-      day: "2-digit", month: "2-digit", year: "numeric"
-    }).format(date);
-  };
-
   if (loading) return <LoadingScreen />;
+
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   const styles = StyleSheet.create({
     container: { padding: 25, gap: 15 },
     welcomeText: {
       fontSize: 26,
       fontWeight: "bold",
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
     },
     card: {
       width: "100%",
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
+      backgroundColor: t.secondBackground,
       borderRadius: 16,
       padding: 16,
     },
@@ -109,36 +75,11 @@ export default function Home() {
       fontSize: 20,
       fontWeight: "bold",
       marginBottom: 12,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
     },
     noDataText: {
       fontSize: 16,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-    },
-    buttonsSelectorContainer: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      justifyContent: "center",
-      marginBottom: 30,
-      gap: 20,
-    },
-    infoRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      width: "100%",
-      marginBottom: 10,
-      alignItems: "flex-start",
-      flexWrap: "wrap",
-    },
-    label: {
-      color: isDarkMode ? secondTextDark : secondTextLight,
-      fontSize: 18,
-    },
-    value: {
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      fontSize: 18,
-      flex: 1,
-      textAlign: "right",
+      color: t.text,
     },
   });
 
@@ -151,36 +92,36 @@ export default function Home() {
           <Text style={styles.cardTitle}>Última cuota</Text>
           {payments.length ? (
             <>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Precio</Text>
+              <View style={common.infoRow}>
+                <Text style={common.label}>Precio</Text>
                 <Text style={[
-                  styles.value,
+                  common.value,
                   { fontSize: 22, fontWeight: "bold" }
                 ]}>
                   ${getFinalAmount(payments[0])}
                 </Text>
               </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Estado</Text>
+              <View style={common.infoRow}>
+                <Text style={common.label}>Estado</Text>
                 <Text
                   style={[
-                    styles.value,
+                    common.value,
                     { color: payments[0].status !== PayStatusCompleted ? inputErrorDark : buttonTextConfirmDark }
                   ]}
                 >
                   {formatPaymentStatus(payments[0].status)}
                 </Text>
               </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Mes</Text>
-                <Text style={styles.value}>
+              <View style={common.infoRow}>
+                <Text style={common.label}>Mes</Text>
+                <Text style={common.value}>
                   {getMonth(payments[0].created_at)} {new Date(payments[0].created_at).getFullYear()}
                 </Text>
               </View>
               <View style={{ flex: 1, alignItems: "flex-end" }}>
                 <TouchableButton
                   title="Ver cuotas"
-                  icon={<Icon name="credit-card" size={22} color={isDarkMode ? defaultTextLight : defaultTextDark} />}
+                  icon={<Icon name="credit-card" size={22} color={t.buttonText} />}
                   onPress={() => navigation.navigate("TraineePayments")}
                 />
               </View>
@@ -195,21 +136,21 @@ export default function Home() {
         <Text style={styles.cardTitle}>Plan de entrenamiento</Text>
         {trainingPlans.length ? trainingPlans.map((plan) => (
           <View key={plan.id}>
-            <View style={styles.infoRow}>
-              <Text style={styles.label}>Entrenador</Text>
-              <Text style={styles.value}>{trainingPlans[0].coach}</Text>
+            <View style={common.infoRow}>
+              <Text style={common.label}>Entrenador</Text>
+              <Text style={common.value}>{trainingPlans[0].coach}</Text>
             </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.label}>Vence</Text>
-              <Text style={styles.value}>
-                {formatDate(trainingPlans[0].expiration_date)}
+            <View style={common.infoRow}>
+              <Text style={common.label}>Vence</Text>
+              <Text style={common.value}>
+                {formatDate(trainingPlans[0].expiration_date, "Sin vencimiento")}
               </Text>
             </View>
 
             <View style={{ flex: 1, alignItems: "flex-end" }}>
               <TouchableButton
                 title="Ver plan"
-                icon={<Icon name="clipboard" size={22} color={isDarkMode ? defaultTextLight : defaultTextDark} />}
+                icon={<Icon name="clipboard" size={22} color={t.buttonText} />}
                 onPress={() => navigation.navigate("TraineePlans")}
               />
             </View>
@@ -223,9 +164,9 @@ export default function Home() {
         <Text style={styles.cardTitle}>Planes y Precios</Text>
         {gymInfo?.plans?.length ? (
           gymInfo.plans.map(plan => (
-            <View key={plan.id} style={styles.infoRow}>
-              <Text style={styles.label}>{plan.name}</Text>
-              <Text style={styles.value}>
+            <View key={plan.id} style={common.infoRow}>
+              <Text style={common.label}>{plan.name}</Text>
+              <Text style={common.value}>
                 ${plan.price}
               </Text>
             </View>
@@ -236,37 +177,37 @@ export default function Home() {
       </View>
 
       {user.role !== TraineeRole && (
-        <View style={styles.buttonsSelectorContainer}>
+        <View style={common.buttonsSelectorContainer}>
           <TouchableButton
             title="Usuarios"
-            icon={<Icon name="users" size={22} color={isDarkMode ? defaultTextLight : defaultTextDark} />}
+            icon={<Icon name="users" size={22} color={t.buttonText} />}
             onPress={() => navigation.navigate("AdminUsers")}
           />
           {user.role === AdminRole && (
             <>
               <TouchableButton
                 title="Familias"
-                icon={<Icon name="home" size={22} color={isDarkMode ? defaultTextLight : defaultTextDark} />}
+                icon={<Icon name="home" size={22} color={t.buttonText} />}
                 onPress={() => navigation.navigate("AdminFamilies")}
               />
               <TouchableButton
                 title="Ejercicios"
-                icon={<Icon name="activity" size={22} color={isDarkMode ? defaultTextLight : defaultTextDark} />}
+                icon={<Icon name="activity" size={22} color={t.buttonText} />}
                 onPress={() => navigation.navigate("AdminExercises")}
               />
               <TouchableButton
                 title="Planes Mensuales"
-                icon={<Icon name="calendar" size={22} color={isDarkMode ? defaultTextLight : defaultTextDark} />}
+                icon={<Icon name="calendar" size={22} color={t.buttonText} />}
                 onPress={() => navigation.navigate("AdminUserPlans")}
               />
               <TouchableButton
                 title="Estadísticas"
-                icon={<Icon name="bar-chart-2" size={22} color={isDarkMode ? defaultTextLight : defaultTextDark} />}
+                icon={<Icon name="bar-chart-2" size={22} color={t.buttonText} />}
                 onPress={() => navigation.navigate("AdminStatistics")}
               />
               <TouchableButton
                 title="Anuncios"
-                icon={<Icon name="message-square" size={22} color={isDarkMode ? defaultTextLight : defaultTextDark} />}
+                icon={<Icon name="message-square" size={22} color={t.buttonText} />}
                 onPress={() => navigation.navigate("AdminAnnouncements")}
               />
             </>

@@ -8,14 +8,14 @@ import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
-import {
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-} from "../../../../constants/UI/colors";
+import { defaultTextLight } from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 import { ExercisesMap } from "../../../../constants/trainingPlans";
 
 export default function AddExerciseModal({ planId, onClose, reload, setSelectedExercise }) {
   const { isDarkMode, gymInfo } = useContext(GymContext);
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
   const [filters, setFilters] = useState({ type: "", name: "" });
   const [exercises, setExercises] = useState([]);
 
@@ -80,14 +80,8 @@ export default function AddExerciseModal({ planId, onClose, reload, setSelectedE
   };
 
   const styles = StyleSheet.create({
-    rootModalContainer: {
-      flex: 1,
-      backgroundColor: "rgba(0,0,0,0.5)",
-      justifyContent: "center",
-      alignItems: "center"
-    },
     cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
+      backgroundColor: t.secondBackground,
       padding: 20,
       borderRadius: 20,
       width: "90%",
@@ -95,15 +89,15 @@ export default function AddExerciseModal({ planId, onClose, reload, setSelectedE
     },
     input: {
       borderWidth: 1,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      borderColor: t.text,
+      color: t.text,
       fontSize: 16,
       borderRadius: 12,
       padding: 10,
       marginBottom: 12,
     },
     card: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
+      backgroundColor: t.secondBackground,
       padding: 15,
       borderRadius: 15,
       marginBottom: 10,
@@ -111,31 +105,31 @@ export default function AddExerciseModal({ planId, onClose, reload, setSelectedE
       borderRightWidth: 3,
       borderBottomWidth: 1,
       borderTopWidth: 1,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
+      borderColor: t.text,
     },
     title: {
       fontSize: 18,
       fontWeight: "bold",
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       marginBottom: 10,
     },
     text: {
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       marginBottom: 5,
     },
     pickerSelect: {
       inputIOS: {
         fontSize: 16,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
+        color: t.text,
         paddingVertical: 5,
         paddingHorizontal: 8,
         borderBottomWidth: 1,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
+        borderColor: t.text,
         borderWidth: 1,
         borderRadius: 20,
         paddingVertical: 5,
         paddingHorizontal: 10,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
+        color: t.text,
         borderRadius: 12,
         alignSelf: "center",
         marginBottom: 10,
@@ -143,28 +137,28 @@ export default function AddExerciseModal({ planId, onClose, reload, setSelectedE
       },
       inputAndroid: {
         fontSize: 16,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
+        color: t.text,
         borderBottomWidth: 1,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
+        borderColor: t.text,
         borderWidth: 1,
         borderRadius: 20,
         paddingVertical: 5,
         paddingHorizontal: 10,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
+        color: t.text,
         borderRadius: 12,
         alignSelf: "center",
         marginBottom: 10,
         paddingHorizontal: 10,
       },
       placeholder: {
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
+        color: t.text,
       },
     },
   });
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.rootModalContainer}>
+      <View style={common.modalContainer}>
         <View style={styles.cardContainer}>
           <Text style={[styles.title, { alignSelf: "center" }]}>Agregar ejercicio</Text>
 
@@ -184,7 +178,7 @@ export default function AddExerciseModal({ planId, onClose, reload, setSelectedE
           <TextInput
             style={styles.input}
             placeholder="Buscar por nombre"
-            placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+            placeholderTextColor={t.text}
             value={filters.name}
             onChangeText={(text) => handleChange("name", text)}
           />

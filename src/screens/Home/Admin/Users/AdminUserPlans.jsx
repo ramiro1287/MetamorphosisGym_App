@@ -1,23 +1,21 @@
 import React, { useContext, useState } from "react";
-import { Text, StyleSheet, View, TouchableOpacity, Modal, TextInput } from "react-native";
+import { Text, View, TouchableOpacity, Modal, TextInput } from "react-native";
 import { GymContext } from "../../../../context/GymContext";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
-import {
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  secondTextDark, secondTextLight,
-  inputErrorDark, inputErrorLight,
-} from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 
 export default function AdminUserPlans() {
   const [plan, setPlan] = useState(null);
   const [planError, setPlanError] = useState("");
   const [showModal, setShowModal] = useState(false);
   const { isDarkMode, gymInfo, getGymInfo } = useContext(GymContext);
+
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   const handleEditPlan = (IdPlan) => {
     const selectedPlan = gymInfo.plans.find((p) => p.id === IdPlan);
@@ -74,95 +72,27 @@ export default function AdminUserPlans() {
     }
   };
 
-  const styles = StyleSheet.create({
-    titleText: {
-      fontSize: 22,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginBottom: 10,
-      alignSelf: "center",
-    },
-    cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      borderRadius: 20,
-      padding: 15,
-      width: "100%",
-      marginBottom: 20,
-      borderRightWidth: 3,
-      borderLeftWidth: 3,
-    },
-    cardRowContainer: {
-      flexDirection: "row",
-      marginBottom: 5,
-    },
-    cardRowTitle: {
-      fontSize: 18,
-      fontWeight: "bold",
-      color: isDarkMode ? secondTextDark : secondTextLight,
-      marginRight: 6,
-    },
-    cardRowText: {
-      fontSize: 20,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-    },
-    modalContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: "rgba(0,0,0,0.5)",
-    },
-    modalCardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      borderWidth: 1.5,
-      padding: 20,
-      borderRadius: 12,
-      width: "80%",
-    },
-    modalCardTitle: {
-      fontSize: 18,
-      marginBottom: 10,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      alignSelf: "center",
-    },
-    modalCardButtonsContainer: {
-      flexDirection: "row",
-      justifyContent: "flex-end",
-      marginTop: 20,
-    },
-    modalCardTextInput: {
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      borderBottomWidth: 1,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-    },
-    errorText: {
-      color: isDarkMode ? inputErrorDark : inputErrorLight,
-      marginBottom: 8,
-      fontSize: 16,
-    },
-  });
-
   return (
     <View style={{ flex: 1, paddingHorizontal: 25 }}>
-      <Text style={styles.titleText}>Tipo de planes</Text>
+      <Text style={common.titleText}>Tipo de planes</Text>
       <ScrollContainer>
         {gymInfo.plans.length ? gymInfo.plans.map((plan) => (
           <TouchableOpacity
             key={plan.id}
             onPress={() => handleEditPlan(plan.id)}
-            style={styles.cardContainer}
+            style={common.cardContainerBordered}
           >
-            <View style={styles.cardRowContainer}>
-              <Text style={styles.cardRowTitle}>Plan:</Text>
-              <Text style={styles.cardRowText}>{plan.name}</Text>
+            <View style={[common.cardRowContainer, { marginBottom: 5 }]}>
+              <Text style={[common.cardRowTitle, { fontSize: 18, fontWeight: "bold" }]}>Plan:</Text>
+              <Text style={[common.cardRowText, { fontSize: 20 }]}>{plan.name}</Text>
             </View>
-            <View style={styles.cardRowContainer}>
-              <Text style={styles.cardRowTitle}>Precio:</Text>
-              <Text style={styles.cardRowText}>{plan.price}</Text>
+            <View style={[common.cardRowContainer, { marginBottom: 5 }]}>
+              <Text style={[common.cardRowTitle, { fontSize: 18, fontWeight: "bold" }]}>Precio:</Text>
+              <Text style={[common.cardRowText, { fontSize: 20 }]}>{plan.price}</Text>
             </View>
           </TouchableOpacity>
         )) : (
-          <Text style={styles.titleText}>Sin planes...</Text>
+          <Text style={common.titleText}>Sin planes...</Text>
         )}
       </ScrollContainer>
 
@@ -173,9 +103,9 @@ export default function AdminUserPlans() {
           animationType="slide"
           onRequestClose={() => setShowModal(false)}
         >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalCardContainer}>
-              <Text style={styles.modalCardTitle}>
+          <View style={common.modalContainer}>
+            <View style={common.modalCardContainer}>
+              <Text style={common.modalCardTitle}>
                 Editar precio del plan: {plan.name}
               </Text>
               <TextInput
@@ -185,13 +115,13 @@ export default function AdminUserPlans() {
                   setPlan({ ...plan, price: txt});
                   setPlanError("");
                 }}
-                style={styles.modalCardTextInput}
+                style={common.modalCardTextInput}
                 placeholder="Ingrese precio del plan"
-                placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+                placeholderTextColor={t.text}
               />
-              {planError && <Text style={styles.errorText}>{planError}</Text>}
+              {planError && <Text style={common.errorText}>{planError}</Text>}
 
-              <View style={styles.modalCardButtonsContainer}>
+              <View style={common.modalCardButtonsContainer}>
                 <TouchableButton title="Cancelar" onPress={() => {
                   setShowModal(false);
                   setPlan(null);

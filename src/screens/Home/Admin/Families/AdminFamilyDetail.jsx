@@ -11,13 +11,7 @@ import LoadingScreen from "../../../../components/Loading/LoadingScreen";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
-import {
-  iconDark, iconLight,
-  defaultTextDark, defaultTextLight,
-  secondTextDark, secondTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  inputErrorDark, inputErrorLight,
-} from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 
 export default function AdminFamilyDetail() {
   const [family, setFamily] = useState(null);
@@ -28,6 +22,8 @@ export default function AdminFamilyDetail() {
   const { isDarkMode } = useContext(GymContext);
   const navigation = useNavigation();
   const route = useRoute();
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   useFocusEffect(
     useCallback(() => {
@@ -189,68 +185,8 @@ export default function AdminFamilyDetail() {
   };
 
   const styles = StyleSheet.create({
-    profileCard: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderRadius: 20,
-      padding: 20,
-      alignItems: "center",
-      width: "100%",
-    },
-    infoRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      width: "100%",
-      marginBottom: 10,
-      alignItems: "flex-start",
-      flexWrap: "wrap",
-    },
-    label: {
-      color: isDarkMode ? secondTextDark : secondTextLight,
-      fontSize: 18,
-    },
-    value: {
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      fontSize: 18,
-      flex: 1,
-      textAlign: "right",
-    },
-    modalContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: "rgba(0,0,0,0.5)",
-    },
-    modalCardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      borderWidth: 1.5,
-      padding: 20,
-      borderRadius: 12,
-      width: "80%",
-    },
-    modalCardTitle: {
-      fontSize: 18,
-      marginBottom: 10,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      alignSelf: "center",
-    },
-    modalCardButtonsContainer: {
-      flexDirection: "row",
-      justifyContent: "flex-end",
-      marginTop: 20,
-    },
-    modalCardTextInput: {
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      borderBottomWidth: 1,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-    },
-    errorText: {
-      color: isDarkMode ? inputErrorDark : inputErrorLight,
-      marginBottom: 8,
-      fontSize: 16,
-    },
     titleText: {
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       fontSize: 22,
       fontWeight: 500,
       marginTop: 15,
@@ -259,8 +195,8 @@ export default function AdminFamilyDetail() {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
+      backgroundColor: t.secondBackground,
+      borderColor: t.text,
       borderRadius: 20,
       padding: 15,
       width: "100%",
@@ -269,7 +205,7 @@ export default function AdminFamilyDetail() {
       borderLeftWidth: 3,
     },
     memberText: {
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       fontSize: 18,
       fontWeight: 500,
     },
@@ -277,37 +213,37 @@ export default function AdminFamilyDetail() {
 
   return (
     <ScrollContainer style={{ padding: 25 }}>
-      <View style={styles.profileCard}>
-        <View style={styles.infoRow}>
+      <View style={common.profileCard}>
+        <View style={common.infoRow}>
           <View style={{ flexDirection: "row" }}>
-            <Text style={styles.label}>Nombre</Text>
+            <Text style={common.label}>Nombre</Text>
             <Icon
               name="edit"
               size={25}
-              color={isDarkMode ? iconDark : iconLight}
+              color={t.icon}
               onPress={() => handleEditionModal("name")}
               style={{ marginLeft: 5 }}
             />
           </View>
-          <Text style={styles.value}>{family.name}</Text>
+          <Text style={common.value}>{family.name}</Text>
         </View>
-        <View style={styles.infoRow}>
+        <View style={common.infoRow}>
           <View style={{ flexDirection: "row" }}>
-            <Text style={styles.label}>Descripción</Text>
+            <Text style={common.label}>Descripción</Text>
             <Icon
               name="edit"
               size={25}
-              color={isDarkMode ? iconDark : iconLight}
+              color={t.icon}
               onPress={() => handleEditionModal("description")}
               style={{ marginLeft: 5 }}
             />
           </View>
-          <Text style={styles.value}>{family.description ? family.description : "N/A"}</Text>
+          <Text style={common.value}>{family.description ? family.description : "N/A"}</Text>
         </View>
         <Icon
           name="delete"
           size={35}
-          color={isDarkMode ? iconDark : iconLight}
+          color={t.icon}
           onPress={handleDeleteFamily}
           style={{ alignSelf: "flex-end", marginTop: 10, marginRight: 10 }}
         />
@@ -319,7 +255,7 @@ export default function AdminFamilyDetail() {
           <Icon
             name="person-add"
             size={35}
-            color={isDarkMode ? iconDark : iconLight}
+            color={t.icon}
             onPress={handleAddMember}
             style={{ alignSelf: "flex-end", marginBottom: 20, marginRight: 10 }}
           />
@@ -332,7 +268,7 @@ export default function AdminFamilyDetail() {
           <Icon
             name="delete"
             size={25}
-            color={isDarkMode ? iconDark : iconLight}
+            color={t.icon}
             onPress={() => handleRemoveMember(member.id_number)}
             style={{ marginLeft: 5 }}
           />
@@ -348,31 +284,31 @@ export default function AdminFamilyDetail() {
           animationType="slide"
           onRequestClose={() => setShowModal(false)}
         >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalCardContainer}>
+          <View style={common.modalContainer}>
+            <View style={common.modalCardContainer}>
               {editField === "name" ? (
                 <>
-                  <Text style={styles.modalCardTitle}>Editar nombre de la familia</Text>
+                  <Text style={common.modalCardTitle}>Editar nombre de la familia</Text>
                   <TextInput
                     value={editValue}
                     onChangeText={setEditValue}
-                    style={styles.modalCardTextInput}
+                    style={common.modalCardTextInput}
                   />
-                  {editValueError && <Text style={styles.errorText}>{editValueError}</Text>}
+                  {editValueError && <Text style={common.errorText}>{editValueError}</Text>}
                 </>
               ) : (
                 <>
-                  <Text style={styles.modalCardTitle}>Editar descripción</Text>
+                  <Text style={common.modalCardTitle}>Editar descripción</Text>
                   <TextInput
                     value={editValue}
                     onChangeText={setEditValue}
-                    style={styles.modalCardTextInput}
+                    style={common.modalCardTextInput}
                     multiline
                   />
-                  {editValueError && <Text style={styles.errorText}>{editValueError}</Text>}
+                  {editValueError && <Text style={common.errorText}>{editValueError}</Text>}
                 </>
               )}
-              <View style={styles.modalCardButtonsContainer}>
+              <View style={common.modalCardButtonsContainer}>
                 <TouchableButton title="Cancelar" onPress={() => setShowModal(false)} />
                 <TouchableButton title="Guardar" onPress={handleSaveField} style={{ marginLeft: 15 }} />
               </View>

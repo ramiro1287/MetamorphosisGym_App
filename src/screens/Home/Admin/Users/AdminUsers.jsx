@@ -14,12 +14,8 @@ import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError } from "../../../../components/Toast/Toast";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
-import {
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  secondTextDark, secondTextLight,
-  errorButtonTextDark,
-} from "../../../../constants/UI/colors";
+import { errorButtonTextDark } from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 import debounce from "lodash.debounce";
 import { StatusActive } from "../../../../constants/users";
 
@@ -35,6 +31,8 @@ export default function AdminUsers() {
 
   const { isDarkMode } = useContext(GymContext);
   const navigation = useNavigation();
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   const buildQuery = useCallback(() => {
     const q = new URLSearchParams();
@@ -120,65 +118,40 @@ export default function AdminUsers() {
   };
 
   const styles = StyleSheet.create({
-    titleText: {
-      fontSize: 22,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginBottom: 10,
-      alignSelf: "center",
-    },
-    input: {
-      borderWidth: 1,
-      borderColor: isDarkMode ? secondTextDark : secondTextLight,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderRadius: 12,
-      padding: 10,
-      marginBottom: 12,
-    },
-    cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      borderRadius: 20,
-      padding: 15,
-      width: "100%",
-      marginBottom: 20,
-      borderRightWidth: 3,
-      borderLeftWidth: 3,
-    },
     cardRowContainer: { flexDirection: "row", marginBottom: 5 },
     cardRowTitle: {
       fontSize: 16,
       fontWeight: "bold",
-      color: isDarkMode ? secondTextDark : secondTextLight,
+      color: t.secondText,
       marginRight: 6,
     },
-    cardRowText: { fontSize: 16, color: isDarkMode ? defaultTextDark : defaultTextLight },
+    cardRowText: { fontSize: 16, color: t.text },
     createButton: { alignSelf: "flex-end", marginBottom: 20, paddingVertical: 2, paddingHorizontal: 5 },
   });
 
   return (
     <View style={{ flex: 1, paddingHorizontal: 25 }}>
-      <Text style={styles.titleText}>Usuarios</Text>
+      <Text style={common.titleText}>Usuarios</Text>
       <TouchableButton title="Nuevo Usuario" onPress={handleCreateUser} style={styles.createButton} />
 
       <TextInput
-        style={styles.input}
+        style={common.searchInput}
         placeholder="Buscar por DNI"
-        placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+        placeholderTextColor={t.text}
         value={filters.id_number}
         onChangeText={text => handleChange("id_number", text)}
       />
       <TextInput
-        style={styles.input}
+        style={common.searchInput}
         placeholder="Buscar por nombre"
-        placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+        placeholderTextColor={t.text}
         value={filters.first_name}
         onChangeText={text => handleChange("first_name", text)}
       />
       <TextInput
-        style={styles.input}
+        style={common.searchInput}
         placeholder="Buscar por apellido"
-        placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+        placeholderTextColor={t.text}
         value={filters.last_name}
         onChangeText={text => handleChange("last_name", text)}
       />
@@ -197,7 +170,7 @@ export default function AdminUsers() {
             <TouchableOpacity
               key={user.id_number}
               style={[
-                styles.cardContainer,
+                common.cardContainerBordered,
                 user.status !== StatusActive && { borderColor: errorButtonTextDark },
               ]}
               onPress={() => handleUserDetail(user.id_number)}
@@ -217,7 +190,7 @@ export default function AdminUsers() {
             </TouchableOpacity>
           ))
         ) : (
-          <Text style={styles.titleText}>Sin usuarios...</Text>
+          <Text style={common.titleText}>Sin usuarios...</Text>
         )}
       </ScrollContainer>
     </View>

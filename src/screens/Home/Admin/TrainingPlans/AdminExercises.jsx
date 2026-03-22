@@ -9,11 +9,8 @@ import { GymContext } from "../../../../context/GymContext";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
-import {
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  iconDark, iconLight
-} from "../../../../constants/UI/colors";
+import { defaultTextLight } from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 import { ExercisesMap } from "../../../../constants/trainingPlans";
 import ExerciseFormModal from "./ExerciseFormModal";
 
@@ -23,6 +20,8 @@ export default function AadminExercises() {
   const [exercises, setExercises] = useState([]);
   const [showFormModal, setShowFormModal] = useState(false);
   const [editingExercise, setEditingExercise] = useState(null);
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   const debouncedSearch = useCallback(
     debounce(() => { loadExercises(); }, 400),
@@ -92,10 +91,10 @@ export default function AadminExercises() {
   const styles = StyleSheet.create({
     rootContainer: { padding: 25, flex: 1 },
     input: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
+      backgroundColor: t.secondBackground,
       borderWidth: 1,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      borderColor: t.text,
+      color: t.text,
       fontSize: 16,
       borderRadius: 12,
       padding: 10,
@@ -110,11 +109,11 @@ export default function AadminExercises() {
     title: {
       fontSize: 22,
       fontWeight: "bold",
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
     },
     card: {
       width: "100%",
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
+      backgroundColor: t.secondBackground,
       padding: 15,
       borderRadius: 15,
       marginBottom: 10,
@@ -122,7 +121,7 @@ export default function AadminExercises() {
       borderRightWidth: 3,
       borderBottomWidth: 1,
       borderTopWidth: 1,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
+      borderColor: t.text,
     },
     cardTitleRow: {
       flexDirection: "row",
@@ -133,33 +132,34 @@ export default function AadminExercises() {
     cardTitle: {
       fontSize: 18,
       fontWeight: "bold",
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
+      flex: 1,
     },
-    text: { color: isDarkMode ? defaultTextDark : defaultTextLight, marginBottom: 5 },
+    text: { color: t.text, marginBottom: 5 },
     actionsRow: { flexDirection: "row", justifyContent: "flex-end" },
     actionIcon: { marginLeft: 12 }
     ,
     pickerSelect: {
       inputIOS: {
         fontSize: 16,
-        backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
+        backgroundColor: t.secondBackground,
+        color: t.text,
         paddingVertical: 5,
         paddingHorizontal: 10,
         borderWidth: 1,
         borderRadius: 12,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
+        borderColor: t.text,
         marginBottom: 10,
       },
       inputAndroid: {
         fontSize: 16,
-        backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
+        backgroundColor: t.secondBackground,
+        color: t.text,
         paddingVertical: 5,
         paddingHorizontal: 10,
         borderWidth: 1,
         borderRadius: 12,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
+        borderColor: t.text,
         marginBottom: 10,
       },
     },
@@ -186,7 +186,7 @@ export default function AadminExercises() {
       <TextInput
         style={styles.input}
         placeholder="Buscar por nombre"
-        placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+        placeholderTextColor={t.text}
         value={filters.name}
         onChangeText={(text) => handleChange("name", text)}
       />
@@ -200,14 +200,14 @@ export default function AadminExercises() {
                 <Icon
                   name="edit"
                   size={24}
-                  color={isDarkMode ? iconDark : iconLight}
+                  color={t.icon}
                   style={styles.actionIcon}
                   onPress={() => handleOpenEdit(ex)}
                 />
                 <Icon
                   name="delete"
                   size={24}
-                  color={isDarkMode ? iconDark : iconLight}
+                  color={t.icon}
                   style={styles.actionIcon}
                   onPress={() => handleDelete(ex)}
                 />

@@ -17,12 +17,11 @@ import {
     StatusActive, StatusDeleted,
 } from "../../../../constants/users";
 import {
-  iconDark, iconLight,
-  defaultTextDark, defaultTextLight,
-  secondTextDark, secondTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  inputErrorDark, inputErrorLight,
+  inputErrorDark,
+  defaultTextLight,
 } from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
+import { formatDate, formatRole, formatUserStatus } from "../../../../utils/formatters";
 
 export default function AdminUserDetail() {
   const [userDetail, setUserDetail] = useState(null);
@@ -34,6 +33,8 @@ export default function AdminUserDetail() {
   const { isDarkMode, gymInfo, user } = useContext(GymContext);
   const navigation = useNavigation();
   const route = useRoute();
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   useFocusEffect(
     useCallback(() => {
@@ -55,24 +56,6 @@ export default function AdminUserDetail() {
   };
 
   if (!userDetail) return <LoadingScreen />;
-
-  const formatDate = (isoString) => {
-    const date = new Date(isoString);
-    return new Intl.DateTimeFormat("es-AR", {
-      day: "2-digit", month: "2-digit", year: "numeric"
-    }).format(date);
-  };
-
-  const formatRole = (role) => {
-    if (role === AdminRole) return "Administrador";
-    if (role === CoachRole) return "Entrenador";
-    return "Cliente";
-  };
-
-  const formatStatus = (status) => {
-    if (status === StatusDeleted) return "Inactivo";
-    return "Activo";
-  };
 
   const handleResetPassword = async () => {
     const { idNumber } = route.params || {};
@@ -234,106 +217,18 @@ export default function AdminUserDetail() {
   };
 
   const styles = StyleSheet.create({
-      profileCard: {
-        backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-        borderRadius: 20,
-        padding: 20,
-        alignItems: "center",
-        width: "100%",
-      },
-      avatar: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        marginBottom: 10,
-      },
       userName: {
         fontSize: 22,
         fontWeight: "bold",
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
+        color: t.text,
       },
       userId: {
         fontSize: 16,
-        color: isDarkMode ? secondTextDark : secondTextLight,
+        color: t.secondText,
         marginBottom: 20,
       },
-      infoRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        width: "100%",
-        marginBottom: 10,
-        alignItems: "flex-start",
-        flexWrap: "wrap",
-      },
-      label: {
-        color: isDarkMode ? secondTextDark : secondTextLight,
-        fontSize: 18,
-      },
-      value: {
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
-        fontSize: 18,
-        flex: 1,
-        textAlign: "right",
-      },
-      modalContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "rgba(0,0,0,0.5)",
-      },
-      modalCardContainer: {
-        backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-        borderColor: isDarkMode ?  defaultTextDark : defaultTextLight,
-        borderWidth: 1.5,
-        padding: 20,
-        borderRadius: 12,
-        width: "80%",
-      },
-      modalCardTitle: {
-        fontSize: 18,
-        marginBottom: 10,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
-        alignSelf: "center",
-      },
-      pickerSelect: {
-        inputIOS: {
-          fontSize: 18,
-          color: isDarkMode ? defaultTextDark : defaultTextLight,
-          paddingVertical: 10,
-          paddingHorizontal: 10,
-          borderWidth: 1,
-          borderRadius: 20,
-          paddingVertical: 5,
-          paddingHorizontal: 10,
-          borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-        },
-        inputAndroid: {
-          fontSize: 18,
-          color: isDarkMode ? defaultTextDark : defaultTextLight,
-          borderWidth: 1,
-          borderRadius: 20,
-          paddingVertical: 5,
-          paddingHorizontal: 10,
-          borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-        },
-      },
-      modalCardButtonsContainer: {
-        flexDirection: "row",
-        justifyContent: "flex-end",
-        marginTop: 20,
-      },
-      modalCardTextInput: {
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
-        borderBottomWidth: 1,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      },
-      errorText: {
-        color: isDarkMode ? inputErrorDark : inputErrorLight,
-        marginBottom: 8,
-        fontSize: 16,
-      },
       buttonsCardContainer: {
-        backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
+        backgroundColor: t.secondBackground,
         borderRadius: 20,
         padding: 20,
         alignItems: "center",
@@ -348,11 +243,11 @@ export default function AdminUserDetail() {
 
   return (
     <ScrollContainer style={{ padding: 25 }}>
-      <View style={styles.profileCard}>
+      <View style={common.profileCard}>
         <Icon
           name="account-circle"
           size={120}
-          color={isDarkMode ? iconDark : iconLight}
+          color={t.icon}
         />
         <View style={{ flexDirection: "row" }}>
           <Text style={styles.userName}>
@@ -364,7 +259,7 @@ export default function AdminUserDetail() {
               <Icon
                 name="edit"
                 size={22}
-                color={isDarkMode ? iconDark : iconLight}
+                color={t.icon}
                 onPress={() => handleEditionModal("full_name")}
                 style={{ marginLeft: 5 }}
               />
@@ -372,31 +267,31 @@ export default function AdminUserDetail() {
           }
         </View>
         <Text style={styles.userId}>{userDetail.id_number}</Text>
-        <View style={styles.infoRow}>
+        <View style={common.infoRow}>
           <View style={{ flexDirection: "row" }}>
-            <Text style={styles.label}>Rol</Text>
+            <Text style={common.label}>Rol</Text>
             {user.role === AdminRole && user.id_number !== userDetail.id_number ? (
               <Icon
                 name="edit"
                 size={22}
-                color={isDarkMode ? iconDark : iconLight}
+                color={t.icon}
                 onPress={() => handleEditionModal("role")}
                 style={{ marginLeft: 5 }}
               />
             ): null}
           </View>
-          <Text style={styles.value}>{formatRole(userDetail.role)}</Text>
+          <Text style={common.value}>{formatRole(userDetail.role)}</Text>
         </View>
-        <View style={styles.infoRow}>
+        <View style={common.infoRow}>
           <View style={{ flexDirection: "row" }}>
-            <Text style={styles.label}>Estado</Text>
+            <Text style={common.label}>Estado</Text>
             {
               (user.role === CoachRole && userDetail.role === TraineeRole)
               || user.role === AdminRole && user.id_number !== userDetail.id_number ? (
                 <Icon
                   name="edit"
                   size={22}
-                  color={isDarkMode ? iconDark : iconLight}
+                  color={t.icon}
                   onPress={() => handleEditionModal("status")}
                   style={{ marginLeft: 5 }}
                 />
@@ -405,80 +300,80 @@ export default function AdminUserDetail() {
           </View>
           <Text
             style={[
-                styles.value,
+                common.value,
                 userDetail.status === StatusDeleted && { color: inputErrorDark }
             ]}
           >
-            {formatStatus(userDetail.status)}
+            {formatUserStatus(userDetail.status)}
           </Text>
         </View>
-        <View style={styles.infoRow}>
+        <View style={common.infoRow}>
           <View style={{ flexDirection: "row" }}>
-            <Text style={styles.label}>Plan</Text>
+            <Text style={common.label}>Plan</Text>
             {
               (user.role === CoachRole && userDetail.role === TraineeRole)
               || user.role === AdminRole ? (
                 <Icon
                   name="edit"
                   size={22}
-                  color={isDarkMode ? iconDark : iconLight}
+                  color={t.icon}
                   onPress={() => handleEditionModal("plan")}
                   style={{ marginLeft: 5 }}
                 />
               ) : null
             }
           </View>
-          <Text style={styles.value}>
+          <Text style={common.value}>
             {userDetail.plan ? userDetail.plan?.name : "N/A"}
           </Text>
         </View>
-        <View style={styles.infoRow}>
+        <View style={common.infoRow}>
           <View style={{ flexDirection: "row" }}>
-            <Text style={styles.label}>Jubilado</Text>
+            <Text style={common.label}>Jubilado</Text>
             {
               (user.role === CoachRole && userDetail.role === TraineeRole)
               || user.role === AdminRole ? (
                 <Icon
                   name="edit"
                   size={22}
-                  color={isDarkMode ? iconDark : iconLight}
+                  color={t.icon}
                   onPress={() => handleEditionModal("is_retired")}
                   style={{ marginLeft: 5 }}
                 />
               ) : null
             }
           </View>
-          <Text style={styles.value}>{userDetail.is_retired ? "Si" : "No"}</Text>
+          <Text style={common.value}>{userDetail.is_retired ? "Si" : "No"}</Text>
         </View>
-        <View style={styles.infoRow}>
+        <View style={common.infoRow}>
           <View style={{ flexDirection: "row" }}>
-            <Text style={styles.label}>Teléfono</Text>
+            <Text style={common.label}>Teléfono</Text>
             {
               (user.role === CoachRole && userDetail.role === TraineeRole)
               || user.role === AdminRole ? (
                 <Icon
                   name="edit"
                   size={22}
-                  color={isDarkMode ? iconDark : iconLight}
+                  color={t.icon}
                   onPress={() => handleEditionModal("phone")}
                   style={{ marginLeft: 5 }}
                 />
               ) : null
             }
           </View>
-          <Text style={styles.value}>
+          <Text style={common.value}>
             {userDetail.phone ? userDetail.phone : "N/A"}
           </Text>
         </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Familia</Text>
-          <Text style={styles.value}>
+        <View style={common.infoRow}>
+          <Text style={common.label}>Familia</Text>
+          <Text style={common.value}>
             {userDetail.family ? userDetail.family?.name : "N/A"}
           </Text>
         </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Dirección</Text>
-          <Text style={styles.value} numberOfLines={2} ellipsizeMode="tail">
+        <View style={common.infoRow}>
+          <Text style={common.label}>Dirección</Text>
+          <Text style={common.value} numberOfLines={2} ellipsizeMode="tail">
             {
               userDetail.address
               ? `${userDetail.address?.address} ${userDetail.address?.city} ${userDetail.address?.state}`
@@ -486,9 +381,9 @@ export default function AdminUserDetail() {
             }
           </Text>
         </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Nacimiento</Text>
-          <Text style={styles.value} numberOfLines={2} ellipsizeMode="tail">
+        <View style={common.infoRow}>
+          <Text style={common.label}>Nacimiento</Text>
+          <Text style={common.value} numberOfLines={2} ellipsizeMode="tail">
             {userDetail.birth_date ? formatDate(userDetail.birth_date) : "N/A"}
           </Text>
         </View>
@@ -520,9 +415,9 @@ export default function AdminUserDetail() {
           animationType="slide"
           onRequestClose={() => setShowModal(false)}
         >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalCardContainer}>
-              <Text style={styles.modalCardTitle}>
+          <View style={common.modalContainer}>
+            <View style={common.modalCardContainer}>
+              <Text style={common.modalCardTitle}>
                 Editar {formatFieldName(editField)}
               </Text>
 
@@ -538,7 +433,7 @@ export default function AdminUserDetail() {
                       color: defaultTextLight,
                     })),
                   ]}
-                  style={styles.pickerSelect}
+                  style={common.pickerSelect}
                   useNativeAndroidPickerStyle={false}
                   placeholder={{}}
                 />
@@ -550,7 +445,7 @@ export default function AdminUserDetail() {
                     { label: "No", value: 0, color: defaultTextLight },
                     { label: "Sí", value: 1, color: defaultTextLight },
                   ]}
-                  style={styles.pickerSelect}
+                  style={common.pickerSelect}
                   useNativeAndroidPickerStyle={false}
                   placeholder={{}}
                 />
@@ -562,7 +457,7 @@ export default function AdminUserDetail() {
                     { label: "Entrenador", value: CoachRole, color: defaultTextLight },
                     { label: "Cliente", value: TraineeRole, color: defaultTextLight },
                   ]}
-                  style={styles.pickerSelect}
+                  style={common.pickerSelect}
                   useNativeAndroidPickerStyle={false}
                   placeholder={{}}
                 />
@@ -574,7 +469,7 @@ export default function AdminUserDetail() {
                     { label: "Activo", value: StatusActive, color: defaultTextLight },
                     { label: "Inactivo", value: StatusDeleted, color: defaultTextLight },
                   ]}
-                  style={styles.pickerSelect}
+                  style={common.pickerSelect}
                   useNativeAndroidPickerStyle={false}
                   placeholder={{}}
                 />
@@ -586,13 +481,13 @@ export default function AdminUserDetail() {
                         setEditValue(prev => ({ ...prev, first_name: txt}));
                         setEditValueError(prev => ({ ...prev, first_name: ""}));
                     }}
-                    style={styles.modalCardTextInput}
+                    style={common.modalCardTextInput}
                     placeholder="Nombre"
-                    placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+                    placeholderTextColor={t.text}
                   />
                   {
                     editValueError?.first_name
-                    ? <Text style={styles.errorText}>{editValueError.first_name}</Text>
+                    ? <Text style={common.errorText}>{editValueError.first_name}</Text>
                     : null
                   }
                   <TextInput
@@ -601,13 +496,13 @@ export default function AdminUserDetail() {
                         setEditValue(prev => ({ ...prev, last_name: txt}));
                         setEditValueError(prev => ({ ...prev, last_name: ""}));
                     }}
-                    style={styles.modalCardTextInput}
+                    style={common.modalCardTextInput}
                     placeholder="Apellido"
-                    placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+                    placeholderTextColor={t.text}
                   />
                   {
                     editValueError?.last_name
-                    ? <Text style={styles.errorText}>{editValueError.last_name}</Text>
+                    ? <Text style={common.errorText}>{editValueError.last_name}</Text>
                     : null
                   }
                 </>
@@ -616,19 +511,19 @@ export default function AdminUserDetail() {
                   <TextInput
                     value={editValue}
                     onChangeText={setEditValue}
-                    style={styles.modalCardTextInput}
+                    style={common.modalCardTextInput}
                     placeholder={editField === "phone" ? "Sin teléfono..." : formatFieldName(editField)}
-                    placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+                    placeholderTextColor={t.text}
                   />
                   {
                     editValueError
-                    ? <Text style={styles.errorText}>{editValueError}</Text>
+                    ? <Text style={common.errorText}>{editValueError}</Text>
                     : null
                   }
                 </>
               )}
 
-              <View style={styles.modalCardButtonsContainer}>
+              <View style={common.modalCardButtonsContainer}>
                 <TouchableButton title="Cancelar" onPress={() => setShowModal(false)} />
                 <TouchableButton title="Guardar" onPress={handleSaveField} style={{ marginLeft: 15 }} />
               </View>

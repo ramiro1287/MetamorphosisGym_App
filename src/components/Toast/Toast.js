@@ -24,12 +24,15 @@ export const getToastConfig = (isDarkMode) => {
     },
     success: {
       borderColor: isDarkMode ? buttonTextConfirmDark : buttonTextConfirmLight,
+      borderLeftColor: isDarkMode ? buttonTextConfirmDark : buttonTextConfirmLight,
     },
     error: {
       borderColor: isDarkMode ? errorButtonTextDark : errorButtonTextLight,
+      borderLeftColor: isDarkMode ? errorButtonTextDark : errorButtonTextLight,
     },
     info: {
       borderColor: isDarkMode ? buttonBackgroundDark : buttonBackgroundLight,
+      borderLeftColor: isDarkMode ? buttonBackgroundDark : buttonBackgroundLight,
     },
     content: {
       paddingVertical: 10,

@@ -10,12 +10,9 @@ import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import { MonthsMap } from "../../../../constants/payments"
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
-import {
-  iconDark, iconLight,
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  secondTextDark, secondTextLight,
-} from "../../../../constants/UI/colors";
+import { defaultTextLight } from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
+import { getFinalAmount } from "../../../../utils/formatters";
 import {
   PayStatusCompleted, PayStatusPending, PayStatusCanceled,
 } from "../../../../constants/payments";
@@ -41,6 +38,8 @@ export default function AdminStatistics() {
 
   const navigation = useNavigation();
   const { isDarkMode } = useContext(GymContext);
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   // ---- helpers
   const buildPaymentsQuery = () => {
@@ -118,13 +117,6 @@ export default function AdminStatistics() {
     setShowPicker(false);
   };
 
-  const getFinalAmount = (payment) => {
-    const discounts_sum = parseFloat(payment.discounts_sum) || 0;
-    const penalties_sum = parseFloat(payment.penalties_sum) || 0;
-    const final_price = (parseFloat(payment.total_amount) || 0) + penalties_sum - discounts_sum;
-    return final_price.toFixed(2);
-  };
-
   const handlePaymentDetail = (payment) => {
     navigation.reset({
       index: 4,
@@ -158,12 +150,6 @@ export default function AdminStatistics() {
   };
 
   const styles = StyleSheet.create({
-    titleText: {
-      fontSize: 22,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginBottom: 10,
-      alignSelf: "center",
-    },
     rowTitle: {
       flexDirection: "row",
       width: "100%",
@@ -172,100 +158,43 @@ export default function AdminStatistics() {
       justifyContent: "center",
     },
     cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
+      backgroundColor: t.secondBackground,
       borderRadius: 20,
       padding: 15,
       alignItems: "center",
       width: "100%",
     },
-    rowContainer: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      width: "100%",
-      alignItems: "flex-start",
-      flexWrap: "wrap",
-      marginBottom: 10,
-    },
-    label: {
-      color: isDarkMode ? secondTextDark : secondTextLight,
-      fontSize: 18,
-    },
-    value: {
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      fontSize: 18,
-      flex: 1,
-      textAlign: "right",
-    },
-    pickerSelect: {
-      inputIOS: {
-        fontSize: 18,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
-        borderWidth: 1,
-        borderRadius: 20,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      },
-      inputAndroid: {
-        fontSize: 18,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
-        borderWidth: 1,
-        borderRadius: 20,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      },
-    },
-    cardRowContainer: {
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "center",
-      flexWrap: "wrap",
-    },
-    cardRowTitle: {
-      fontSize: 16,
-      color: isDarkMode ? secondTextDark : secondTextLight,
-      marginRight: 6,
-      flexShrink: 1,
-    },
-    cardRowText: {
-      fontSize: 18,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginLeft: 6,
-      flex: 1,
-      flexShrink: 1,
-    },
   });
 
   return (
     <View style={{ flex: 1, padding: 20, paddingHorizontal: 40 }}>
-      <Text style={styles.titleText}>Estadísticas</Text>
+      <Text style={common.titleText}>Estadísticas</Text>
 
       <View style={styles.cardContainer}>
-        <View style={styles.rowContainer}>
-          <Text style={styles.label}>
+        <View style={common.infoRow}>
+          <Text style={common.label}>
             Ingresos {MonthsMap[queryDate.getUTCMonth() + 1]} {queryDate.getFullYear()}
           </Text>
           <Icon
             name="edit-calendar"
             size={25}
-            color={isDarkMode ? iconDark : iconLight}
+            color={t.icon}
             onPress={() => setShowPicker(true)}
             style={{ marginLeft: 5 }}
           />
         </View>
 
-        <View style={styles.rowContainer}>
-          <Text style={styles.label}>Ganancias</Text>
-          <Text style={styles.value}>$ {earnings?.payments_completed_total}</Text>
+        <View style={common.infoRow}>
+          <Text style={common.label}>Ganancias</Text>
+          <Text style={common.value}>$ {earnings?.payments_completed_total}</Text>
         </View>
-        <View style={styles.rowContainer}>
-          <Text style={styles.label}>Pendientes</Text>
-          <Text style={styles.value}>$ {earnings?.payments_pending_total}</Text>
+        <View style={common.infoRow}>
+          <Text style={common.label}>Pendientes</Text>
+          <Text style={common.value}>$ {earnings?.payments_pending_total}</Text>
         </View>
-        <View style={styles.rowContainer}>
-          <Text style={styles.label}>Cancelados</Text>
-          <Text style={styles.value}>$ {earnings?.payments_canceled_total}</Text>
+        <View style={common.infoRow}>
+          <Text style={common.label}>Cancelados</Text>
+          <Text style={common.value}>$ {earnings?.payments_canceled_total}</Text>
         </View>
       </View>
 
@@ -280,7 +209,7 @@ export default function AdminStatistics() {
       )}
 
       <View style={styles.rowTitle}>
-        <Text style={[styles.titleText, { marginTop: 20 }]}>Cuotas </Text>
+        <Text style={[common.titleText, { marginTop: 20 }]}>Cuotas </Text>
         <RNPickerSelect
           value={paymentStatus}
           onValueChange={(v) => setPaymentStatus(v)}
@@ -289,7 +218,7 @@ export default function AdminStatistics() {
             { label: "Pendientes", value: PayStatusPending, color: defaultTextLight },
             { label: "Canceladas", value: PayStatusCanceled, color: defaultTextLight },
           ]}
-          style={styles.pickerSelect}
+          style={common.pickerSelect}
           useNativeAndroidPickerStyle={false}
           placeholder={{}}
         />
@@ -310,18 +239,18 @@ export default function AdminStatistics() {
               style={[styles.cardContainer, { marginBottom: 15 }]}
               onPress={() => handlePaymentDetail(payment)}
             >
-              <View style={styles.cardRowContainer}>
-                <Text style={styles.cardRowTitle}>Usuario:</Text>
-                <Text style={styles.cardRowText}>{payment.user_fullname}</Text>
+              <View style={common.cardRowContainer}>
+                <Text style={common.cardRowTitle}>Usuario:</Text>
+                <Text style={common.cardRowText}>{payment.user_fullname}</Text>
               </View>
-              <View style={styles.cardRowContainer}>
-                <Text style={styles.cardRowTitle}>Monto a pagar:</Text>
-                <Text style={styles.cardRowText}>${getFinalAmount(payment)}</Text>
+              <View style={common.cardRowContainer}>
+                <Text style={common.cardRowTitle}>Monto a pagar:</Text>
+                <Text style={common.cardRowText}>${getFinalAmount(payment)}</Text>
                 {paymentStatus === PayStatusPending && (
                   <Icon
                     name="forward-to-inbox"
                     size={25}
-                    color={isDarkMode ? iconDark : iconLight}
+                    color={t.icon}
                     onPress={() => handleNotifyUser(payment.id)}
                     style={{ marginLeft: 5 }}
                   />
@@ -330,7 +259,7 @@ export default function AdminStatistics() {
             </TouchableOpacity>
           ))
         ) : (
-          <Text style={styles.value}>Sin Cuotas</Text>
+          <Text style={common.value}>Sin Cuotas</Text>
         )}
       </ScrollContainer>
     </View>

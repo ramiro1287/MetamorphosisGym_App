@@ -5,18 +5,10 @@ import { GymContext } from "../../../context/GymContext";
 import ScrollContainer from "../../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../../services/authService";
 import { toastError } from "../../../components/Toast/Toast";
-import {
-  ExerciseArms, ExerciseBack, ExerciseLegs,
-  ExerciseChest, ExerciseAbs,
-} from "../../../constants/trainingPlans";
-import {
-  iconDark, iconLight,
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  secondTextDark, secondTextLight,
-  buttonTextConfirmDark,
-} from "../../../constants/UI/colors";
 import { WeekDaysMap } from "../../../constants/trainingPlans";
+import { buttonTextConfirmDark } from "../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../constants/UI/theme";
+import { formatDate, formatExerciseType } from "../../../utils/formatters";
 import TouchableButton from "../../../components/Buttons/TouchableButton";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
@@ -48,44 +40,18 @@ export default function TraineePlans() {
     }
   };
 
-  const formatDate = (isoString) => {
-    if (!isoString) return "Sin vencimiento";
-    const date = new Date(isoString);
-    return new Intl.DateTimeFormat("es-AR", {
-      day: "2-digit", month: "2-digit", year: "numeric"
-    }).format(date);
-  };
-
-  const formatExerciseType = (type) => {
-    if (type === ExerciseArms) return "Brazos";
-    if (type === ExerciseBack) return "Espalda";
-    if (type === ExerciseLegs) return "Piernas";
-    if (type === ExerciseChest) return "Pecho";
-    if (type === ExerciseAbs) return "Abdominales";
-    return "Grupo desconocido";
-  };
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   const styles = StyleSheet.create({
-    titleText: {
-      fontSize: 22,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginVertical: 20,
-      alignSelf: "center",
-    },
-    cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderRadius: 20,
-      padding: 15,
-      marginBottom: 20,
-    },
     label: {
       fontSize: 16,
-      color: isDarkMode ? secondTextDark : secondTextLight,
+      color: t.secondText,
       fontWeight: "bold",
     },
     value: {
       fontSize: 16,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       marginBottom: 10,
     },
     daySelectorContainer: {
@@ -104,13 +70,13 @@ export default function TraineePlans() {
     exerciseTitle: {
       fontSize: 18,
       fontWeight: "bold",
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       flexDirection: "row",
       alignItems: "center",
     },
     exerciseDetail: {
       fontSize: 16,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
     },
     iconRow: {
       flexDirection: "row",
@@ -127,15 +93,15 @@ export default function TraineePlans() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Text style={styles.titleText}>Plan de ejercitación</Text>
+      <Text style={[common.titleText, { marginVertical: 20, marginBottom: 0 }]}>Plan de ejercitación</Text>
       <ScrollContainer style={{ paddingHorizontal: 25 }}>
         {trainingPlan ? (
           <>
-            <View style={styles.cardContainer}>
+            <View style={common.cardContainer}>
               <Text style={styles.label}>Entrenador:</Text>
               <Text style={styles.value}>{trainingPlan.coach}</Text>
               <Text style={styles.label}>Válido hasta:</Text>
-              <Text style={styles.value}>{formatDate(trainingPlan.expiration_date)}</Text>
+              <Text style={styles.value}>{formatDate(trainingPlan.expiration_date, "Sin vencimiento")}</Text>
             </View>
 
             <View style={styles.daySelectorContainer}>
@@ -168,14 +134,14 @@ export default function TraineePlans() {
             {exercisesByDay[selectedDay]?.map((ex) => (
               <TouchableOpacity
                 key={ex.id}
-                style={styles.cardContainer}
+                style={common.cardContainer}
                 onPress={() => {
                   setSelectedExercise(ex);
                   setModalVisible(true);
                 }}
               >
                 <View style={styles.iconRow}>
-                  <Icon name="bolt" size={25} color={isDarkMode ? iconDark : iconLight} />
+                  <Icon name="bolt" size={25} color={t.icon} />
                   <Text style={styles.exerciseTitle}>{ex.exercise.name}</Text>
                 </View>
                 <Text style={styles.exerciseDetail}>
@@ -188,7 +154,7 @@ export default function TraineePlans() {
             ))}
           </>
         ) : (
-          <Text style={styles.titleText}>Sin plan...</Text>
+          <Text style={[common.titleText, { marginVertical: 20, marginBottom: 0 }]}>Sin plan...</Text>
         )}
       </ScrollContainer>
       <Modal
@@ -204,14 +170,14 @@ export default function TraineePlans() {
           backgroundColor: "rgba(0,0,0,0.5)"
         }}>
           <View style={{
-            backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
+            backgroundColor: t.secondBackground,
             borderRadius: 20,
             padding: 20,
             width: "85%",
             maxHeight: "70%",
           }}>
             <ScrollContainer style={{ alignItems: "flex-start" }}>
-              <Text style={[styles.titleText, { fontSize: 20 }]}>
+              <Text style={[common.titleText, { marginVertical: 20, marginBottom: 0, fontSize: 20 }]}>
                 {selectedExercise?.exercise.name}
               </Text>
               <Text style={styles.exerciseDetail}>

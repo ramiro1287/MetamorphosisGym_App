@@ -21,19 +21,14 @@ import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
 import {
   PayStatusCanceled, PayStatusCompleted,
-  PayStatusPending, PayStatusProcessing,
-  PayMethodMercadoPago, PayMethodBrubank,
-  PayMethodBankTransfer, PayMethodCash,
-  PayMethodDebit, MonthsMap,
+  PayStatusPending,
 } from "../../../../constants/payments";
 import {
-  iconDark, iconLight, inputErrorLight,
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
   buttonTextConfirmDark, inputErrorDark,
-  secondTextDark, secondTextLight,
-  mainBackgroundDark, mainBackgroundLight,
+  defaultTextLight,
 } from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
+import { formatDate, formatPaymentStatus, formatPaymentMethod, getFinalAmount, getMonth } from "../../../../utils/formatters";
 
 export default function AdminUserPaymentDetail() {
   const [payment, setPayment] = useState(null);
@@ -46,6 +41,8 @@ export default function AdminUserPaymentDetail() {
   const { isDarkMode, gymInfo } = useContext(GymContext);
   const route = useRoute();
   const { paymentId, fullName } = route.params || {};
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   useFocusEffect(
     useCallback(() => {
@@ -66,43 +63,6 @@ export default function AdminUserPaymentDetail() {
   };
 
   if (!payment) return <LoadingScreen />;
-
-  const formatPaymentStatus = (status) => {
-    if (status === PayStatusPending) return "Pendiente";
-    if (status === PayStatusCompleted) return "Pagada";
-    if (status === PayStatusCanceled) return "Cancelada";
-    if (status === PayStatusProcessing) return "Procesando";
-    return "Error";
-  };
-
-  const getFinalAmount = (payment) => {
-    const discounts_sum = parseFloat(payment.discounts_sum);
-    const penalties_sum = parseFloat(payment.penalties_sum);
-    const final_price = parseFloat(payment.total_amount) + penalties_sum - discounts_sum;
-    return final_price.toFixed(2);
-  };
-
-  const getMonth = (stringDate) => {
-    const date = new Date(stringDate);
-    return MonthsMap[date.getUTCMonth() + 1]
-  };
-
-  const formatDate = (isoString) => {
-    if (!isoString) return "Sin fecha";
-    const date = new Date(isoString);
-    return new Intl.DateTimeFormat("es-AR", {
-      day: "2-digit", month: "2-digit", year: "numeric"
-    }).format(date);
-  };
-
-  const formatPaymentMethod = (method) => {
-    if (method === PayMethodMercadoPago) return "Mercado Pago";
-    if (method === PayMethodBrubank) return "Brubank";
-    if (method === PayMethodBankTransfer) return "Transferencia";
-    if (method === PayMethodCash) return "Efectivo";
-    if (method === PayMethodDebit) return "Debito";
-    return "Sin forma de pago";
-  };
 
   const handleEditionModal = (field, obj) => {
     setEditField(field);
@@ -330,35 +290,22 @@ export default function AdminUserPaymentDetail() {
   };
 
   const styles = StyleSheet.create({
-    titleText: {
-      fontSize: 22,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginBottom: 10,
-      alignSelf: "center",
-    },
-    cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderRadius: 20,
-      padding: 15,
-      width: "100%",
-      marginBottom: 20,
-    },
     cardRowContainer: {
       flex: 1,
       flexDirection: "row",
       alignItems: "center",
       flexWrap: "wrap",
-      marginVertical: 5
+      marginVertical: 5,
     },
     cardRowTitle: {
       fontSize: 18,
-      color: isDarkMode ? secondTextDark : secondTextLight,
+      color: t.secondText,
       marginRight: 6,
       flexShrink: 1,
     },
     cardRowText: {
       fontSize: 20,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       marginLeft: 6,
       flex: 1,
       flexShrink: 1,
@@ -367,61 +314,10 @@ export default function AdminUserPaymentDetail() {
       flex: 1,
       padding: 10,
       borderRadius: 20,
-      backgroundColor: isDarkMode ? mainBackgroundDark : mainBackgroundLight,
+      backgroundColor: t.background,
       marginTop: 10,
       borderRightWidth: 3,
       borderLeftWidth: 3,
-    },
-    modalContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: "rgba(0,0,0,0.5)",
-    },
-    modalCardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      borderWidth: 1.5,
-      padding: 20,
-      borderRadius: 12,
-      width: "80%",
-    },
-    modalCardTitle: {
-      fontSize: 18,
-      marginBottom: 10,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      alignSelf: "center",
-    },
-    pickerSelect: {
-      inputIOS: {
-        fontSize: 18,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
-        paddingVertical: 10,
-        paddingHorizontal: 10,
-        borderBottomWidth: 1,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      },
-      inputAndroid: {
-        fontSize: 18,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
-        borderBottomWidth: 1,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      },
-    },
-    modalCardButtonsContainer: {
-      flexDirection: "row",
-      justifyContent: "flex-end",
-      marginTop: 20,
-    },
-    modalCardTextInput: {
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      borderBottomWidth: 1,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-    },
-    errorText: {
-      color: isDarkMode ? inputErrorDark : inputErrorLight,
-      marginBottom: 8,
-      fontSize: 16,
     },
     penaltybutton: {
       alignSelf: "flex-end",
@@ -430,16 +326,33 @@ export default function AdminUserPaymentDetail() {
     },
   });
 
+  const pickerSelectStyles = {
+    inputIOS: {
+      fontSize: 18,
+      color: t.text,
+      paddingVertical: 10,
+      paddingHorizontal: 10,
+      borderBottomWidth: 1,
+      borderColor: t.text,
+    },
+    inputAndroid: {
+      fontSize: 18,
+      color: t.text,
+      borderBottomWidth: 1,
+      borderColor: t.text,
+    },
+  };
+
   return (
     <ScrollContainer style={{ padding: 25 }}>
-      <Text style={styles.titleText}>Cuota de</Text>
-      <Text style={styles.titleText}>{fullName}</Text>
-      <View key={payment.id} style={styles.cardContainer}>
+      <Text style={common.titleText}>Cuota de</Text>
+      <Text style={common.titleText}>{fullName}</Text>
+      <View key={payment.id} style={common.cardContainer}>
         <View style={styles.cardRowContainer}>
           <Icon
             name="edit"
             size={25}
-            color={isDarkMode ? iconDark : iconLight}
+            color={t.icon}
             onPress={() => handleEditionModal("status")}
             style={{ marginRight: 10 }}
           />
@@ -457,7 +370,7 @@ export default function AdminUserPaymentDetail() {
           <Icon
             name="edit"
             size={25}
-            color={isDarkMode ? iconDark : iconLight}
+            color={t.icon}
             onPress={() => setShowPicker(true)}
             style={{ marginRight: 10 }}
           />
@@ -468,7 +381,7 @@ export default function AdminUserPaymentDetail() {
           <Icon
             name="edit"
             size={25}
-            color={isDarkMode ? iconDark : iconLight}
+            color={t.icon}
             onPress={() => handleEditionModal("payment_method")}
             style={{ marginRight: 10 }}
           />
@@ -481,7 +394,7 @@ export default function AdminUserPaymentDetail() {
           <Icon
             name="edit"
             size={25}
-            color={isDarkMode ? iconDark : iconLight}
+            color={t.icon}
             onPress={() => handleEditionModal("total_amount")}
             style={{ marginRight: 10 }}
           />
@@ -521,7 +434,7 @@ export default function AdminUserPaymentDetail() {
               <Icon
                 name="edit"
                 size={25}
-                color={isDarkMode ? iconDark : iconLight}
+                color={t.icon}
                 onPress={() => handleEditionModal("penalty_amount", penalty)}
                 style={{ marginLeft: 10 }}
               />
@@ -557,7 +470,7 @@ export default function AdminUserPaymentDetail() {
               <Icon
                 name="edit"
                 size={25}
-                color={isDarkMode ? iconDark : iconLight}
+                color={t.icon}
                 onPress={() => handleEditionModal("discount_amount", discount)}
                 style={{ marginLeft: 10 }}
               />
@@ -589,9 +502,9 @@ export default function AdminUserPaymentDetail() {
           animationType="slide"
           onRequestClose={() => setShowModal(false)}
         >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalCardContainer}>
-              <Text style={styles.modalCardTitle}>
+          <View style={common.modalContainer}>
+            <View style={common.modalCardContainer}>
+              <Text style={common.modalCardTitle}>
                 Editar {formatFieldName(editField)}
               </Text>
 
@@ -604,7 +517,7 @@ export default function AdminUserPaymentDetail() {
                     { label: "Cancelada", value: PayStatusCanceled, color: defaultTextLight },
                     { label: "Pagada", value: PayStatusCompleted, color: defaultTextLight },
                   ]}
-                  style={styles.pickerSelect}
+                  style={pickerSelectStyles}
                   useNativeAndroidPickerStyle={false}
                   placeholder={{}}
                 />
@@ -615,7 +528,7 @@ export default function AdminUserPaymentDetail() {
                   items={gymInfo.payment_methods.map((method) => (
                     {label: formatPaymentMethod(method), value: method, color: defaultTextLight }
                   ))}
-                  style={styles.pickerSelect}
+                  style={pickerSelectStyles}
                   useNativeAndroidPickerStyle={false}
                   placeholder={{}}
                 />
@@ -628,11 +541,11 @@ export default function AdminUserPaymentDetail() {
                       setEditValue(txt);
                       setEditValueError("");
                     }}
-                    style={styles.modalCardTextInput}
+                    style={common.modalCardTextInput}
                     placeholder="Ingrese un precio"
-                    placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+                    placeholderTextColor={t.text}
                   />
-                  {editValueError ? <Text style={styles.errorText}>{editValueError}</Text> : null}
+                  {editValueError ? <Text style={common.errorText}>{editValueError}</Text> : null}
                 </>
               ) : editField === "penalty_amount" ? (
                 <>
@@ -643,11 +556,11 @@ export default function AdminUserPaymentDetail() {
                       setEditValue(txt);
                       setEditValueError("");
                     }}
-                    style={styles.modalCardTextInput}
+                    style={common.modalCardTextInput}
                     placeholder="Ingrese un precio"
-                    placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+                    placeholderTextColor={t.text}
                   />
-                  {editValueError ? <Text style={styles.errorText}>{editValueError}</Text> : null}
+                  {editValueError ? <Text style={common.errorText}>{editValueError}</Text> : null}
                 </>
               ) : editField === "discount_amount" ? (
                 <>
@@ -658,16 +571,16 @@ export default function AdminUserPaymentDetail() {
                       setEditValue(txt);
                       setEditValueError("");
                     }}
-                    style={styles.modalCardTextInput}
+                    style={common.modalCardTextInput}
                     placeholder="Ingrese un precio"
-                    placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+                    placeholderTextColor={t.text}
                   />
-                  {editValueError ? <Text style={styles.errorText}>{editValueError}</Text> : null}
+                  {editValueError ? <Text style={common.errorText}>{editValueError}</Text> : null}
                 </>
               ) : null
               }
 
-              <View style={styles.modalCardButtonsContainer}>
+              <View style={common.modalCardButtonsContainer}>
                 <TouchableButton title="Cancelar" onPress={() => setShowModal(false)} />
                 <TouchableButton title="Guardar" onPress={handleSaveField} style={{ marginLeft: 15 }} />
               </View>

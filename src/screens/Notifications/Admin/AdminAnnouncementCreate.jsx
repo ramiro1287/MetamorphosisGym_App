@@ -15,12 +15,7 @@ import TouchableButton from "../../../components/Buttons/TouchableButton";
 import { fetchWithAuth } from "../../../services/authService";
 import { toastError, toastSuccess } from "../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../components/Alerts/ConfirmModalAlert";
-import {
-  iconDark, iconLight,
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  inputErrorDark, inputErrorLight,
-} from "../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../constants/UI/theme";
 
 export default function AdminAnnouncementCreate() {
   const [form, setForm] = useState({
@@ -36,6 +31,8 @@ export default function AdminAnnouncementCreate() {
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   const { isDarkMode, getHasUnreadNotifications } = useContext(GymContext);
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   const handleChange = (key, value) => {
     if (key === "title") setTitleError("");
@@ -126,16 +123,9 @@ export default function AdminAnnouncementCreate() {
   const styles = StyleSheet.create({
     titleText: {
       fontSize: 22,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       marginBottom: 15,
       alignSelf: "center",
-    },
-    cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderRadius: 20,
-      padding: 20,
-      paddingTop: 0,
-      width: "80%",
     },
     cardInputContainer: {
       flex: 1,
@@ -143,14 +133,14 @@ export default function AdminAnnouncementCreate() {
     },
     cardInputLabel: {
       fontSize: 18,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
     },
     cardInput: {
       flex: 1,
       fontSize: 18,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       borderBottomWidth: 1,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
+      borderColor: t.text,
       paddingVertical: 5
     },
     expirationRow: {
@@ -158,17 +148,12 @@ export default function AdminAnnouncementCreate() {
       alignItems: "center",
       gap: 10,
     },
-    errorText: {
-      color: isDarkMode ? inputErrorDark : inputErrorLight,
-      marginBottom: 8,
-      fontSize: 16,
-    },
   });
 
   return (
     <ScrollContainer>
       <Text style={styles.titleText}>Nuevo Anuncio</Text>
-      <View style={styles.cardContainer}>
+      <View style={common.formCardContainer}>
         <View style={styles.cardInputContainer}>
           <Text style={styles.cardInputLabel}>Título:</Text>
           <TextInput
@@ -177,7 +162,7 @@ export default function AdminAnnouncementCreate() {
             onChangeText={(t) => handleChange("title", t)}
           />
         </View>
-        {titleError ? <Text style={styles.errorText}>{titleError}</Text> : null}
+        {titleError ? <Text style={common.errorText}>{titleError}</Text> : null}
 
         <View style={styles.cardInputContainer}>
           <Text style={styles.cardInputLabel}>Descripción:</Text>
@@ -188,7 +173,7 @@ export default function AdminAnnouncementCreate() {
             multiline
           />
         </View>
-        {descriptionError ? <Text style={styles.errorText}>{descriptionError}</Text> : null}
+        {descriptionError ? <Text style={common.errorText}>{descriptionError}</Text> : null}
 
         <View style={[styles.cardInputContainer, styles.expirationRow]}>
           <Text style={styles.cardInputLabel}>
@@ -197,12 +182,12 @@ export default function AdminAnnouncementCreate() {
           <Icon
             name="edit"
             size={25}
-            color={isDarkMode ? iconDark : iconLight}
+            color={t.icon}
             onPress={() => setShowPicker(true)}
             style={{ marginLeft: 5 }}
           />
         </View>
-        {expirationDateError ? <Text style={styles.errorText}>{expirationDateError}</Text> : null}
+        {expirationDateError ? <Text style={common.errorText}>{expirationDateError}</Text> : null}
 
         <TouchableButton
           title="Crear anuncio"

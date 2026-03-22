@@ -15,12 +15,9 @@ import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastInfo } from "../../../../components/Toast/Toast";
 import LoadingScreen from "../../../../components/Loading/LoadingScreen";
 import { PlanStatusActive } from "../../../../constants/trainingPlans";
-import {
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  buttonTextConfirmDark,
-  secondTextDark, secondTextLight,
-} from "../../../../constants/UI/colors";
+import { buttonTextConfirmDark } from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
+import { formatDate } from "../../../../utils/formatters";
 
 const PAGE_SIZE = 10;
 
@@ -34,6 +31,9 @@ export default function AdminUserTrainingPlans() {
   const navigation = useNavigation();
   const route = useRoute();
   const { idNumber, fullName } = route.params || {};
+
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   const buildQuery = () => {
     const q = new URLSearchParams();
@@ -76,12 +76,6 @@ export default function AdminUserTrainingPlans() {
     finally { setLoadingMore(false); }
   };
 
-  const formatDate = (isoString) => {
-    if (!isoString) return "Sin vencimiento";
-    const date = new Date(isoString);
-    return new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
-  };
-
   const handlePlanDetail = (planId) => {
     navigation.reset({
       index: 4,
@@ -115,45 +109,14 @@ export default function AdminUserTrainingPlans() {
 
   const styles = StyleSheet.create({
     titleText: {
+      ...common.titleText,
       fontSize: 20,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
       marginTop: 20,
-      alignSelf: "center",
-    },
-    cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderRadius: 20,
-      padding: 15,
-      width: "100%",
-      marginBottom: 20,
-      borderRightWidth: 3,
-      borderLeftWidth: 3,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-    },
-    cardRowContainer: {
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "center",
-      flexWrap: "wrap",
-    },
-    cardRowTitle: {
-      fontSize: 16,
-      color: isDarkMode ? secondTextDark : secondTextLight,
-      marginRight: 6,
-      flexShrink: 1,
-    },
-    cardRowText: {
-      fontSize: 18,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginLeft: 6,
-      flex: 1,
-      flexShrink: 1,
+      marginBottom: 0,
     },
     addButton: {
-      alignSelf: "flex-end",
+      ...common.createButton,
       marginVertical: 20,
-      paddingVertical: 2,
-      paddingHorizontal: 5,
     },
   });
 
@@ -175,23 +138,23 @@ export default function AdminUserTrainingPlans() {
             <TouchableOpacity
               key={plan.id}
               style={[
-                styles.cardContainer,
+                common.cardContainerBordered,
                 plan.status === PlanStatusActive && { borderColor: buttonTextConfirmDark }
               ]}
               onPress={() => handlePlanDetail(plan.id)}
             >
-              <View style={styles.cardRowContainer}>
-                <Text style={styles.cardRowTitle}>Entrenador:</Text>
-                <Text style={styles.cardRowText}>{plan.coach}</Text>
+              <View style={common.cardRowContainer}>
+                <Text style={common.cardRowTitle}>Entrenador:</Text>
+                <Text style={common.cardRowText}>{plan.coach}</Text>
               </View>
-              <View style={styles.cardRowContainer}>
-                <Text style={styles.cardRowTitle}>Fecha de expiración:</Text>
-                <Text style={styles.cardRowText}>{formatDate(plan.expiration_date)}</Text>
+              <View style={common.cardRowContainer}>
+                <Text style={common.cardRowTitle}>Fecha de expiración:</Text>
+                <Text style={common.cardRowText}>{formatDate(plan.expiration_date, "Sin vencimiento")}</Text>
               </View>
               {plan.description ? (
-                <View style={styles.cardRowContainer}>
-                  <Text style={styles.cardRowTitle}>Anotaciones:</Text>
-                  <Text style={styles.cardRowText}>{plan.description}</Text>
+                <View style={common.cardRowContainer}>
+                  <Text style={common.cardRowTitle}>Anotaciones:</Text>
+                  <Text style={common.cardRowText}>{plan.description}</Text>
                 </View>
               ) : null}
             </TouchableOpacity>
