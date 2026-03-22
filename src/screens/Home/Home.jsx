@@ -1,6 +1,6 @@
 import React, { useContext, useState, useCallback } from "react";
 import { useFocusEffect } from '@react-navigation/native';
-import { Text, StyleSheet, View } from "react-native";
+import { Text, StyleSheet, View, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Feather";
 import TouchableButton from "../../components/Buttons/TouchableButton";
@@ -23,9 +23,11 @@ export default function Home() {
   const navigation = useNavigation();
 
   useFocusEffect(useCallback(() => {
-    loadTrainingPlan();
-    loadPayments();
-    setLoading(false);
+    const load = async () => {
+      await Promise.all([loadTrainingPlan(), loadPayments()]);
+      setLoading(false);
+    };
+    load();
   }, []));
 
   const loadTrainingPlan = async () => {
@@ -81,6 +83,27 @@ export default function Home() {
       fontSize: 16,
       color: t.text,
     },
+    adminGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "space-between",
+      gap: 12,
+    },
+    adminGridItem: {
+      width: "48%",
+      backgroundColor: t.buttonBackground,
+      borderRadius: 12,
+      paddingVertical: 18,
+      paddingHorizontal: 12,
+      alignItems: "center",
+      gap: 8,
+    },
+    adminGridItemText: {
+      color: t.buttonText,
+      fontSize: 14,
+      fontWeight: "600",
+      textAlign: "center",
+    },
   });
 
   return (
@@ -134,8 +157,8 @@ export default function Home() {
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Plan de entrenamiento</Text>
-        {trainingPlans.length ? trainingPlans.map((plan) => (
-          <View key={plan.id}>
+        {trainingPlans.length ? (
+          <>
             <View style={common.infoRow}>
               <Text style={common.label}>Entrenador</Text>
               <Text style={common.value}>{trainingPlans[0].coach}</Text>
@@ -146,7 +169,6 @@ export default function Home() {
                 {formatDate(trainingPlans[0].expiration_date, "Sin vencimiento")}
               </Text>
             </View>
-
             <View style={{ flex: 1, alignItems: "flex-end" }}>
               <TouchableButton
                 title="Ver plan"
@@ -154,8 +176,8 @@ export default function Home() {
                 onPress={() => navigation.navigate("TraineePlans")}
               />
             </View>
-          </View>
-        )) : (
+          </>
+        ) : (
           <Text style={styles.noDataText}>Sin plan asignado</Text>
         )}
       </View>
@@ -177,41 +199,29 @@ export default function Home() {
       </View>
 
       {user.role !== TraineeRole && (
-        <View style={common.buttonsSelectorContainer}>
-          <TouchableButton
-            title="Usuarios"
-            icon={<Icon name="users" size={22} color={t.buttonText} />}
-            onPress={() => navigation.navigate("AdminUsers")}
-          />
-          {user.role === AdminRole && (
-            <>
-              <TouchableButton
-                title="Familias"
-                icon={<Icon name="home" size={22} color={t.buttonText} />}
-                onPress={() => navigation.navigate("AdminFamilies")}
-              />
-              <TouchableButton
-                title="Ejercicios"
-                icon={<Icon name="activity" size={22} color={t.buttonText} />}
-                onPress={() => navigation.navigate("AdminExercises")}
-              />
-              <TouchableButton
-                title="Planes Mensuales"
-                icon={<Icon name="calendar" size={22} color={t.buttonText} />}
-                onPress={() => navigation.navigate("AdminUserPlans")}
-              />
-              <TouchableButton
-                title="Estadísticas"
-                icon={<Icon name="bar-chart-2" size={22} color={t.buttonText} />}
-                onPress={() => navigation.navigate("AdminStatistics")}
-              />
-              <TouchableButton
-                title="Anuncios"
-                icon={<Icon name="message-square" size={22} color={t.buttonText} />}
-                onPress={() => navigation.navigate("AdminAnnouncements")}
-              />
-            </>
-          )}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Administración</Text>
+          <View style={styles.adminGrid}>
+            {[
+              { title: "Usuarios", icon: "users", route: "AdminUsers", show: true },
+              { title: "Familias", icon: "home", route: "AdminFamilies", show: user.role === AdminRole },
+              { title: "Ejercicios", icon: "activity", route: "AdminExercises", show: user.role === AdminRole },
+              { title: "Planes Mensuales", icon: "calendar", route: "AdminUserPlans", show: user.role === AdminRole },
+              { title: "Estadísticas", icon: "bar-chart-2", route: "AdminStatistics", show: user.role === AdminRole },
+              { title: "Anuncios", icon: "message-square", route: "AdminAnnouncements", show: user.role === AdminRole },
+            ]
+              .filter(item => item.show)
+              .map(item => (
+                <TouchableOpacity
+                  key={item.route}
+                  style={styles.adminGridItem}
+                  onPress={() => navigation.navigate(item.route)}
+                >
+                  <Icon name={item.icon} size={28} color={t.buttonText} />
+                  <Text style={styles.adminGridItemText}>{item.title}</Text>
+                </TouchableOpacity>
+              ))}
+          </View>
         </View>
       )}
     </ScrollContainer>

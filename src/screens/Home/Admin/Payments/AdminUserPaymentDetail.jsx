@@ -1,4 +1,4 @@
-import React, { useContext, useState, useCallback } from "react";
+import React, { useContext, useState, useCallback, useEffect, useRef } from "react";
 import { useFocusEffect } from '@react-navigation/native';
 import {
   Text,
@@ -7,10 +7,11 @@ import {
   Modal,
   Platform,
   TextInput,
+  TouchableOpacity,
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import { GymContext } from "../../../../context/GymContext";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -32,6 +33,10 @@ import { formatDate, formatPaymentStatus, formatPaymentMethod, getFinalAmount, g
 
 export default function AdminUserPaymentDetail() {
   const [payment, setPayment] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedFields, setEditedFields] = useState({});
+  const [showDiscardModal, setShowDiscardModal] = useState(false);
+  const [pendingNavAction, setPendingNavAction] = useState(null);
   const [editField, setEditField] = useState(null);
   const [editValue, setEditValue] = useState(null);
   const [editValueError, setEditValueError] = useState("");
@@ -40,15 +45,30 @@ export default function AdminUserPaymentDetail() {
   const [showPicker, setShowPicker] = useState(false);
   const { isDarkMode, gymInfo } = useContext(GymContext);
   const route = useRoute();
+  const navigation = useNavigation();
   const { paymentId, fullName } = route.params || {};
   const t = getThemeColors(isDarkMode);
   const common = getCommonStyles(isDarkMode);
 
+  const hasChanges = Object.keys(editedFields).length > 0;
+  const skipGuardRef = useRef(false);
+
   useFocusEffect(
     useCallback(() => {
+      skipGuardRef.current = false;
       loadPayment();
     }, [])
   );
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if (skipGuardRef.current || !hasChanges) return;
+      e.preventDefault();
+      setPendingNavAction(e.data.action);
+      setShowDiscardModal(true);
+    });
+    return unsubscribe;
+  }, [navigation, hasChanges]);
 
   const loadPayment = async () => {
     try {
@@ -64,135 +84,131 @@ export default function AdminUserPaymentDetail() {
 
   if (!payment) return <LoadingScreen />;
 
+  const handleFieldChange = (field, value) => {
+    setEditedFields(prev => ({ ...prev, [field]: value }));
+  };
+
+  const toggleEditMode = () => {
+    if (isEditing) {
+      if (hasChanges) {
+        setPendingNavAction(null);
+        setShowDiscardModal(true);
+      } else {
+        setIsEditing(false);
+        setEditedFields({});
+      }
+    } else {
+      setIsEditing(true);
+      if (!payment.payment_method && gymInfo.payment_methods?.length) {
+        setEditedFields(prev => ({ ...prev, payment_method: gymInfo.payment_methods[0] }));
+      }
+    }
+  };
+
+  const doSaveFields = async (skipConfirm = false) => {
+    const payload = { ...editedFields };
+
+    if (payload.total_amount !== undefined) {
+      const parsed = parseFloat(payload.total_amount);
+      if (isNaN(parsed) || parsed < 0) {
+        toastError("Error", "Ingrese un precio válido para el monto");
+        return false;
+      }
+      payload.total_amount = parsed;
+    }
+
+    if (payload.date_paid instanceof Date) {
+      payload.date_paid = payload.date_paid.toISOString().split("T")[0];
+    }
+
+    if (!skipConfirm) {
+      const confirm = await showConfirmModalAlert("¿Guardar todos los cambios?");
+      if (!confirm) return false;
+    }
+
+    try {
+      const response = await fetchWithAuth(
+        `/admin/payments/update/${paymentId}/`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (response.ok) {
+        toastSuccess("Cuota actualizada correctamente");
+        setIsEditing(false);
+        setEditedFields({});
+        loadPayment();
+        return true;
+      } else if (response.status === 400) {
+        const { data } = await response.json();
+        toastError("Error", data.error_detail);
+      } else {
+        toastError("Error", "No se pudo actualizar la cuota");
+      }
+    } catch (error) {
+      toastError("Error", "Error de conexión");
+    }
+    return false;
+  };
+
+  const handleDiscard = () => {
+    setShowDiscardModal(false);
+    setIsEditing(false);
+    setEditedFields({});
+    if (pendingNavAction) {
+      skipGuardRef.current = true;
+      navigation.dispatch(pendingNavAction);
+      setPendingNavAction(null);
+    }
+  };
+
+  const handleSaveAndContinue = async () => {
+    const action = pendingNavAction;
+    setShowDiscardModal(false);
+    setPendingNavAction(null);
+    const success = await doSaveFields(true);
+    if (success && action) {
+      skipGuardRef.current = true;
+      navigation.dispatch(action);
+    }
+  };
+
   const handleEditionModal = (field, obj) => {
     setEditField(field);
-    if (obj) {
-      setPenaltyDiscount(obj);
-      if (field === "penalty_amount") setEditValue(obj.amount);
-      else setEditValue(obj.fixed_amount || "0.00");
-    } else setEditValue(payment[field] || "");
+    setPenaltyDiscount(obj);
+    if (field === "penalty_amount") setEditValue(String(obj.amount));
+    else setEditValue(obj.fixed_amount || "0.00");
     setEditValueError("");
     setShowModal(true);
   };
 
   const formatFieldName = (field) => {
-    if (field === "status") return "estado de la cuota";
-    if (field === "payment_method") return "forma de pago";
-    if (field === "total_amount") return "monto de la cuota";
     if (field === "penalty_amount") return "monto de la penalización";
     if (field === "discount_amount") return "monto del descuento";
     return field;
   };
 
   const handleSaveField = async () => {
-    let parsedPrice = 0
-
-    if (["total_amount", "penalty_amount", "discount_amount"].includes(editField)) {
-      parsedPrice = parseFloat(editValue);
-      if (isNaN(parsedPrice) || parsedPrice < 0) {
-        setEditValueError("Ingrese un precio válido");
-        return;
-      }
+    const parsedPrice = parseFloat(editValue);
+    if (isNaN(parsedPrice) || parsedPrice < 0) {
+      setEditValueError("Ingrese un precio válido");
+      return;
     }
 
     if (editField === "penalty_amount") {
-      handleUpdatePenalty({ amount: parsedPrice }, penaltyDiscount.id)
-      return;
-    }
-    if (editField === "discount_amount") {
-      handleUpdateDiscount({ fixed_amount: parsedPrice }, penaltyDiscount.id)
-      return;
-    }
-
-    const confirm = await showConfirmModalAlert(
-        "¿Estás seguro de actualizar el campo?"
-    );
-    if (!confirm) {
-        setShowModal(false);
-        setEditField(null);
-        setEditValue(null);
-        return;
-    }
-
-    try {
-      const response = await fetchWithAuth(
-        `/admin/payments/update/${paymentId}/`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            [editField]: editField === "total_amount" ? parsedPrice : editValue
-          }),
-        }
-      );
-  
-      if (response.ok) {
-        toastSuccess("Campo actualizado correctamente");
-        setShowModal(false);
-        setEditField(null);
-        setEditValue(null);
-        loadPayment();
-        return;
-      } if (response.status === 400) {
-        setShowModal(false);
-        const { data } = await response.json();
-        toastError(data.error_detail);
-        setEditField(null);
-        setEditValue(null);
-        return;
-      } else {
-        setShowModal(false);
-        setEditField(null);
-        setEditValue(null);
-        toastError("Error", "No se pudo actualizar el campo");
-        return;
-      }
-    } catch (error) {
-      setShowModal(false);
-      setEditField(null);
-      setEditValue(null);
-      toastError("Error", "Error de conexión");
+      handleUpdatePenalty({ amount: parsedPrice }, penaltyDiscount.id);
+    } else if (editField === "discount_amount") {
+      handleUpdateDiscount({ fixed_amount: parsedPrice }, penaltyDiscount.id);
     }
   };
 
-  const onChangeDatePaid = async (event, selectedDate) => {
-    if (event.type === "dismissed") {
-      setShowPicker(false);
-      return;
-    }
-
-    const confirm = await showConfirmModalAlert(
-      "¿Estás seguro de cambiar la fecha de pago?"
-    );
-    if (!confirm) {
-      if (Platform.OS === "android") setShowPicker(false);
-      return;
-    }
-
-    handleUpdateDatePaid(selectedDate);
+  const onChangeDatePaid = (event, selectedDate) => {
     if (Platform.OS === "android") setShowPicker(false);
-  };
-
-  const handleUpdateDatePaid = async (date) => {
-    try {
-      const response = await fetchWithAuth(
-        `/admin/payments/update/${paymentId}/`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ date_paid: date.toISOString().split("T")[0] }),
-        }
-      );
-
-      if (response.ok) {
-        toastSuccess("Fecha de pago actualizada");
-        loadPayment();
-      } else {
-        toastError("Error", "No se pudo actualizar la fecha de pago");
-      }
-    } catch (error) {
-      toastError("Error", "Error de conexión");
-    }
+    if (event.type === "dismissed") return;
+    handleFieldChange("date_paid", selectedDate);
   };
 
   const handleUpdatePenalty = async (payload, penaltyId, enabledValue) => {
@@ -324,6 +340,20 @@ export default function AdminUserPaymentDetail() {
       paddingVertical: 2,
       paddingHorizontal: 5,
     },
+    editHeader: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      gap: 15,
+      marginBottom: 10,
+    },
+    editableText: {
+      textDecorationLine: "underline",
+    },
+    editableInput: {
+      borderBottomWidth: 1,
+      borderColor: t.text,
+      paddingVertical: 2,
+    },
   });
 
   const pickerSelectStyles = {
@@ -348,59 +378,99 @@ export default function AdminUserPaymentDetail() {
       <Text style={common.titleText}>Cuota de</Text>
       <Text style={common.titleText}>{fullName}</Text>
       <View key={payment.id} style={common.cardContainer}>
+        <View style={styles.editHeader}>
+          <TouchableOpacity onPress={toggleEditMode}>
+            <Icon name={isEditing ? "close" : "edit"} size={26} color={t.icon} />
+          </TouchableOpacity>
+          {isEditing && hasChanges && (
+            <TouchableOpacity onPress={() => doSaveFields()}>
+              <Icon name="save" size={26} color={buttonTextConfirmDark} />
+            </TouchableOpacity>
+          )}
+        </View>
+
         <View style={styles.cardRowContainer}>
-          <Icon
-            name="edit"
-            size={25}
-            color={t.icon}
-            onPress={() => handleEditionModal("status")}
-            style={{ marginRight: 10 }}
-          />
           <Text style={styles.cardRowTitle}>Estado:</Text>
-          <Text
-            style={[
-              styles.cardRowText,
-              [PayStatusCompleted, PayStatusCanceled].includes(payment.status) ? { color: buttonTextConfirmDark } : { color: inputErrorDark }
-            ]}
-          >
-            {formatPaymentStatus(payment.status)}
-          </Text>
+          {isEditing ? (
+            <View style={{ flex: 1 }}>
+              <RNPickerSelect
+                value={editedFields.status ?? payment.status}
+                onValueChange={(value) => handleFieldChange("status", value)}
+                items={[
+                  { label: "Pendiente", value: PayStatusPending, color: defaultTextLight },
+                  { label: "Cancelada", value: PayStatusCanceled, color: defaultTextLight },
+                  { label: "Pagada", value: PayStatusCompleted, color: defaultTextLight },
+                ]}
+                style={pickerSelectStyles}
+                useNativeAndroidPickerStyle={false}
+                placeholder={{}}
+              />
+            </View>
+          ) : (
+            <Text
+              style={[
+                styles.cardRowText,
+                [PayStatusCompleted, PayStatusCanceled].includes(payment.status) ? { color: buttonTextConfirmDark } : { color: inputErrorDark }
+              ]}
+            >
+              {formatPaymentStatus(payment.status)}
+            </Text>
+          )}
         </View>
+
         <View style={styles.cardRowContainer}>
-          <Icon
-            name="edit"
-            size={25}
-            color={t.icon}
-            onPress={() => setShowPicker(true)}
-            style={{ marginRight: 10 }}
-          />
           <Text style={styles.cardRowTitle}>Fecha de pago:</Text>
-          <Text style={styles.cardRowText}>{payment.date_paid ? formatDate(payment.date_paid) : "N/A"}</Text>
+          {isEditing ? (
+            <TouchableOpacity onPress={() => setShowPicker(true)} style={{ flex: 1 }}>
+              <Text style={[styles.cardRowText, styles.editableText]}>
+                {editedFields.date_paid
+                  ? formatDate(editedFields.date_paid.toISOString().split("T")[0])
+                  : (payment.date_paid ? formatDate(payment.date_paid) : "Seleccionar fecha")}
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <Text style={styles.cardRowText}>{payment.date_paid ? formatDate(payment.date_paid) : "N/A"}</Text>
+          )}
         </View>
+
         <View style={styles.cardRowContainer}>
-          <Icon
-            name="edit"
-            size={25}
-            color={t.icon}
-            onPress={() => handleEditionModal("payment_method")}
-            style={{ marginRight: 10 }}
-          />
           <Text style={styles.cardRowTitle}>Forma de pago:</Text>
-          <Text style={styles.cardRowText}>
-            {payment.payment_method ? formatPaymentMethod(payment.payment_method) : "N/A"}
-          </Text>
+          {isEditing ? (
+            <View style={{ flex: 1 }}>
+              <RNPickerSelect
+                value={editedFields.payment_method ?? payment.payment_method}
+                onValueChange={(value) => handleFieldChange("payment_method", value)}
+                items={gymInfo.payment_methods.map((method) => (
+                  { label: formatPaymentMethod(method), value: method, color: defaultTextLight }
+                ))}
+                style={pickerSelectStyles}
+                useNativeAndroidPickerStyle={false}
+                placeholder={{}}
+              />
+            </View>
+          ) : (
+            <Text style={styles.cardRowText}>
+              {payment.payment_method ? formatPaymentMethod(payment.payment_method) : "N/A"}
+            </Text>
+          )}
         </View>
+
         <View style={styles.cardRowContainer}>
-          <Icon
-            name="edit"
-            size={25}
-            color={t.icon}
-            onPress={() => handleEditionModal("total_amount")}
-            style={{ marginRight: 10 }}
-          />
           <Text style={styles.cardRowTitle}>Valor de la cuota:</Text>
-          <Text style={styles.cardRowText}>${payment.total_amount}</Text>
+          {isEditing ? (
+            <TextInput
+              keyboardType="numeric"
+              value={String(editedFields.total_amount ?? payment.total_amount)}
+              onChangeText={(txt) => handleFieldChange("total_amount", txt)}
+              style={[styles.cardRowText, styles.editableInput]}
+              placeholder="Ingrese un precio"
+              placeholderTextColor={t.secondText}
+            />
+          ) : (
+            <Text style={styles.cardRowText}>${payment.total_amount}</Text>
+          )}
         </View>
+
         <View style={styles.cardRowContainer}>
           <Text style={styles.cardRowTitle}>Monto a pagar:</Text>
           <Text style={styles.cardRowText}>${getFinalAmount(payment)}</Text>
@@ -487,7 +557,9 @@ export default function AdminUserPaymentDetail() {
 
       {showPicker && (
         <DateTimePicker
-          value={payment.date_paid ? new Date(payment.date_paid) : new Date()}
+          value={editedFields.date_paid instanceof Date
+            ? editedFields.date_paid
+            : (payment.date_paid ? new Date(payment.date_paid) : new Date())}
           mode="date"
           display="spinner"
           onChange={onChangeDatePaid}
@@ -496,93 +568,49 @@ export default function AdminUserPaymentDetail() {
       )}
 
       {showModal && (
-        <Modal
-          visible={true}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setShowModal(false)}
-        >
+        <Modal visible transparent animationType="slide" onRequestClose={() => setShowModal(false)}>
           <View style={common.modalContainer}>
             <View style={common.modalCardContainer}>
               <Text style={common.modalCardTitle}>
                 Editar {formatFieldName(editField)}
               </Text>
-
-              {editField === "status" ? (
-                <RNPickerSelect
-                  value={editValue}
-                  onValueChange={(value) => setEditValue(value)}
-                  items={[
-                    { label: "Pendiente", value: PayStatusPending, color: defaultTextLight },
-                    { label: "Cancelada", value: PayStatusCanceled, color: defaultTextLight },
-                    { label: "Pagada", value: PayStatusCompleted, color: defaultTextLight },
-                  ]}
-                  style={pickerSelectStyles}
-                  useNativeAndroidPickerStyle={false}
-                  placeholder={{}}
-                />
-              ) : editField === "payment_method" ? (
-                <RNPickerSelect
-                  value={editValue}
-                  onValueChange={(value) => setEditValue(value)}
-                  items={gymInfo.payment_methods.map((method) => (
-                    {label: formatPaymentMethod(method), value: method, color: defaultTextLight }
-                  ))}
-                  style={pickerSelectStyles}
-                  useNativeAndroidPickerStyle={false}
-                  placeholder={{}}
-                />
-              ) : editField === "total_amount" ? (
-                <>
-                  <TextInput
-                    keyboardType="numeric"
-                    value={editValue}
-                    onChangeText={(txt) => {
-                      setEditValue(txt);
-                      setEditValueError("");
-                    }}
-                    style={common.modalCardTextInput}
-                    placeholder="Ingrese un precio"
-                    placeholderTextColor={t.text}
-                  />
-                  {editValueError ? <Text style={common.errorText}>{editValueError}</Text> : null}
-                </>
-              ) : editField === "penalty_amount" ? (
-                <>
-                  <TextInput
-                    keyboardType="numeric"
-                    value={editValue}
-                    onChangeText={(txt) => {
-                      setEditValue(txt);
-                      setEditValueError("");
-                    }}
-                    style={common.modalCardTextInput}
-                    placeholder="Ingrese un precio"
-                    placeholderTextColor={t.text}
-                  />
-                  {editValueError ? <Text style={common.errorText}>{editValueError}</Text> : null}
-                </>
-              ) : editField === "discount_amount" ? (
-                <>
-                  <TextInput
-                    keyboardType="numeric"
-                    value={editValue}
-                    onChangeText={(txt) => {
-                      setEditValue(txt);
-                      setEditValueError("");
-                    }}
-                    style={common.modalCardTextInput}
-                    placeholder="Ingrese un precio"
-                    placeholderTextColor={t.text}
-                  />
-                  {editValueError ? <Text style={common.errorText}>{editValueError}</Text> : null}
-                </>
-              ) : null
-              }
-
+              <TextInput
+                keyboardType="numeric"
+                value={String(editValue)}
+                onChangeText={(txt) => {
+                  setEditValue(txt);
+                  setEditValueError("");
+                }}
+                style={common.modalCardTextInput}
+                placeholder="Ingrese un precio"
+                placeholderTextColor={t.text}
+              />
+              {editValueError ? <Text style={common.errorText}>{editValueError}</Text> : null}
               <View style={common.modalCardButtonsContainer}>
                 <TouchableButton title="Cancelar" onPress={() => setShowModal(false)} />
                 <TouchableButton title="Guardar" onPress={handleSaveField} style={{ marginLeft: 15 }} />
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {showDiscardModal && (
+        <Modal
+          visible
+          transparent
+          animationType="slide"
+          onRequestClose={() => { setPendingNavAction(null); setShowDiscardModal(false); }}
+        >
+          <View style={common.modalContainer}>
+            <View style={common.modalCardContainer}>
+              <Text style={common.modalCardTitle}>Cambios sin guardar</Text>
+              <Text style={{ color: t.text, textAlign: "center", marginVertical: 10 }}>
+                Tienes cambios sin guardar. ¿Qué deseas hacer?
+              </Text>
+              <View style={common.modalCardButtonsContainer}>
+                <TouchableButton title="Descartar" variant="error" onPress={handleDiscard} />
+                <TouchableButton title="Guardar" onPress={handleSaveAndContinue} style={{ marginLeft: 15 }} />
               </View>
             </View>
           </View>

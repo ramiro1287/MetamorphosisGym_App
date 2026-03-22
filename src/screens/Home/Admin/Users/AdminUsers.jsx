@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import Icon from "react-native-vector-icons/Feather";
 import { GymContext } from "../../../../context/GymContext";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../../../services/authService";
@@ -17,7 +18,7 @@ import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import { errorButtonTextDark } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 import debounce from "lodash.debounce";
-import { StatusActive } from "../../../../constants/users";
+import { StatusActive, TraineeRole } from "../../../../constants/users";
 
 const PAGE_SIZE = 20;
 
@@ -117,6 +118,17 @@ export default function AdminUsers() {
     });
   };
 
+  const handleUserPayments = (idNumber, firstName, lastName) => {
+    navigation.reset({
+      index: 2,
+      routes: [
+        { name: "Home" },
+        { name: "AdminUsers" },
+        { name: "AdminUserPayments", params: { idNumber, fullName: `${firstName} ${lastName}` } },
+      ]
+    });
+  };
+
   const styles = StyleSheet.create({
     cardRowContainer: { flexDirection: "row", marginBottom: 5 },
     cardRowTitle: {
@@ -127,6 +139,27 @@ export default function AdminUsers() {
     },
     cardRowText: { fontSize: 16, color: t.text },
     createButton: { alignSelf: "flex-end", marginBottom: 20, paddingVertical: 2, paddingHorizontal: 5 },
+    cardContent: {
+      flexDirection: "row",
+      alignItems: "stretch",
+    },
+    cardInfo: {
+      flex: 1,
+      marginRight: 10,
+    },
+    paymentButton: {
+      backgroundColor: t.buttonBackground,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 4,
+    },
+    paymentButtonText: {
+      color: t.buttonText,
+      fontSize: 12,
+      fontWeight: "600",
+    },
   });
 
   return (
@@ -175,17 +208,30 @@ export default function AdminUsers() {
               ]}
               onPress={() => handleUserDetail(user.id_number)}
             >
-              <View style={styles.cardRowContainer}>
-                <Text style={styles.cardRowTitle}>DNI:</Text>
-                <Text style={styles.cardRowText}>{user.id_number}</Text>
-              </View>
-              <View style={styles.cardRowContainer}>
-                <Text style={styles.cardRowTitle}>Nombre:</Text>
-                <Text style={styles.cardRowText}>{user.first_name}</Text>
-              </View>
-              <View style={styles.cardRowContainer}>
-                <Text style={styles.cardRowTitle}>Apellido:</Text>
-                <Text style={styles.cardRowText}>{user.last_name}</Text>
+              <View style={styles.cardContent}>
+                <View style={styles.cardInfo}>
+                  <View style={styles.cardRowContainer}>
+                    <Text style={styles.cardRowTitle}>DNI:</Text>
+                    <Text style={styles.cardRowText}>{user.id_number}</Text>
+                  </View>
+                  <View style={styles.cardRowContainer}>
+                    <Text style={styles.cardRowTitle}>Nombre:</Text>
+                    <Text style={styles.cardRowText} numberOfLines={1} ellipsizeMode="tail">{user.first_name}</Text>
+                  </View>
+                  <View style={styles.cardRowContainer}>
+                    <Text style={styles.cardRowTitle}>Apellido:</Text>
+                    <Text style={styles.cardRowText} numberOfLines={1} ellipsizeMode="tail">{user.last_name}</Text>
+                  </View>
+                </View>
+                {user.role === TraineeRole && (
+                  <TouchableOpacity
+                    style={styles.paymentButton}
+                    onPress={() => handleUserPayments(user.id_number, user.first_name, user.last_name)}
+                  >
+                    <Icon name="credit-card" size={24} color={t.buttonText} />
+                    <Text style={styles.paymentButtonText}>Cuotas</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </TouchableOpacity>
           ))
