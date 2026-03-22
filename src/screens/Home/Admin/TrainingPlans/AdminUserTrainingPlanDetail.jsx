@@ -15,12 +15,11 @@ import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModa
 import EditExerciseModal from "./EditExerciseModal";
 import AddExerciseModal from "./AddExerciseModal";
 import {
-  iconDark, iconLight,
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  buttonTextConfirmDark, secondTextDark, secondTextLight,
-  errorButtonTextDark,
+  buttonTextConfirmDark, errorButtonTextDark,
+  defaultTextLight,
 } from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
+import { formatDate, formatPlanStatus } from "../../../../utils/formatters";
 import {
   WeekDaysMap, PlanStatusActive,
   PlanStatusFinish, PlanStatusCanceled,
@@ -40,6 +39,8 @@ export default function AdminUserTrainingPlanDetail() {
   const navigation = useNavigation();
   const route = useRoute();
   const { idNumber, planId, fullName } = route.params || {};
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   useFocusEffect(useCallback(() => {
     loadPlan();
@@ -81,21 +82,6 @@ export default function AdminUserTrainingPlanDetail() {
   };
 
   if (!trainingPlan) return <LoadingScreen />;
-
-  const formatDate = (isoString) => {
-    if (!isoString) return "Sin vencimiento";
-    const date = new Date(isoString);
-    return new Intl.DateTimeFormat("es-AR", {
-      day: "2-digit", month: "2-digit", year: "numeric"
-    }).format(date);
-  };
-
-  const formatStatus = (status) => {
-    if (status === PlanStatusActive) return "Activo";
-    if (status === PlanStatusFinish) return "Finalizado";
-    if (status === PlanStatusCanceled) return "Cancelado";
-    return status;
-  };
 
   const handleDeletePlan = async () => {
     const confirm = await showConfirmModalAlert(
@@ -269,13 +255,8 @@ export default function AdminUserTrainingPlanDetail() {
   };  
 
   const styles = StyleSheet.create({
-    titleText: {
-      fontSize: 22,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      alignSelf: "center",
-    },
     cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
+      backgroundColor: t.secondBackground,
       borderRadius: 20,
       padding: 15,
       marginBottom: 20,
@@ -283,12 +264,12 @@ export default function AdminUserTrainingPlanDetail() {
     },
     label: {
       fontSize: 16,
-      color: isDarkMode ? secondTextDark : secondTextLight,
+      color: t.secondText,
       fontWeight: "bold",
     },
     value: {
       fontSize: 16,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
     },
     editionRow: {
       flexDirection: "row",
@@ -298,7 +279,7 @@ export default function AdminUserTrainingPlanDetail() {
     exerciseTitle: {
       fontSize: 18,
       fontWeight: "bold",
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
     },
     daySelectorContainer: {
       flexDirection: "row",
@@ -307,34 +288,12 @@ export default function AdminUserTrainingPlanDetail() {
       marginBottom: 30,
       gap: 10,
     },
-    pickerSelect: {
-      inputIOS: {
-        fontSize: 18,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
-        paddingVertical: 10,
-        paddingHorizontal: 10,
-        borderWidth: 1,
-        borderRadius: 20,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      },
-      inputAndroid: {
-        fontSize: 18,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
-        borderWidth: 1,
-        borderRadius: 20,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      },
-    },
     rowInput: {
       flex:1,
       fontSize: 16,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       borderBottomWidth: 1,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
+      borderColor: t.text,
     },
   });
 
@@ -346,8 +305,8 @@ export default function AdminUserTrainingPlanDetail() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Text style={[styles.titleText, { fontSize: 20 }]}>Plan de ejercitación de</Text>
-      <Text style={[styles.titleText, { marginBottom: 15 }]}>{fullName}</Text>
+      <Text style={[common.titleText, { fontSize: 20, marginBottom: 0 }]}>Plan de ejercitación de</Text>
+      <Text style={[common.titleText, { marginBottom: 15 }]}>{fullName}</Text>
       <ScrollContainer style={{ paddingHorizontal: 25 }}>
         <View style={styles.cardContainer}>
           <Text style={styles.label}>Entrenador:</Text>
@@ -363,7 +322,7 @@ export default function AdminUserTrainingPlanDetail() {
                     { label: "Finalizado", value: PlanStatusFinish, color: defaultTextLight },
                     { label: "Cancelado", value: PlanStatusCanceled, color: defaultTextLight },
                   ]}
-                  style={styles.pickerSelect}
+                  style={common.pickerSelect}
                   useNativeAndroidPickerStyle={false}
                   placeholder={{}}
                 />
@@ -376,13 +335,13 @@ export default function AdminUserTrainingPlanDetail() {
                   : { color: errorButtonTextDark }
                 ]}
               >
-                {formatStatus(trainingPlan.status)}
+                {formatPlanStatus(trainingPlan.status)}
               </Text>
             )}
             <Icon
               name={showStatusPicker ? "save" : "edit"}
               size={25}
-              color={isDarkMode ? iconDark : iconLight}
+              color={t.icon}
               style={{ marginLeft: 10 }}
               onPress={handleEditStatus}
             />
@@ -390,11 +349,11 @@ export default function AdminUserTrainingPlanDetail() {
 
           <Text style={styles.label}>Plan válido hasta:</Text>
           <View style={styles.editionRow}>
-            <Text style={styles.value}>{formatDate(trainingPlan.expiration_date)}</Text>
+            <Text style={styles.value}>{formatDate(trainingPlan.expiration_date, "Sin vencimiento")}</Text>
             <Icon
               name="edit"
               size={25}
-              color={isDarkMode ? iconDark : iconLight}
+              color={t.icon}
               style={{ marginLeft: 10 }}
               onPress={() => {setShowDatePicker(true)}}
             />
@@ -406,10 +365,10 @@ export default function AdminUserTrainingPlanDetail() {
               <TextInput
                 style={styles.rowInput}
                 value={editPlanDescription}
-                onChangeText={(t) => setEditPlanDescription(t)}
+                onChangeText={(val) => setEditPlanDescription(val)}
                 multiline
                 placeholder="N/A"
-                placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+                placeholderTextColor={t.text}
               />
             ) : (
               <Text style={styles.value}>
@@ -419,7 +378,7 @@ export default function AdminUserTrainingPlanDetail() {
             <Icon
               name={editPlanDescription ? "save" : "edit"}
               size={25}
-              color={isDarkMode ? iconDark : iconLight}
+              color={t.icon}
               style={{ marginLeft: 10 }}
               onPress={handleUpdateDescription}
             />
@@ -427,7 +386,7 @@ export default function AdminUserTrainingPlanDetail() {
           <Icon
               name="delete"
               size={25}
-              color={isDarkMode ? iconDark : iconLight}
+              color={t.icon}
               style={{ alignSelf: "flex-end" }}
               onPress={handleDeletePlan}
             />
@@ -473,14 +432,14 @@ export default function AdminUserTrainingPlanDetail() {
               <Icon
                 name="edit"
                 size={25}
-                color={isDarkMode ? iconDark : iconLight}
+                color={t.icon}
                 style={{ marginRight: 8 }}
                 onPress={() => setSelectedExercise(ex)}
               />
               <Icon
                 name="delete"
                 size={25}
-                color={isDarkMode ? iconDark : iconLight}
+                color={t.icon}
                 style={{ marginLeft: 8 }}
                 onPress={() => handleDeleteExercise(ex.id)}
               />

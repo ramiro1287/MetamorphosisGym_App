@@ -8,16 +8,14 @@ import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError } from "../../../../components/Toast/Toast";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
-import {
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  secondTextDark, secondTextLight,
-} from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 
 export default function AdminFamilies() {
   const [families, setFamilies] = useState([]);
   const { isDarkMode } = useContext(GymContext);
   const navigation = useNavigation();
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   useFocusEffect(
     useCallback(() => {
@@ -60,22 +58,6 @@ export default function AdminFamilies() {
   };
  
   const styles = StyleSheet.create({
-    titleText: {
-      fontSize: 22,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginBottom: 10,
-      alignSelf: "center",
-    },
-    cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      borderRadius: 20,
-      padding: 15,
-      width: "100%",
-      marginBottom: 20,
-      borderRightWidth: 3,
-      borderLeftWidth: 3,
-    },
     cardRowContainer: {
       flexDirection: "row",
       marginBottom: 5,
@@ -83,35 +65,29 @@ export default function AdminFamilies() {
     cardRowTitle: {
       fontSize: 18,
       fontWeight: "bold",
-      color: isDarkMode ? secondTextDark : secondTextLight,
+      color: t.secondText,
       marginRight: 6,
     },
     cardRowText: {
       fontSize: 20,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-    },
-    createButton: {
-      alignSelf: "flex-end",
-      marginBottom: 20,
-      paddingVertical: 2,
-      paddingHorizontal: 5,
+      color: t.text,
     },
   });
 
   return (
     <View style={{ flex: 1, paddingHorizontal: 25 }}>
-      <Text style={styles.titleText}>Familias</Text>
+      <Text style={common.titleText}>Familias</Text>
       <TouchableButton
         title="Nueva Familia"
         onPress={handleCreateFamily}
-        style={styles.createButton}
+        style={[common.createButton, { marginBottom: 20 }]}
       />
       <ScrollContainer>
         {families.length ? families.map((family) => (
           <TouchableOpacity
             key={family.id}
             onPress={() => handleFamilyDetail(family.id)}
-            style={styles.cardContainer}
+            style={common.cardContainerBordered}
           >
             <View style={styles.cardRowContainer}>
               <Text style={styles.cardRowTitle}>Nombre:</Text>
@@ -119,7 +95,7 @@ export default function AdminFamilies() {
             </View>
           </TouchableOpacity>
         )) : (
-          <Text style={styles.titleText}>Sin familias...</Text>
+          <Text style={common.titleText}>Sin familias...</Text>
         )}
       </ScrollContainer>
     </View>

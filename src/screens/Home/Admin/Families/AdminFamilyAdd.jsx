@@ -10,12 +10,7 @@ import LoadingScreen from "../../../../components/Loading/LoadingScreen";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
-import {
-  iconDark, iconLight,
-  defaultTextDark, defaultTextLight,
-  secondTextDark, secondTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-} from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 import debounce from "lodash.debounce";
 
 export default function AdminFamilyAdd() {
@@ -25,6 +20,8 @@ export default function AdminFamilyAdd() {
   const { isDarkMode } = useContext(GymContext);
   const navigation = useNavigation();
   const route = useRoute();
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   useFocusEffect(
     useCallback(() => {
@@ -117,33 +114,8 @@ export default function AdminFamilyAdd() {
   };
 
   const styles = StyleSheet.create({
-    profileCard: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderRadius: 20,
-      padding: 20,
-      alignItems: "center",
-      width: "100%",
-    },
-    infoRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      width: "100%",
-      marginBottom: 10,
-      alignItems: "flex-start",
-      flexWrap: "wrap",
-    },
-    label: {
-      color: isDarkMode ? secondTextDark : secondTextLight,
-      fontSize: 18,
-    },
-    value: {
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      fontSize: 18,
-      flex: 1,
-      textAlign: "right",
-    },
     titleText: {
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       fontSize: 22,
       fontWeight: 500,
       marginBottom: 15,
@@ -152,8 +124,8 @@ export default function AdminFamilyAdd() {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
+      backgroundColor: t.secondBackground,
+      borderColor: t.text,
       borderRadius: 20,
       padding: 15,
       width: "100%",
@@ -162,43 +134,34 @@ export default function AdminFamilyAdd() {
       borderLeftWidth: 3,
     },
     userText: {
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       fontSize: 18,
       fontWeight: 500,
-    },
-    input: {
-      borderWidth: 1,
-      borderColor: isDarkMode ? secondTextDark : secondTextLight,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderRadius: 12,
-      padding: 10,
-      marginBottom: 12,
     },
   });
 
   return (
     <ScrollContainer style={{ padding: 25 }}>
-      <View style={styles.profileCard}>
+      <View style={common.profileCard}>
         <Text style={styles.titleText}>Agregar miembro a familia</Text>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Nombre</Text>
-          <Text style={styles.value}>{family.name}</Text>
+        <View style={common.infoRow}>
+          <Text style={common.label}>Nombre</Text>
+          <Text style={common.value}>{family.name}</Text>
         </View>
       </View>
       <Text style={[styles.titleText, { marginTop: 20 }]}>Usuarios</Text>
       <View style={{ width: "100%", paddingHorizontal: 30, marginBottom: 15 }}>
         <TextInput
-          style={styles.input}
+          style={common.searchInput}
           placeholder="Buscar por nombre"
-          placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+          placeholderTextColor={t.text}
           value={filters.first_name}
           onChangeText={(text) => handleChange("first_name", text)}
         />
         <TextInput
-          style={styles.input}
+          style={common.searchInput}
           placeholder="Buscar por apellido"
-          placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+          placeholderTextColor={t.text}
           value={filters.last_name}
           onChangeText={(text) => handleChange("last_name", text)}
         />
@@ -209,7 +172,7 @@ export default function AdminFamilyAdd() {
           <Icon
             name="person-add"
             size={25}
-            color={isDarkMode ? iconDark : iconLight}
+            color={t.icon}
             onPress={() => handleAddMember(usr)}
             style={{ marginLeft: 5 }}
           />

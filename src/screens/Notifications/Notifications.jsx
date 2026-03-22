@@ -11,15 +11,14 @@ import { GymContext } from "../../context/GymContext";
 import ScrollContainer from "../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../services/authService";
 import { toastError } from "../../components/Toast/Toast";
-import {
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  secondTextDark, secondTextLight,
-} from "../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../constants/UI/theme";
+import { formatDate } from "../../utils/formatters";
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
   const { isDarkMode, getHasUnreadNotifications } = useContext(GymContext);
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   useFocusEffect(
     useCallback(() => {
@@ -68,27 +67,14 @@ export default function Notifications() {
     }
   };
 
-  const formatDate = (isoString) => {
-    const date = new Date(isoString);
-    return new Intl.DateTimeFormat("es-AR", {
-      day: "2-digit", month: "2-digit", year: "numeric"
-    }).format(date);
-  };
-
   const styles = StyleSheet.create({
     container: {
       flex: 1,
       paddingHorizontal: 25,
     },
-    titleText: {
-      fontSize: 22,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginBottom: 10,
-      alignSelf: "center",
-    },
     cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
+      backgroundColor: t.secondBackground,
+      borderColor: t.text,
       borderRadius: 20,
       padding: 10,
       width: "100%",
@@ -99,13 +85,13 @@ export default function Notifications() {
     cardTitle: {
       fontSize: 18,
       fontWeight: "bold",
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       flex: 1,
       marginRight: 10,
     },
     cardDescription: {
       fontSize: 16,
-      color: isDarkMode ? secondTextDark : secondTextLight,
+      color: t.secondText,
     },
     cardFooter: {
       flexDirection: "row",
@@ -114,7 +100,7 @@ export default function Notifications() {
     },
     cardDate: {
       fontSize: 14,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
     },
     iconButton: {
       marginLeft: 10,
@@ -133,7 +119,7 @@ export default function Notifications() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titleText}>Notificaciones</Text>
+      <Text style={common.titleText}>Notificaciones</Text>
       <ScrollContainer style={{ marginTop: 20 }}>
         {notifications.length ? notifications.map((notif) => {
           if (notif.is_read) {
@@ -156,7 +142,7 @@ export default function Notifications() {
                     <Icon
                       name="delete"
                       size={24}
-                      color={isDarkMode ? defaultTextDark : defaultTextLight}
+                      color={t.text}
                     />
                   </TouchableOpacity>
                 </View>
@@ -184,14 +170,14 @@ export default function Notifications() {
                   <Icon
                     name="delete"
                     size={24}
-                    color={isDarkMode ? defaultTextDark : defaultTextLight}
+                    color={t.text}
                   />
                 </TouchableOpacity>
               </View>
             </TouchableOpacity>
           )
         }) : (
-          <Text style={styles.titleText}>Sin notificaciones...</Text>
+          <Text style={common.titleText}>Sin notificaciones...</Text>
         )}
       </ScrollContainer>
     </View>

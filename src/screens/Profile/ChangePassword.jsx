@@ -13,10 +13,7 @@ import TouchableButton from "../../components/Buttons/TouchableButton";
 import FormContainer from "../../components/Containers/FormContainer";
 import { fetchWithAuth } from "../../services/authService";
 import { toastError, toastSuccess } from "../../components/Toast/Toast";
-import {
-  inputErrorDark, inputErrorLight,
-  defaultTextDark, defaultTextLight,
-} from "../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../constants/UI/theme";
 
 export default function ChangePassword () {
   const [oldPassword, setOldPassword] = useState("");
@@ -31,6 +28,8 @@ export default function ChangePassword () {
   const [loading, setLoading] = useState(false);
   const { isDarkMode } = useContext(GymContext);
   const navigation = useNavigation();
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   const handleChangePassword = async () => {
     let hasError = false;
@@ -102,51 +101,26 @@ export default function ChangePassword () {
     }
   };
 
-  const iconStroke = isDarkMode ? defaultTextDark : defaultTextLight;
   const styles = StyleSheet.create({
     title: {
       fontSize: 20,
       fontWeight: "bold",
       marginTop: 25,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-    },
-    input: {
-      height: 40,
-      borderBottomWidth: 1,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginBottom: 10,
-      paddingHorizontal: 8,
-      width: "80%",
-      fontSize: 18,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-    },
-    passwordContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      width: "80%",
-      marginBottom: 10,
+      color: t.text,
     },
     passwordInput: {
       flex: 1,
-    },
-    inputError: {
-      borderColor: isDarkMode ? inputErrorDark : inputErrorLight,
-    },
-    errorText: {
-      color: isDarkMode ? inputErrorDark : inputErrorLight,
-      marginBottom: 8,
-      fontSize: 16,
     },
   });
 
   return (
     <FormContainer>
       <Text style={styles.title}>Contraseña Actual</Text>
-      <View style={styles.passwordContainer}>
+      <View style={common.passwordContainer}>
         <TextInput
-          style={[styles.input, oldPasswordError ? styles.inputError : null, styles.passwordInput]}
+          style={[common.input, oldPasswordError ? common.inputError : null, styles.passwordInput]}
           placeholder="Contraseña Actual"
-          placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+          placeholderTextColor={t.text}
           value={oldPassword}
           onChangeText={(text) => {
             setOldPassword(text);
@@ -156,20 +130,20 @@ export default function ChangePassword () {
         />
         <TouchableOpacity onPress={() => setShowOldPassword(!showOldPassword)}>
           {showOldPassword ? (
-            <Eye width={24} height={24} stroke={iconStroke} />
+            <Eye width={24} height={24} stroke={t.text} />
           ) : (
-            <EyeOff width={24} height={24} stroke={iconStroke} />
+            <EyeOff width={24} height={24} stroke={t.text} />
           )}
         </TouchableOpacity>
       </View>
-      {oldPasswordError ? <Text style={styles.errorText}>{oldPasswordError}</Text> : null}
+      {oldPasswordError ? <Text style={common.errorText}>{oldPasswordError}</Text> : null}
 
       <Text style={styles.title}>Nueva Contraseña</Text>
-      <View style={styles.passwordContainer}>
+      <View style={common.passwordContainer}>
         <TextInput
-          style={[styles.input, newPasswordError ? styles.inputError : null, styles.passwordInput]}
+          style={[common.input, newPasswordError ? common.inputError : null, styles.passwordInput]}
           placeholder="Nueva Contraseña"
-          placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+          placeholderTextColor={t.text}
           value={newPassword}
           onChangeText={(text) => {
             setNewPassword(text);
@@ -179,20 +153,20 @@ export default function ChangePassword () {
         />
         <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)}>
           {showNewPassword ? (
-            <Eye width={24} height={24} stroke={iconStroke} />
+            <Eye width={24} height={24} stroke={t.text} />
           ) : (
-            <EyeOff width={24} height={24} stroke={iconStroke} />
+            <EyeOff width={24} height={24} stroke={t.text} />
           )}
         </TouchableOpacity>
       </View>
-      {newPasswordError ? <Text style={styles.errorText}>{newPasswordError}</Text> : null}
+      {newPasswordError ? <Text style={common.errorText}>{newPasswordError}</Text> : null}
 
       <Text style={styles.title}>Repita Contraseña</Text>
-      <View style={styles.passwordContainer}>
+      <View style={common.passwordContainer}>
         <TextInput
-          style={[styles.input, newPasswordError2 ? styles.inputError : null, styles.passwordInput]}
+          style={[common.input, newPasswordError2 ? common.inputError : null, styles.passwordInput]}
           placeholder="Repita Contraseña"
-          placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+          placeholderTextColor={t.text}
           value={newPassword2}
           onChangeText={(text) => {
             setNewPassword2(text);
@@ -202,13 +176,13 @@ export default function ChangePassword () {
         />
         <TouchableOpacity onPress={() => setShowNewPassword2(!showNewPassword2)}>
           {showNewPassword2 ? (
-            <Eye width={24} height={24} stroke={iconStroke} />
+            <Eye width={24} height={24} stroke={t.text} />
           ) : (
-            <EyeOff width={24} height={24} stroke={iconStroke} />
+            <EyeOff width={24} height={24} stroke={t.text} />
           )}
         </TouchableOpacity>
       </View>
-      {newPasswordError2 ? <Text style={styles.errorText}>{newPasswordError2}</Text> : null}
+      {newPasswordError2 ? <Text style={common.errorText}>{newPasswordError2}</Text> : null}
       <TouchableButton title="Cambiar Contraseña" onPress={handleChangePassword} loading={loading} />
     </FormContainer>
   );

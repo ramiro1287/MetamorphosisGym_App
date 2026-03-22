@@ -13,16 +13,15 @@ import { fetchWithAuth } from "../../../services/authService";
 import { toastError } from "../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../components/Alerts/ConfirmModalAlert";
 import TouchableButton from "../../../components/Buttons/TouchableButton";
-import {
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  secondTextDark, secondTextLight,
-} from "../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../constants/UI/theme";
+import { formatDate } from "../../../utils/formatters";
 
 export default function AdminAnnouncements() {
   const [announcements, setAnnouncements] = useState([]);
   const { isDarkMode, getHasUnreadNotifications } = useContext(GymContext);
   const navigation = useNavigation();
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   useFocusEffect(
     useCallback(() => {
@@ -92,27 +91,14 @@ export default function AdminAnnouncements() {
     });
   };
 
-  const formatDate = (isoString) => {
-    const date = new Date(isoString);
-    return new Intl.DateTimeFormat("es-AR", {
-      day: "2-digit", month: "2-digit", year: "numeric"
-    }).format(date);
-  };
-
   const styles = StyleSheet.create({
     container: {
       flex: 1,
       paddingHorizontal: 25,
     },
-    titleText: {
-      fontSize: 22,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginBottom: 10,
-      alignSelf: "center",
-    },
     cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
+      backgroundColor: t.secondBackground,
+      borderColor: t.text,
       borderRadius: 20,
       padding: 10,
       width: "100%",
@@ -123,13 +109,13 @@ export default function AdminAnnouncements() {
     cardTitle: {
       fontSize: 18,
       fontWeight: "bold",
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       flex: 1,
       marginRight: 10,
     },
     cardDescription: {
       fontSize: 16,
-      color: isDarkMode ? secondTextDark : secondTextLight,
+      color: t.secondText,
     },
     cardFooter: {
       flexDirection: "row",
@@ -138,25 +124,20 @@ export default function AdminAnnouncements() {
     },
     cardDate: {
       fontSize: 14,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
     },
     iconButton: {
       marginLeft: 10,
-    },
-    createButton: {
-      alignSelf: "flex-end",
-      paddingVertical: 2,
-      paddingHorizontal: 5,
     },
   });
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titleText}>Anuncios</Text>
+      <Text style={common.titleText}>Anuncios</Text>
       <TouchableButton
         title="Nuevo Anuncio"
         onPress={handleCreateAnnouncement}
-        style={styles.createButton}
+        style={common.createButton}
       />
       <ScrollContainer style={{ marginTop: 20 }}>
         {announcements.length ? announcements.map((annc) => (
@@ -180,13 +161,13 @@ export default function AdminAnnouncements() {
                 <Icon
                   name="delete"
                   size={24}
-                  color={isDarkMode ? defaultTextDark : defaultTextLight}
+                  color={t.text}
                 />
               </TouchableOpacity>
             </View>
           </View>
         )) : (
-          <Text style={styles.titleText}>Sin anuncios...</Text>
+          <Text style={common.titleText}>Sin anuncios...</Text>
         )}
       </ScrollContainer>
     </View>

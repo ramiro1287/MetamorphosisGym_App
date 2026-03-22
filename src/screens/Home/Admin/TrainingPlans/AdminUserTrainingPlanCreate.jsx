@@ -15,11 +15,7 @@ import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
-import {
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  mainBackgroundDark, mainBackgroundLight
-} from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 
 export default function AdminUserTrainingPlanCreate() {
   const defaultDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -33,6 +29,8 @@ export default function AdminUserTrainingPlanCreate() {
   const { isDarkMode } = useContext(GymContext);
   const route = useRoute();
   const { idNumber, fullName } = route.params || {};
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   const handleChange = (key, value) => {
     setForm({ ...form, [key]: value });
@@ -92,61 +90,8 @@ export default function AdminUserTrainingPlanCreate() {
   };
 
   const styles = StyleSheet.create({
-    titleText: {
-      fontSize: 22,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      alignSelf: "center",
-    },
-    cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderRadius: 20,
-      padding: 20,
-      paddingTop: 0,
-      width: "100%",
-      marginTop: 15,
-    },
-    cardInputContainer: {
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "center",
-      marginTop: 15,
-    },
-    cardInputLabel: {
-      fontSize: 18,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginRight: 10,
-    },
-    cardInput: {
-      flex:1,
-      fontSize: 18,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      borderBottomWidth: 1,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-    },
-    pickerSelect: {
-      inputIOS: {
-        fontSize: 18,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
-        paddingVertical: 10,
-        paddingHorizontal: 10,
-        borderWidth: 1,
-        borderRadius: 20,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      },
-      inputAndroid: {
-        fontSize: 18,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
-        borderWidth: 1,
-        borderRadius: 20,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      },
-    },
     dateInput: {
-      backgroundColor: isDarkMode ? mainBackgroundDark : mainBackgroundLight,
+      backgroundColor: t.background,
       paddingVertical: 5,
       paddingHorizontal: 8,
       borderRadius: 12,
@@ -155,13 +100,13 @@ export default function AdminUserTrainingPlanCreate() {
 
   return (
     <ScrollContainer style={{ paddingHorizontal: 25 }}>
-      <Text style={[styles.titleText, { fontSize: 20 }]}>Plan para:</Text>
-      <Text style={styles.titleText}>{fullName}</Text>
-      <View style={styles.cardContainer}>
-        <View style={styles.cardInputContainer}>
-          <Text style={styles.cardInputLabel}>Fecha de expiración:</Text>
+      <Text style={[common.titleText, { fontSize: 20, marginBottom: 0 }]}>Plan para:</Text>
+      <Text style={[common.titleText, { marginBottom: 0 }]}>{fullName}</Text>
+      <View style={[common.formCardContainer, { width: "100%", marginTop: 15 }]}>
+        <View style={common.formInputContainer}>
+          <Text style={common.formInputLabel}>Fecha de expiración:</Text>
           <TouchableOpacity style={styles.dateInput} onPress={() => setShowPicker(true)}>
-            <Text style={styles.cardInputLabel}>
+            <Text style={common.formInputLabel}>
             {form.expiration_date
               ? `${String(form.expiration_date.getDate()).padStart(2, '0')}/${String(form.expiration_date.getMonth() + 1).padStart(2, '0')}/${form.expiration_date.getFullYear()}`
               : ""
@@ -169,13 +114,13 @@ export default function AdminUserTrainingPlanCreate() {
             </Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.cardInputContainer}>
-          <Text style={styles.cardInputLabel}>Anotaciones:</Text>
+        <View style={common.formInputContainer}>
+          <Text style={common.formInputLabel}>Anotaciones:</Text>
           <TextInput
-            style={styles.cardInput}
+            style={common.formInput}
             value={form.description}
             multiline
-            onChangeText={(t) => handleChange("description", t)}
+            onChangeText={(val) => handleChange("description", val)}
           />
         </View>
       </View>

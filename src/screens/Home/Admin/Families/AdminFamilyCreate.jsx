@@ -2,7 +2,6 @@
 import React, { useContext, useState } from "react";
 import {
   Text,
-  StyleSheet,
   View,
   TextInput,
 } from "react-native";
@@ -13,11 +12,7 @@ import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
-import {
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  inputErrorDark, inputErrorLight,
-} from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 
 export default function AdminFamilyCreate() {
   const [form, setForm] = useState({
@@ -29,6 +24,8 @@ export default function AdminFamilyCreate() {
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   const { isDarkMode } = useContext(GymContext);
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   const handleChange = (key, value) => {
     if (key === "name") setNameError("");
@@ -81,67 +78,28 @@ export default function AdminFamilyCreate() {
     }
   };
 
-  const styles = StyleSheet.create({
-    titleText: {
-      fontSize: 22,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginBottom: 15,
-      alignSelf: "center",
-    },
-    cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderRadius: 20,
-      padding: 20,
-      paddingTop: 0,
-      width: "80%",
-    },
-    cardInputContainer: {
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "center",
-      marginTop: 15,
-    },
-    cardInputLabel: {
-      fontSize: 18,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginRight: 10,
-    },
-    cardInput: {
-      flex:1,
-      fontSize: 18,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      borderBottomWidth: 1,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-    },
-    errorText: {
-      color: isDarkMode ? inputErrorDark : inputErrorLight,
-      marginBottom: 8,
-      fontSize: 16,
-    },
-  });
-
   return (
     <ScrollContainer>
-      <Text style={styles.titleText}>Nueva Familia</Text>
-      <View style={styles.cardContainer}>
-        <View style={styles.cardInputContainer}>
-          <Text style={styles.cardInputLabel}>Nombre:</Text>
+      <Text style={[common.titleText, { marginBottom: 15 }]}>Nueva Familia</Text>
+      <View style={common.formCardContainer}>
+        <View style={common.formInputContainer}>
+          <Text style={common.formInputLabel}>Nombre:</Text>
           <TextInput
-            style={styles.cardInput}
+            style={common.formInput}
             value={form.name}
-            onChangeText={(t) => handleChange("name", t)}
+            onChangeText={(text) => handleChange("name", text)}
           />
         </View>
-        {nameError && (<Text style={styles.errorText}>{nameError}</Text>)}
-        <View style={styles.cardInputContainer}>
-          <Text style={styles.cardInputLabel}>Descripcion:</Text>
+        {nameError && (<Text style={common.errorText}>{nameError}</Text>)}
+        <View style={common.formInputContainer}>
+          <Text style={common.formInputLabel}>Descripcion:</Text>
           <TextInput
-            style={styles.cardInput}
+            style={common.formInput}
             value={form.description}
-            onChangeText={(t) => handleChange("description", t)}
+            onChangeText={(text) => handleChange("description", text)}
           />
         </View>
-        {descriptionError && (<Text style={styles.errorText}>{descriptionError}</Text>)}
+        {descriptionError && (<Text style={common.errorText}>{descriptionError}</Text>)}
         <TouchableButton
           title="Crear familia"
           onPress={handleSubmit}

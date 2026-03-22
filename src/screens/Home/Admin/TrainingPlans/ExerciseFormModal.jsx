@@ -6,15 +6,15 @@ import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import { GymContext } from "../../../../context/GymContext";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
-import {
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-} from "../../../../constants/UI/colors";
+import { defaultTextLight } from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 import { ExercisesMap } from "../../../../constants/trainingPlans";
 
 export default function ExerciseFormModal({ visible, onClose, initialData, onSaved }) {
   const isEdit = !!initialData;
   const { isDarkMode } = useContext(GymContext);
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
   const [form, setForm] = useState({
     type: "",
     name: "",
@@ -106,14 +106,8 @@ export default function ExerciseFormModal({ visible, onClose, initialData, onSav
   };
 
   const styles = StyleSheet.create({
-    rootModalContainer: {
-      flex: 1,
-      backgroundColor: "rgba(0,0,0,0.5)",
-      justifyContent: "center",
-      alignItems: "center"
-    },
     cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
+      backgroundColor: t.secondBackground,
       padding: 20,
       borderRadius: 20,
       width: "90%",
@@ -121,15 +115,15 @@ export default function ExerciseFormModal({ visible, onClose, initialData, onSav
     title: {
       fontSize: 18,
       fontWeight: "bold",
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       marginBottom: 12,
       alignSelf: "center",
     },
     input: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
+      backgroundColor: t.secondBackground,
       borderWidth: 1,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      borderColor: t.text,
+      color: t.text,
       fontSize: 16,
       borderRadius: 12,
       padding: 10,
@@ -138,34 +132,34 @@ export default function ExerciseFormModal({ visible, onClose, initialData, onSav
     pickerSelect: {
       inputIOS: {
         fontSize: 16,
-        backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
+        backgroundColor: t.secondBackground,
+        color: t.text,
         paddingVertical: 5,
         paddingHorizontal: 10,
         borderWidth: 1,
         borderRadius: 12,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
+        borderColor: t.text,
         marginBottom: 10,
       },
       inputAndroid: {
         fontSize: 16,
-        backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
+        backgroundColor: t.secondBackground,
+        color: t.text,
         paddingVertical: 5,
         paddingHorizontal: 10,
         borderWidth: 1,
         borderRadius: 12,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
+        borderColor: t.text,
         marginBottom: 10,
       },
-      placeholder: { color: isDarkMode ? defaultTextDark : defaultTextLight },
+      placeholder: { color: t.text },
     },
     actionsRow: { flexDirection: "row", justifyContent: "flex-end", marginTop: 8, gap: 8 },
   });
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.rootModalContainer}>
+      <View style={common.modalContainer}>
         <View style={styles.cardContainer}>
           <Text style={styles.title}>{isEdit ? "Editar ejercicio" : "Nuevo ejercicio"}</Text>
 
@@ -183,18 +177,18 @@ export default function ExerciseFormModal({ visible, onClose, initialData, onSav
           <TextInput
             style={styles.input}
             placeholder="Nombre"
-            placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+            placeholderTextColor={t.text}
             value={form.name}
-            onChangeText={(t) => handleChange("name", t)}
+            onChangeText={(val) => handleChange("name", val)}
             maxLength={80}
           />
 
           <TextInput
             style={[styles.input, { height: 100, textAlignVertical: "top" }]}
             placeholder="Descripción"
-            placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+            placeholderTextColor={t.text}
             value={form.description}
-            onChangeText={(t) => handleChange("description", t)}
+            onChangeText={(val) => handleChange("description", val)}
             maxLength={256}
             multiline
           />

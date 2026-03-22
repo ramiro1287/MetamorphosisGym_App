@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { View, Text, StyleSheet, Platform  } from "react-native";
+import { View, Text, StyleSheet, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import TouchableButton from "../../components/Buttons/TouchableButton";
@@ -9,13 +9,8 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import { toastError, toastSuccess } from "../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../components/Alerts/ConfirmModalAlert";
 import ScrollContainer from "../../components/Containers/ScrollContainer";
-import { AdminRole, CoachRole, StatusDeleted } from "../../constants/users";
-import {
-  iconDark, iconLight,
-  defaultTextDark, defaultTextLight,
-  secondTextDark, secondTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-} from "../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../constants/UI/theme";
+import { formatDate, formatRole, formatUserStatus } from "../../utils/formatters";
 
 export default function Profile() {
   const [showPicker, setShowPicker] = useState(false);
@@ -78,23 +73,8 @@ export default function Profile() {
 
   if (!user) return null;
 
-  const formatDate = (isoString) => {
-    const date = new Date(isoString);
-    return new Intl.DateTimeFormat("es-AR", {
-      day: "2-digit", month: "2-digit", year: "numeric"
-    }).format(date);
-  };
-
-  const formatRole = (role) => {
-    if (role === AdminRole) return "Administrador";
-    if (role === CoachRole) return "Entrenador";
-    return "Cliente";
-  };
-
-  const formatStatus = (status) => {
-    if (status === StatusDeleted) return "Desactivado";
-    return "Activo";
-  };
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   const handleButtonLogout = async () => {
     const confirm = await showConfirmModalAlert("¿Seguro que quieres cerrar sesión?");
@@ -114,46 +94,15 @@ export default function Profile() {
   };
 
   const styles = StyleSheet.create({
-    profileCard: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderRadius: 20,
-      padding: 20,
-      alignItems: "center",
-      width: "100%",
-    },
-    avatar: {
-      width: 100,
-      height: 100,
-      borderRadius: 50,
-      marginBottom: 10,
-    },
     userName: {
       fontSize: 24,
       fontWeight: "bold",
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
     },
     userId: {
       fontSize: 16,
-      color: isDarkMode ? secondTextDark : secondTextLight,
+      color: t.secondText,
       marginBottom: 20,
-    },
-    infoRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      width: "100%",
-      marginBottom: 10,
-      alignItems: "flex-start",
-      flexWrap: "wrap",
-    },
-    label: {
-      color: isDarkMode ? secondTextDark : secondTextLight,
-      fontSize: 18,
-    },
-    value: {
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      fontSize: 18,
-      flex: 1,
-      textAlign: "right",
     },
     headerRow: {
       flexDirection: "row",
@@ -165,19 +114,19 @@ export default function Profile() {
   return (
     <ScrollContainer style={{ padding: 25 }}>
 
-        <View style={styles.profileCard}>
+        <View style={common.profileCard}>
           <View style={styles.headerRow}>
             <Icon
               name={isDarkMode ? "light-mode" : "dark-mode"}
               size={30}
-              color={isDarkMode ? iconDark : iconLight}
+              color={t.icon}
               onPress={() => setIsDarkMode(!isDarkMode)}
               style={{ marginRight: 10 }}
             />
             <Icon
               name="power-settings-new"
               size={30}
-              color={isDarkMode ? iconDark : iconLight}
+              color={t.icon}
               onPress={handleButtonLogout}
               style={{ marginLeft: 10 }}
             />
@@ -185,61 +134,61 @@ export default function Profile() {
           <Icon
             name="account-circle"
             size={120}
-            color={isDarkMode ? iconDark : iconLight}
+            color={t.icon}
           />
           <Text style={styles.userName}>{user.first_name} {user.last_name}</Text>
           <Text style={styles.userId}>{user.id_number}</Text>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Rol</Text>
-            <Text style={styles.value}>{formatRole(user.role)}</Text>
+          <View style={common.infoRow}>
+            <Text style={common.label}>Rol</Text>
+            <Text style={common.value}>{formatRole(user.role)}</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Estado</Text>
-            <Text style={styles.value}>{formatStatus(user.status)}</Text>
+          <View style={common.infoRow}>
+            <Text style={common.label}>Estado</Text>
+            <Text style={common.value}>{formatUserStatus(user.status, "Desactivado")}</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Plan</Text>
-            <Text style={styles.value}>{user.plan ? user.plan?.name : "N/A"}</Text>
+          <View style={common.infoRow}>
+            <Text style={common.label}>Plan</Text>
+            <Text style={common.value}>{user.plan ? user.plan?.name : "N/A"}</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Jubilado</Text>
-            <Text style={styles.value}>{user.is_retired ? "Si" : "No"}</Text>
+          <View style={common.infoRow}>
+            <Text style={common.label}>Jubilado</Text>
+            <Text style={common.value}>{user.is_retired ? "Si" : "No"}</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Teléfono</Text>
-            <Text style={styles.value}>{user.phone ? user.phone : "N/A"}</Text>
+          <View style={common.infoRow}>
+            <Text style={common.label}>Teléfono</Text>
+            <Text style={common.value}>{user.phone ? user.phone : "N/A"}</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Familia</Text>
-            <Text style={styles.value}>{user.family ? user.family?.name : "N/A"}</Text>
+          <View style={common.infoRow}>
+            <Text style={common.label}>Familia</Text>
+            <Text style={common.value}>{user.family ? user.family?.name : "N/A"}</Text>
           </View>
-          <View style={styles.infoRow}>
+          <View style={common.infoRow}>
             <View style={{ flexDirection: "row" }}>
-              <Text style={styles.label}>Dirección</Text>
+              <Text style={common.label}>Dirección</Text>
               <Icon
                 name="edit"
                 size={25}
-                color={isDarkMode ? iconDark : iconLight}
+                color={t.icon}
                 onPress={handleChangeAddress}
                 style={{ marginLeft: 5 }}
               />
             </View>
-            <Text style={styles.value} numberOfLines={2} ellipsizeMode="tail">
+            <Text style={common.value} numberOfLines={2} ellipsizeMode="tail">
               {user.address ? `${user.address?.address} ${user.address?.city} ${user.address?.state}` : "N/A"}
             </Text>
           </View>
-          <View style={styles.infoRow}>
+          <View style={common.infoRow}>
             <View style={{ flexDirection: "row" }}>
-              <Text style={styles.label}>Nacimiento</Text>
+              <Text style={common.label}>Nacimiento</Text>
               <Icon
                 name="edit"
                 size={25}
-                color={isDarkMode ? iconDark : iconLight}
+                color={t.icon}
                 onPress={() => setShowPicker(true)}
                 style={{ marginLeft: 5 }}
               />
             </View>
-            <Text style={styles.value} numberOfLines={2} ellipsizeMode="tail">
+            <Text style={common.value} numberOfLines={2} ellipsizeMode="tail">
               {user.birth_date ? formatDate(user.birth_date) : "N/A"}
             </Text>
           </View>

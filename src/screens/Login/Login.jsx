@@ -16,11 +16,7 @@ import TouchableButton from "../../components/Buttons/TouchableButton";
 import FormContainer from "../../components/Containers/FormContainer";
 import { GymContext } from "../../context/GymContext";
 import { toastError } from "../../components/Toast/Toast";
-import {
-  inputErrorDark, inputErrorLight,
-  defaultTextDark, defaultTextLight,
-  mainBackgroundDark, mainBackgroundLight,
-} from "../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../constants/UI/theme";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -31,6 +27,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const { refreshUser, isDarkMode } = useContext(GymContext);
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   const handleLogin = async () => {
     let hasError = false;
@@ -80,44 +78,19 @@ export default function Login() {
     }
   };
 
-  const iconStroke = isDarkMode ? defaultTextDark : defaultTextLight;
   const styles = StyleSheet.create({
     title: {
       fontSize: 25,
       fontWeight: "bold",
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-    },
-    input: {
-      height: 40,
-      borderBottomWidth: 1,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginBottom: 10,
-      paddingHorizontal: 8,
-      width: "80%",
-      fontSize: 18,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-    },
-    passwordContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      width: "80%",
-      marginBottom: 10,
+      color: t.text,
     },
     passwordInput: {
       flex: 1,
     },
-    inputError: {
-      borderColor: isDarkMode ? inputErrorDark : inputErrorLight,
-    },
-    errorText: {
-      color: isDarkMode ? inputErrorDark : inputErrorLight,
-      marginBottom: 8,
-      fontSize: 16,
-    },
   });
 
   return (
-    <View style={{ flex: 1, backgroundColor: isDarkMode ? mainBackgroundDark : mainBackgroundLight }}>
+    <View style={{ flex: 1, backgroundColor: t.background }}>
       <FormContainer>
         {isDarkMode ? (
           <Image
@@ -134,9 +107,9 @@ export default function Login() {
         )}
         <Text style={styles.title}>Iniciar sesión</Text>
         <TextInput
-          style={[styles.input, usernameError ? styles.inputError : null]}
+          style={[common.input, usernameError ? common.inputError : null]}
           placeholder="DNI"
-          placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+          placeholderTextColor={t.text}
           value={username}
           onChangeText={(text) => {
             setUsername(text);
@@ -144,13 +117,13 @@ export default function Login() {
           }}
           keyboardType="numeric"
         />
-        {usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
+        {usernameError ? <Text style={common.errorText}>{usernameError}</Text> : null}
 
-        <View style={styles.passwordContainer}>
+        <View style={common.passwordContainer}>
           <TextInput
-            style={[styles.input, passwordError ? styles.inputError : null, styles.passwordInput]}
+            style={[common.input, passwordError ? common.inputError : null, styles.passwordInput]}
             placeholder="Contraseña"
-            placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+            placeholderTextColor={t.text}
             value={password}
             onChangeText={(text) => {
               setPassword(text);
@@ -160,18 +133,18 @@ export default function Login() {
           />
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             {showPassword ? (
-              <Eye width={24} height={24} stroke={iconStroke} />
+              <Eye width={24} height={24} stroke={t.text} />
             ) : (
-              <EyeOff width={24} height={24} stroke={iconStroke} />
+              <EyeOff width={24} height={24} stroke={t.text} />
             )}
           </TouchableOpacity>
         </View>
-        {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+        {passwordError ? <Text style={common.errorText}>{passwordError}</Text> : null}
         <TouchableButton title="Ingresar" onPress={handleLogin} loading={loading} />
 
         <Text
           style={{
-            color: isDarkMode ? defaultTextDark : defaultTextLight,
+            color: t.text,
             marginTop: 20,
             marginBottom: 15,
             fontSize: 15,

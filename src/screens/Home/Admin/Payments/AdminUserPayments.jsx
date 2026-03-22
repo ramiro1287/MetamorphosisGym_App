@@ -15,15 +15,12 @@ import { toastError } from "../../../../components/Toast/Toast";
 import LoadingScreen from "../../../../components/Loading/LoadingScreen";
 import {
   PayStatusCanceled, PayStatusCompleted,
-  PayStatusPending, PayStatusProcessing,
-  MonthsMap,
 } from "../../../../constants/payments";
 import {
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
   buttonTextConfirmDark, inputErrorDark,
-  secondTextDark, secondTextLight,
 } from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
+import { formatPaymentStatus, getFinalAmount, getMonth } from "../../../../utils/formatters";
 
 const PAGE_SIZE = 10;
 
@@ -37,6 +34,9 @@ export default function AdminUserPayments() {
   const navigation = useNavigation();
   const route = useRoute();
   const { idNumber, fullName } = route.params || {};
+
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   const buildQuery = () => {
     const q = new URLSearchParams();
@@ -79,26 +79,6 @@ export default function AdminUserPayments() {
     finally { setLoadingMore(false); }
   };
 
-  const formatPaymentStatus = (status) => {
-    if (status === PayStatusPending) return "Pendiente";
-    if (status === PayStatusCompleted) return "Pagada";
-    if (status === PayStatusCanceled) return "Cancelada";
-    if (status === PayStatusProcessing) return "Procesando";
-    return "Error";
-  };
-
-  const getFinalAmount = (payment) => {
-    const discounts_sum = parseFloat(payment.discounts_sum) || 0;
-    const penalties_sum = parseFloat(payment.penalties_sum) || 0;
-    const final_price = (parseFloat(payment.total_amount) || 0) + penalties_sum - discounts_sum;
-    return final_price.toFixed(2);
-  };
-
-  const getMonth = (stringDate) => {
-    const date = new Date(stringDate);
-    return MonthsMap[date.getUTCMonth() + 1];
-  };
-
   const handlePaymentDetail = (paymentId) => {
     navigation.reset({
       index: 4,
@@ -115,35 +95,9 @@ export default function AdminUserPayments() {
   const styles = StyleSheet.create({
     titleText: {
       fontSize: 20,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       marginVertical: 20,
       alignSelf: "center",
-    },
-    cardContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
-      borderRadius: 20,
-      padding: 15,
-      width: "100%",
-      marginBottom: 20,
-    },
-    cardRowContainer: {
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "center",
-      flexWrap: "wrap",
-    },
-    cardRowTitle: {
-      fontSize: 16,
-      color: isDarkMode ? secondTextDark : secondTextLight,
-      marginRight: 6,
-      flexShrink: 1,
-    },
-    cardRowText: {
-      fontSize: 18,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
-      marginLeft: 6,
-      flex: 1,
-      flexShrink: 1,
     },
   });
 
@@ -164,14 +118,14 @@ export default function AdminUserPayments() {
           payments.map((payment) => (
             <TouchableOpacity
               key={payment.id}
-              style={styles.cardContainer}
+              style={common.cardContainer}
               onPress={() => handlePaymentDetail(payment.id)}
             >
-              <View style={styles.cardRowContainer}>
-                <Text style={styles.cardRowTitle}>Estado:</Text>
+              <View style={common.cardRowContainer}>
+                <Text style={common.cardRowTitle}>Estado:</Text>
                 <Text
                   style={[
-                    styles.cardRowText,
+                    common.cardRowText,
                     [PayStatusCompleted, PayStatusCanceled].includes(payment.status)
                       ? { color: buttonTextConfirmDark }
                       : { color: inputErrorDark }
@@ -180,17 +134,17 @@ export default function AdminUserPayments() {
                   {formatPaymentStatus(payment.status)}
                 </Text>
               </View>
-              <View style={styles.cardRowContainer}>
-                <Text style={styles.cardRowTitle}>Valor de la cuota:</Text>
-                <Text style={styles.cardRowText}>${payment.total_amount}</Text>
+              <View style={common.cardRowContainer}>
+                <Text style={common.cardRowTitle}>Valor de la cuota:</Text>
+                <Text style={common.cardRowText}>${payment.total_amount}</Text>
               </View>
-              <View style={styles.cardRowContainer}>
-                <Text style={styles.cardRowTitle}>Monto a pagar:</Text>
-                <Text style={styles.cardRowText}>${getFinalAmount(payment)}</Text>
+              <View style={common.cardRowContainer}>
+                <Text style={common.cardRowTitle}>Monto a pagar:</Text>
+                <Text style={common.cardRowText}>${getFinalAmount(payment)}</Text>
               </View>
-              <View style={styles.cardRowContainer}>
-                <Text style={styles.cardRowTitle}>Mes correspondiente:</Text>
-                <Text style={styles.cardRowText}>{getMonth(payment.created_at)}</Text>
+              <View style={common.cardRowContainer}>
+                <Text style={common.cardRowTitle}>Mes correspondiente:</Text>
+                <Text style={common.cardRowText}>{getMonth(payment.created_at)}</Text>
               </View>
             </TouchableOpacity>
           ))

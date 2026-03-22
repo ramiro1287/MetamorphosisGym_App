@@ -6,15 +6,14 @@ import { GymContext } from "../../../../context/GymContext";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
-import {
-  defaultTextDark, defaultTextLight,
-  secondBackgroundDark, secondBackgroundLight,
-  inputErrorDark, inputErrorLight,
-} from "../../../../constants/UI/colors";
+import { defaultTextLight } from "../../../../constants/UI/colors";
+import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 import { WeekDaysMap } from "../../../../constants/trainingPlans";
 
 export default function EditExerciseModal({ exercise, onClose, reload }) {
   const { isDarkMode } = useContext(GymContext);
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
 
   const [formData, setFormData] = useState({
     description: exercise.description || "",
@@ -92,60 +91,27 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
   };
 
   const styles = StyleSheet.create({
-    rootModalContainer: {
-      flex: 1,
-      backgroundColor: "rgba(0,0,0,0.5)",
-      justifyContent: "center",
-      alignItems: "center",
-    },
     cardModalContainer: {
-      backgroundColor: isDarkMode ? secondBackgroundDark : secondBackgroundLight,
+      backgroundColor: t.secondBackground,
       borderRadius: 16,
       padding: 20,
       width: "90%",
     },
     cardTitle: {
       fontSize: 20,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       alignSelf: "center",
     },
     cardInputLabel: {
       fontSize: 16,
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
     },
     cardInput: {
-      color: isDarkMode ? defaultTextDark : defaultTextLight,
+      color: t.text,
       fontSize: 16,
       borderBottomWidth: 1,
-      borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
+      borderColor: t.text,
       marginBottom: 20,
-    },
-    pickerSelect: {
-      inputIOS: {
-        fontSize: 18,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
-        paddingVertical: 10,
-        paddingHorizontal: 10,
-        borderWidth: 1,
-        borderRadius: 20,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      },
-      inputAndroid: {
-        fontSize: 18,
-        color: isDarkMode ? defaultTextDark : defaultTextLight,
-        borderWidth: 1,
-        borderRadius: 20,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderColor: isDarkMode ? defaultTextDark : defaultTextLight,
-      },
-    },
-    errorText: {
-      color: isDarkMode ? inputErrorDark : inputErrorLight,
-      marginBottom: 8,
-      fontSize: 16,
     },
   });
 
@@ -155,7 +121,7 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.rootModalContainer}>
+      <View style={common.modalContainer}>
         <View style={styles.cardModalContainer}>
           <Text style={[styles.cardTitle, { fontSize: 18 }]}>Editar ejercicio</Text>
           <Text style={[styles.cardTitle, { marginBottom: 15 }]}>{exercise.exercise.name}</Text>
@@ -167,7 +133,7 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
             multiline
             style={styles.cardInput}
             placeholder="N/A"
-            placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+            placeholderTextColor={t.text}
           />
 
           <Text style={styles.cardInputLabel}>Día de la semana</Text>
@@ -175,11 +141,11 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
             value={formData.week_day}
             onValueChange={(value) => handleChange("week_day", value)}
             items={weekdayOptions}
-            style={styles.pickerSelect}
+            style={common.pickerSelect}
             placeholder={{}}
             useNativeAndroidPickerStyle={false}
           />
-          {errors.week_day && (<Text style={styles.errorText}>{errors.week_day}</Text>)}
+          {errors.week_day && (<Text style={common.errorText}>{errors.week_day}</Text>)}
 
           <Text style={styles.cardInputLabel}>Series</Text>
           <TextInput
@@ -188,9 +154,9 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
             keyboardType="numeric"
             style={styles.cardInput}
             placeholder="Cantidad de series"
-            placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+            placeholderTextColor={t.text}
           />
-          {errors.sets && (<Text style={styles.errorText}>{errors.sets}</Text>)}
+          {errors.sets && (<Text style={common.errorText}>{errors.sets}</Text>)}
 
           <Text style={styles.cardInputLabel}>Repeticiones</Text>
           <TextInput
@@ -199,9 +165,9 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
             keyboardType="numeric"
             style={styles.cardInput}
             placeholder={formData.sets ? "Hasta el fallo" : "N/A"}
-            placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+            placeholderTextColor={t.text}
           />
-          {errors.reps && (<Text style={styles.errorText}>{errors.reps}</Text>)}
+          {errors.reps && (<Text style={common.errorText}>{errors.reps}</Text>)}
 
           <Text style={styles.cardInputLabel}>Descanso</Text>
           <TextInput
@@ -210,9 +176,9 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
             keyboardType="numeric"
             style={styles.cardInput}
             placeholder="Hasta recuperarse"
-            placeholderTextColor={isDarkMode ? defaultTextDark : defaultTextLight}
+            placeholderTextColor={t.text}
           />
-          {errors.rest && (<Text style={styles.errorText}>{errors.rest}</Text>)}
+          {errors.rest && (<Text style={common.errorText}>{errors.rest}</Text>)}
 
           <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 20 }}>
             <TouchableButton title="Cancelar" onPress={onClose} />
