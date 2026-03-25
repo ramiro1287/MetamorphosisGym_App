@@ -145,7 +145,7 @@ export default function TraineePlans() {
                   <Text style={styles.exerciseTitle}>{ex.exercise.name}</Text>
                 </View>
                 <Text style={styles.exerciseDetail}>
-                  Series: {ex.sets}  |  Repeticiones: {ex.reps}
+                  Series: {ex.sets}  |  Repeticiones: {ex.reps ? ex.reps : 'N/A'}
                 </Text>
                 <Text style={styles.exerciseDetail}>
                   Descanso: {ex.rest ? `${ex.rest} segundos` : "Hasta recuperarse"}

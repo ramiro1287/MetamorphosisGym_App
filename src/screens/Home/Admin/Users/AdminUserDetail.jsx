@@ -131,6 +131,7 @@ export default function AdminUserDetail() {
       payload.plan_id = editValue;
     } else if (editField === "phone") {
       payload.phone = !editValue.trim() ? null : editValue;
+      if (payload.phone) payload.country = 'AR';
     } else if (editField === "is_retired") {
       payload.is_retired = editValue;
     } else {
