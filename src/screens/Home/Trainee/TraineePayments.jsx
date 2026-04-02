@@ -13,6 +13,7 @@ import ScrollContainer from "../../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../../services/authService";
 import { toastError } from "../../../components/Toast/Toast";
 import LoadingScreen from "../../../components/Loading/LoadingScreen";
+import NoConnectionScreen from "../../../components/NoConnection/NoConnectionScreen";
 import {
   PayStatusCanceled, PayStatusCompleted,
 } from "../../../constants/payments";
@@ -29,6 +30,7 @@ export default function TraineePayments() {
   const [nextUrl, setNextUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [connectionError, setConnectionError] = useState(false);
 
   const { isDarkMode } = useContext(GymContext);
   const navigation = useNavigation();
@@ -54,13 +56,18 @@ export default function TraineePayments() {
       setNextUrl(data.next ?? null);
       setPayments(prev => (append ? [...prev, ...data.results] : data.results));
     } catch (error) {
-      toastError("Error", "Error de conexión");
+      if (error.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   };
 
   useFocusEffect(
     useCallback(() => {
       (async () => {
+        setConnectionError(false);
         setLoading(true);
         try { await fetchPage({ append: false }); }
         finally { setLoading(false); }
@@ -78,6 +85,15 @@ export default function TraineePayments() {
   const handlePaymentDetail = (paymentId) => {
     navigation.navigate("PaymentDetail", { paymentId });
   };
+
+  const handleRetry = async () => {
+    setConnectionError(false);
+    setLoading(true);
+    try { await fetchPage({ append: false }); }
+    finally { setLoading(false); }
+  };
+
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
 
   const styles = StyleSheet.create({
     titleText: {

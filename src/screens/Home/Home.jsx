@@ -6,6 +6,7 @@ import Icon from "react-native-vector-icons/Feather";
 import TouchableButton from "../../components/Buttons/TouchableButton";
 import ScrollContainer from "../../components/Containers/ScrollContainer";
 import LoadingScreen from "../../components/Loading/LoadingScreen";
+import NoConnectionScreen from "../../components/NoConnection/NoConnectionScreen";
 import { GymContext } from "../../context/GymContext";
 import { fetchWithAuth } from "../../services/authService";
 import { toastError } from "../../components/Toast/Toast";
@@ -19,11 +20,13 @@ export default function Home() {
   const [trainingPlans, setTrainingPlans] = useState([]);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [connectionError, setConnectionError] = useState(false);
   const { isDarkMode, user, gymInfo } = useContext(GymContext);
   const navigation = useNavigation();
 
   useFocusEffect(useCallback(() => {
     const load = async () => {
+      setConnectionError(false);
       await Promise.all([loadTrainingPlan(), loadPayments()]);
       setLoading(false);
     };
@@ -38,7 +41,11 @@ export default function Home() {
         setTrainingPlans(data["results"]);
       }
     } catch (error) {
-      toastError("Error", "Error de conexión");
+      if (error.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   };
 
@@ -51,10 +58,22 @@ export default function Home() {
         setPayments(data["results"]);
       }
     } catch (error) {
-      toastError("Error", "Error de conexión");
+      if (error.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   };
 
+  const handleRetry = async () => {
+    setConnectionError(false);
+    setLoading(true);
+    await Promise.all([loadTrainingPlan(), loadPayments()]);
+    setLoading(false);
+  };
+
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
   if (loading) return <LoadingScreen />;
 
   const t = getThemeColors(isDarkMode);

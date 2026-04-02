@@ -6,6 +6,7 @@ import { GymContext } from "../../../context/GymContext";
 import ScrollContainer from "../../../components/Containers/ScrollContainer";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import LoadingScreen from "../../../components/Loading/LoadingScreen";
+import NoConnectionScreen from "../../../components/NoConnection/NoConnectionScreen";
 import { fetchWithAuth } from "../../../services/authService";
 import { toastError } from "../../../components/Toast/Toast";
 import { PayStatusCanceled, PayStatusCompleted } from "../../../constants/payments";
@@ -15,6 +16,7 @@ import { formatDate, formatPaymentStatus, formatPaymentMethod, getFinalAmount, g
 
 export default function PaymentDetail() {
   const [payment, setPayment] = useState(null);
+  const [connectionError, setConnectionError] = useState(false);
   const { isDarkMode } = useContext(GymContext);
   const route = useRoute();
 
@@ -23,6 +25,7 @@ export default function PaymentDetail() {
 
   useFocusEffect(
     useCallback(() => {
+      setConnectionError(false);
       loadPayment();
     }, [])
   );
@@ -36,10 +39,20 @@ export default function PaymentDetail() {
         setPayment(data);
       }
     } catch (error) {
-      toastError("Error", "Error de conexión");
+      if (error.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   };
 
+  const handleRetry = () => {
+    setConnectionError(false);
+    loadPayment();
+  };
+
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
   if (!payment) return <LoadingScreen />;
 
   const styles = StyleSheet.create({

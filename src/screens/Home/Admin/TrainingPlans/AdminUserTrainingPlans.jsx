@@ -14,6 +14,7 @@ import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastInfo } from "../../../../components/Toast/Toast";
 import LoadingScreen from "../../../../components/Loading/LoadingScreen";
+import NoConnectionScreen from "../../../../components/NoConnection/NoConnectionScreen";
 import { PlanStatusActive } from "../../../../constants/trainingPlans";
 import { buttonTextConfirmDark } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
@@ -26,6 +27,7 @@ export default function AdminUserTrainingPlans() {
   const [nextUrl, setNextUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [connectionError, setConnectionError] = useState(false);
 
   const { isDarkMode } = useContext(GymContext);
   const navigation = useNavigation();
@@ -53,7 +55,11 @@ export default function AdminUserTrainingPlans() {
       setNextUrl(data.next ?? null);
       setTrainingPlans(prev => (append ? [...prev, ...data.results] : data.results));
     } catch (err) {
-      toastError("Error", "Error de conexión");
+      if (err.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   };
 
@@ -61,6 +67,7 @@ export default function AdminUserTrainingPlans() {
     useCallback(() => {
       let isMounted = true;
       (async () => {
+        setConnectionError(false);
         setLoading(true);
         try { if (isMounted) await fetchPage({ append: false }); }
         finally { if (isMounted) setLoading(false); }
@@ -106,6 +113,15 @@ export default function AdminUserTrainingPlans() {
       ]
     });
   };
+
+  const handleRetry = async () => {
+    setConnectionError(false);
+    setLoading(true);
+    try { await fetchPage({ append: false }); }
+    finally { setLoading(false); }
+  };
+
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
 
   const styles = StyleSheet.create({
     titleText: {

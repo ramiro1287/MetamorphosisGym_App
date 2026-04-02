@@ -8,6 +8,7 @@ import { GymContext } from "../../../../context/GymContext";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import LoadingScreen from "../../../../components/Loading/LoadingScreen";
+import NoConnectionScreen from "../../../../components/NoConnection/NoConnectionScreen";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
@@ -19,6 +20,7 @@ export default function AdminFamilyDetail() {
   const [editValue, setEditValue] = useState(null);
   const [editValueError, setEditValueError] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [connectionError, setConnectionError] = useState(false);
   const { isDarkMode } = useContext(GymContext);
   const navigation = useNavigation();
   const route = useRoute();
@@ -27,6 +29,7 @@ export default function AdminFamilyDetail() {
 
   useFocusEffect(
     useCallback(() => {
+      setConnectionError(false);
       loadFamily();
     }, [])
   );
@@ -40,10 +43,20 @@ export default function AdminFamilyDetail() {
         setFamily(data);
       }
     } catch (error) {
-      toastError("Error", "Error de conexión");
+      if (error.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   };
 
+  const handleRetry = () => {
+    setConnectionError(false);
+    loadFamily();
+  };
+
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
   if (!family) return <LoadingScreen />;
 
   const handleEditionModal = (field) => {

@@ -13,6 +13,7 @@ import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError } from "../../../../components/Toast/Toast";
 import LoadingScreen from "../../../../components/Loading/LoadingScreen";
+import NoConnectionScreen from "../../../../components/NoConnection/NoConnectionScreen";
 import {
   PayStatusCanceled, PayStatusCompleted,
 } from "../../../../constants/payments";
@@ -29,6 +30,7 @@ export default function AdminUserPayments() {
   const [nextUrl, setNextUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [connectionError, setConnectionError] = useState(false);
 
   const { isDarkMode } = useContext(GymContext);
   const navigation = useNavigation();
@@ -56,7 +58,11 @@ export default function AdminUserPayments() {
       setNextUrl(data.next ?? null);
       setPayments(prev => (append ? [...prev, ...data.results] : data.results));
     } catch (error) {
-      toastError("Error", "Error de conexión");
+      if (error.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   };
 
@@ -64,6 +70,7 @@ export default function AdminUserPayments() {
     useCallback(() => {
       let isMounted = true;
       (async () => {
+        setConnectionError(false);
         setLoading(true);
         try { if (isMounted) await fetchPage({ append: false }); }
         finally { if (isMounted) setLoading(false); }
@@ -91,6 +98,15 @@ export default function AdminUserPayments() {
       ]
     });
   };
+
+  const handleRetry = async () => {
+    setConnectionError(false);
+    setLoading(true);
+    try { await fetchPage({ append: false }); }
+    finally { setLoading(false); }
+  };
+
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
 
   const styles = StyleSheet.create({
     titleText: {

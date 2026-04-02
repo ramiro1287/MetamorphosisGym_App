@@ -14,6 +14,7 @@ import { GymContext } from "../../../../context/GymContext";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError } from "../../../../components/Toast/Toast";
+import NoConnectionScreen from "../../../../components/NoConnection/NoConnectionScreen";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import { errorButtonTextDark } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
@@ -29,6 +30,7 @@ export default function AdminUsers() {
   const [nextUrl, setNextUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [connectionError, setConnectionError] = useState(false);
 
   const { isDarkMode } = useContext(GymContext);
   const navigation = useNavigation();
@@ -54,7 +56,11 @@ export default function AdminUsers() {
       setNextUrl(data.next ?? null);
       setUsers(prev => (append ? [...prev, ...data.results] : data.results));
     } catch (e) {
-      toastError("Error", "Error de conexión");
+      if (e.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   }, [buildQuery]);
 
@@ -62,6 +68,7 @@ export default function AdminUsers() {
     useCallback(() => {
       let alive = true;
       (async () => {
+        setConnectionError(false);
         setLoading(true);
         try { if (alive) await fetchPage({ append: false }); }
         finally { if (alive) setLoading(false); }
@@ -128,6 +135,15 @@ export default function AdminUsers() {
       ]
     });
   };
+
+  const handleRetry = async () => {
+    setConnectionError(false);
+    setLoading(true);
+    try { await fetchPage({ append: false }); }
+    finally { setLoading(false); }
+  };
+
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
 
   const styles = StyleSheet.create({
     cardRowContainer: { flexDirection: "row", marginBottom: 5 },

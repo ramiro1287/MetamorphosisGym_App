@@ -9,6 +9,7 @@ import { GymContext } from "../../../../context/GymContext";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import LoadingScreen from "../../../../components/Loading/LoadingScreen";
+import NoConnectionScreen from "../../../../components/NoConnection/NoConnectionScreen";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
@@ -29,6 +30,7 @@ export default function AdminUserDetail() {
   const [editValue, setEditValue] = useState(null);
   const [editValueError, setEditValueError] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [connectionError, setConnectionError] = useState(false);
   
   const { isDarkMode, gymInfo, user } = useContext(GymContext);
   const navigation = useNavigation();
@@ -38,6 +40,7 @@ export default function AdminUserDetail() {
 
   useFocusEffect(
     useCallback(() => {
+      setConnectionError(false);
       loadUser();
     }, [])
   );
@@ -51,10 +54,20 @@ export default function AdminUserDetail() {
         setUserDetail(data);
       }
     } catch (error) {
-      toastError("Error", "Error de conexión");
+      if (error.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   };
 
+  const handleRetry = () => {
+    setConnectionError(false);
+    loadUser();
+  };
+
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
   if (!userDetail) return <LoadingScreen />;
 
   const handleResetPassword = async () => {
@@ -179,7 +192,6 @@ export default function AdminUserDetail() {
 
   const formatFieldName = (field) => {
     if (field === "full_name") return "nombre completo";
-    if (field === "role") return "rol";
     if (field === "status") return "estado";
     if (field === "is_retired") return "si es jubilado";
     if (field === "phone") return "teléfono";
@@ -269,18 +281,7 @@ export default function AdminUserDetail() {
         </View>
         <Text style={styles.userId}>{userDetail.id_number}</Text>
         <View style={common.infoRow}>
-          <View style={{ flexDirection: "row" }}>
-            <Text style={common.label}>Rol</Text>
-            {user.role === AdminRole && user.id_number !== userDetail.id_number ? (
-              <Icon
-                name="edit"
-                size={22}
-                color={t.icon}
-                onPress={() => handleEditionModal("role")}
-                style={{ marginLeft: 5 }}
-              />
-            ): null}
-          </View>
+          <Text style={common.label}>Rol</Text>
           <Text style={common.value}>{formatRole(userDetail.role)}</Text>
         </View>
         <View style={common.infoRow}>
@@ -445,18 +446,6 @@ export default function AdminUserDetail() {
                   items={[
                     { label: "No", value: 0, color: defaultTextLight },
                     { label: "Sí", value: 1, color: defaultTextLight },
-                  ]}
-                  style={common.pickerSelect}
-                  useNativeAndroidPickerStyle={false}
-                  placeholder={{}}
-                />
-              ) : editField === "role" ? (
-                <RNPickerSelect
-                  value={editValue}
-                  onValueChange={(value) => setEditValue(value)}
-                  items={[
-                    { label: "Entrenador", value: CoachRole, color: defaultTextLight },
-                    { label: "Cliente", value: TraineeRole, color: defaultTextLight },
                   ]}
                   style={common.pickerSelect}
                   useNativeAndroidPickerStyle={false}

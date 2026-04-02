@@ -17,6 +17,7 @@ import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import LoadingScreen from "../../../../components/Loading/LoadingScreen";
+import NoConnectionScreen from "../../../../components/NoConnection/NoConnectionScreen";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
@@ -43,6 +44,7 @@ export default function AdminUserPaymentDetail() {
   const [penaltyDiscount, setPenaltyDiscount] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
+  const [connectionError, setConnectionError] = useState(false);
   const { isDarkMode, gymInfo } = useContext(GymContext);
   const route = useRoute();
   const navigation = useNavigation();
@@ -56,6 +58,7 @@ export default function AdminUserPaymentDetail() {
   useFocusEffect(
     useCallback(() => {
       skipGuardRef.current = false;
+      setConnectionError(false);
       loadPayment();
     }, [])
   );
@@ -78,10 +81,20 @@ export default function AdminUserPaymentDetail() {
         setPayment(data);
       }
     } catch (error) {
-      toastError("Error", "Error de conexión");
+      if (error.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   };
 
+  const handleRetry = () => {
+    setConnectionError(false);
+    loadPayment();
+  };
+
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
   if (!payment) return <LoadingScreen />;
 
   const handleFieldChange = (field, value) => {

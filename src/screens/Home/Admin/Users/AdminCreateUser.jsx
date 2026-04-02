@@ -13,18 +13,23 @@ import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
-import { CoachRole, TraineeRole } from "../../../../constants/users";
+import { TraineeRole } from "../../../../constants/users";
 import { defaultTextLight, buttonTextConfirmDark, errorButtonTextDark } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 
 export default function AdminCreateUser() {
+  const navigation = useNavigation();
+  const { isDarkMode, gymInfo } = useContext(GymContext);
+  const t = getThemeColors(isDarkMode);
+  const common = getCommonStyles(isDarkMode);
+
   const [form, setForm] = useState({
     id_number: "",
     first_name: "",
     last_name: "",
     is_retired: false,
     role: TraineeRole,
-    plan_id: null,
+    plan_id: gymInfo?.plans?.[0]?.id || null,
     phone: "",
     country: "AR",
   });
@@ -33,10 +38,6 @@ export default function AdminCreateUser() {
   const [lastNameError, setLastNameError] = useState("");
   const [planError, setPlanError] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigation = useNavigation();
-  const { isDarkMode, gymInfo } = useContext(GymContext);
-  const t = getThemeColors(isDarkMode);
-  const common = getCommonStyles(isDarkMode);
 
   const handleChange = (key, value) => {
     if (key === "id_number") setIdNumberError("");
@@ -170,20 +171,6 @@ export default function AdminCreateUser() {
               value: key,
               color: defaultTextLight,
             }))}
-            style={styles.pickerSelect}
-            useNativeAndroidPickerStyle={false}
-            placeholder={{}}
-          />
-        </View>
-        <View style={styles.cardInputContainer}>
-          <Text style={styles.cardInputLabel}>Rol:</Text>
-          <RNPickerSelect
-            value={form.role}
-            onValueChange={(v) => handleChange("role", v)}
-            items={[
-              { label: "Entrenador", value: CoachRole, color: defaultTextLight },
-              { label: "Cliente", value: TraineeRole, color: defaultTextLight },
-            ]}
             style={styles.pickerSelect}
             useNativeAndroidPickerStyle={false}
             placeholder={{}}

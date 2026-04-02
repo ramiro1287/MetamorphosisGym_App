@@ -8,6 +8,7 @@ import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import { GymContext } from "../../../../context/GymContext";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
+import NoConnectionScreen from "../../../../components/NoConnection/NoConnectionScreen";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
 import { defaultTextLight } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
@@ -20,6 +21,7 @@ export default function AadminExercises() {
   const [exercises, setExercises] = useState([]);
   const [showFormModal, setShowFormModal] = useState(false);
   const [editingExercise, setEditingExercise] = useState(null);
+  const [connectionError, setConnectionError] = useState(false);
   const t = getThemeColors(isDarkMode);
   const common = getCommonStyles(isDarkMode);
 
@@ -42,11 +44,16 @@ export default function AadminExercises() {
       if (response.ok) {
         const { data } = await response.json();
         setExercises(data);
+        setConnectionError(false);
       } else {
         toastError("Error", "No se pudo obtener ejercicios");
       }
     } catch (error) {
-      toastError("Error", "Error de conexión");
+      if (error.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   };
 
@@ -164,6 +171,13 @@ export default function AadminExercises() {
       },
     },
   });
+
+  const handleRetry = () => {
+    setConnectionError(false);
+    loadExercises();
+  };
+
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
 
   return (
     <View style={styles.rootContainer}>

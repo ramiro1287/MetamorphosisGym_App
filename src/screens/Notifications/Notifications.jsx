@@ -11,17 +11,20 @@ import { GymContext } from "../../context/GymContext";
 import ScrollContainer from "../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../services/authService";
 import { toastError } from "../../components/Toast/Toast";
+import NoConnectionScreen from "../../components/NoConnection/NoConnectionScreen";
 import { getThemeColors, getCommonStyles } from "../../constants/UI/theme";
 import { formatDate } from "../../utils/formatters";
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
+  const [connectionError, setConnectionError] = useState(false);
   const { isDarkMode, getHasUnreadNotifications } = useContext(GymContext);
   const t = getThemeColors(isDarkMode);
   const common = getCommonStyles(isDarkMode);
 
   useFocusEffect(
     useCallback(() => {
+      setConnectionError(false);
       loadNotifications();
     }, [])
   );
@@ -34,9 +37,20 @@ export default function Notifications() {
         setNotifications(data);
       }
     } catch (error) {
-      toastError("Error", "Error de conexión");
+      if (error.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   };
+
+  const handleRetry = () => {
+    setConnectionError(false);
+    loadNotifications();
+  };
+
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
 
   const handleDeleteNotification = async (idNumber) => {
     try {

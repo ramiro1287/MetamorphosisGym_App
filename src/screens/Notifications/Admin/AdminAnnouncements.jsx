@@ -11,6 +11,7 @@ import { GymContext } from "../../../context/GymContext";
 import ScrollContainer from "../../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../../services/authService";
 import { toastError } from "../../../components/Toast/Toast";
+import NoConnectionScreen from "../../../components/NoConnection/NoConnectionScreen";
 import { showConfirmModalAlert } from "../../../components/Alerts/ConfirmModalAlert";
 import TouchableButton from "../../../components/Buttons/TouchableButton";
 import { getThemeColors, getCommonStyles } from "../../../constants/UI/theme";
@@ -18,6 +19,7 @@ import { formatDate } from "../../../utils/formatters";
 
 export default function AdminAnnouncements() {
   const [announcements, setAnnouncements] = useState([]);
+  const [connectionError, setConnectionError] = useState(false);
   const { isDarkMode, getHasUnreadNotifications } = useContext(GymContext);
   const navigation = useNavigation();
   const t = getThemeColors(isDarkMode);
@@ -25,6 +27,7 @@ export default function AdminAnnouncements() {
 
   useFocusEffect(
     useCallback(() => {
+      setConnectionError(false);
       loadAnnouncements();
     }, [])
   );
@@ -37,7 +40,11 @@ export default function AdminAnnouncements() {
         setAnnouncements(data);
       }
     } catch (error) {
-      toastError("Error", "Error de conexión");
+      if (error.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   };
 
@@ -90,6 +97,13 @@ export default function AdminAnnouncements() {
       ]
     });
   };
+
+  const handleRetry = () => {
+    setConnectionError(false);
+    loadAnnouncements();
+  };
+
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
 
   const styles = StyleSheet.create({
     container: {

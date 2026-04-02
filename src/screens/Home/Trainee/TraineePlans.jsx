@@ -5,6 +5,7 @@ import { GymContext } from "../../../context/GymContext";
 import ScrollContainer from "../../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../../services/authService";
 import { toastError } from "../../../components/Toast/Toast";
+import NoConnectionScreen from "../../../components/NoConnection/NoConnectionScreen";
 import { WeekDaysMap } from "../../../constants/trainingPlans";
 import { buttonTextConfirmDark } from "../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../constants/UI/theme";
@@ -17,10 +18,12 @@ export default function TraineePlans() {
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [connectionError, setConnectionError] = useState(false);
   const { isDarkMode } = useContext(GymContext);
 
   useFocusEffect(
     useCallback(() => {
+      setConnectionError(false);
       loadTrainingPlan();
     }, [])
   );
@@ -36,9 +39,20 @@ export default function TraineePlans() {
         }
       }
     } catch (error) {
-      toastError("Error", "Error de conexión");
+      if (error.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   };
+
+  const handleRetry = () => {
+    setConnectionError(false);
+    loadTrainingPlan();
+  };
+
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
 
   const t = getThemeColors(isDarkMode);
   const common = getCommonStyles(isDarkMode);

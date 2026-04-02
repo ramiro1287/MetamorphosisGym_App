@@ -7,11 +7,13 @@ import { GymContext } from "../../../../context/GymContext";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError } from "../../../../components/Toast/Toast";
+import NoConnectionScreen from "../../../../components/NoConnection/NoConnectionScreen";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 
 export default function AdminFamilies() {
   const [families, setFamilies] = useState([]);
+  const [connectionError, setConnectionError] = useState(false);
   const { isDarkMode } = useContext(GymContext);
   const navigation = useNavigation();
   const t = getThemeColors(isDarkMode);
@@ -19,6 +21,7 @@ export default function AdminFamilies() {
 
   useFocusEffect(
     useCallback(() => {
+      setConnectionError(false);
       loadFamilies();
     }, [])
   );
@@ -31,7 +34,11 @@ export default function AdminFamilies() {
         setFamilies(data);
       }
     } catch (error) {
-      toastError("Error", "Error de conexión");
+      if (error.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   };
 
@@ -56,6 +63,13 @@ export default function AdminFamilies() {
       ]
     });
   };
+
+  const handleRetry = () => {
+    setConnectionError(false);
+    loadFamilies();
+  };
+
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
  
   const styles = StyleSheet.create({
     cardRowContainer: {

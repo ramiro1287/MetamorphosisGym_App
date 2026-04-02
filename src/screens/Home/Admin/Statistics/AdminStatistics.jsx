@@ -9,6 +9,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import { MonthsMap } from "../../../../constants/payments"
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
+import NoConnectionScreen from "../../../../components/NoConnection/NoConnectionScreen";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
 import { defaultTextLight } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
@@ -35,6 +36,7 @@ export default function AdminStatistics() {
   const [nextUrl, setNextUrl] = useState(null);
   const [loading, setLoading] = useState(false);       // primera carga / recarga
   const [loadingMore, setLoadingMore] = useState(false); // paginación
+  const [connectionError, setConnectionError] = useState(false);
 
   const navigation = useNavigation();
   const { isDarkMode } = useContext(GymContext);
@@ -59,12 +61,15 @@ export default function AdminStatistics() {
         const { data } = await response.json();
         setEarnings(data);
       }
-    } catch {
-      toastError("Error", "Error de conexión");
+    } catch (error) {
+      if (error.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   };
 
-  // Trae página (primera o next)
   const getPayments = async ({ url, append = false } = {}) => {
     try {
       const base = "/admin/payments/";
@@ -76,14 +81,19 @@ export default function AdminStatistics() {
       const { data } = await response.json(); // { results, next, ... }
       setNextUrl(data.next ?? null);
       setPayments(prev => (append ? [...prev, ...data.results] : data.results));
-    } catch {
-      toastError("Error", "Error de conexión");
+    } catch (error) {
+      if (error.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
   };
 
   // Carga de earnings cuando cambia la fecha
   useFocusEffect(
     useCallback(() => {
+      setConnectionError(false);
       getEarnings();
     }, [queryDate])
   );
@@ -93,6 +103,7 @@ export default function AdminStatistics() {
     useCallback(() => {
       let isMounted = true;
       (async () => {
+        setConnectionError(false);
         setLoading(true);
         try { if (isMounted) await getPayments({ append: false }); }
         finally { if (isMounted) setLoading(false); }
@@ -148,6 +159,18 @@ export default function AdminStatistics() {
       toastError("Error", "Error de conexión");
     }
   };
+
+  const handleRetry = async () => {
+    setConnectionError(false);
+    setLoading(true);
+    try {
+      await Promise.all([getEarnings(), getPayments({ append: false })]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
 
   const styles = StyleSheet.create({
     rowTitle: {

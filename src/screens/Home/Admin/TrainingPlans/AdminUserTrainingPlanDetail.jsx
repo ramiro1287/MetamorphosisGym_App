@@ -7,6 +7,7 @@ import RNPickerSelect from "react-native-picker-select";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import LoadingScreen from "../../../../components/Loading/LoadingScreen";
+import NoConnectionScreen from "../../../../components/NoConnection/NoConnectionScreen";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import { GymContext } from "../../../../context/GymContext";
 import { fetchWithAuth } from "../../../../services/authService";
@@ -34,6 +35,7 @@ export default function AdminUserTrainingPlanDetail() {
   const [showAddExerciseModal, setShowAddExerciseModal] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showStatusPicker, setShowStatusPicker] = useState(false);
+  const [connectionError, setConnectionError] = useState(false);
 
   const { isDarkMode } = useContext(GymContext);
   const navigation = useNavigation();
@@ -43,6 +45,7 @@ export default function AdminUserTrainingPlanDetail() {
   const common = getCommonStyles(isDarkMode);
 
   useFocusEffect(useCallback(() => {
+    setConnectionError(false);
     loadPlan();
   }, []));
 
@@ -54,8 +57,17 @@ export default function AdminUserTrainingPlanDetail() {
         setTrainingPlan(data);
       }
     } catch (error) {
-      toastError("Error", "Error de conexión");
+      if (error.message === 'Network request failed') {
+        setConnectionError(true);
+      } else {
+        toastError("Error", "Error de conexión");
+      }
     }
+  };
+
+  const handleRetry = () => {
+    setConnectionError(false);
+    loadPlan();
   };
 
   const handleDeleteExercise = async (exerciseId) => {
@@ -81,6 +93,7 @@ export default function AdminUserTrainingPlanDetail() {
     }
   };
 
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
   if (!trainingPlan) return <LoadingScreen />;
 
   const handleDeletePlan = async () => {
