@@ -47,12 +47,12 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
       newErrors.sets = "Ingrese un numero entero mayor a 0";
     }
 
-    if (formData.reps !== "" && !isPositiveInteger(formData.reps)) {
-      newErrors.reps = "Ingrese un numero entero mayor a 0";
+    if (formData.reps !== "" && formData.reps.length > 32) {
+      newErrors.reps = "Máximo 32 caracteres";
     }
 
-    if (formData.rest !== "" && !isNonNegativeInteger(formData.rest)) {
-      newErrors.rest = "Ingrese un numero entero mayor o igual a 0";
+    if (formData.rest !== "" && formData.rest.length > 32) {
+      newErrors.rest = "Máximo 32 caracteres";
     }
 
     setErrors(newErrors);
@@ -73,8 +73,8 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
           body: JSON.stringify({
             ...formData,
             sets: formData.sets ? parseInt(formData.sets) : null,
-            reps: formData.reps ? parseInt(formData.reps) : null,
-            rest: formData.rest ? parseInt(formData.rest) : null,
+            reps: formData.reps || null,
+            rest: formData.rest || null,
           })
         }
       );
@@ -162,9 +162,8 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
           <TextInput
             value={formData.reps}
             onChangeText={(text) => handleChange("reps", text)}
-            keyboardType="numeric"
             style={styles.cardInput}
-            placeholder={formData.sets ? "Hasta el fallo" : "N/A"}
+            placeholder="N/A"
             placeholderTextColor={t.text}
           />
           {errors.reps && (<Text style={common.errorText}>{errors.reps}</Text>)}
@@ -173,9 +172,8 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
           <TextInput
             value={formData.rest}
             onChangeText={(text) => handleChange("rest", text)}
-            keyboardType="numeric"
             style={styles.cardInput}
-            placeholder="Hasta recuperarse"
+            placeholder="N/A"
             placeholderTextColor={t.text}
           />
           {errors.rest && (<Text style={common.errorText}>{errors.rest}</Text>)}

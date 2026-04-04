@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import RNPickerSelect from "react-native-picker-select";
+import DraggableFlatList, { ScaleDecorator } from "react-native-draggable-flatlist";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import LoadingScreen from "../../../../components/Loading/LoadingScreen";
@@ -92,9 +93,6 @@ export default function AdminUserTrainingPlanDetail() {
       toastError("Error", "Error de conexión");
     }
   };
-
-  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
-  if (!trainingPlan) return <LoadingScreen />;
 
   const handleDeletePlan = async () => {
     const confirm = await showConfirmModalAlert(
@@ -310,11 +308,93 @@ export default function AdminUserTrainingPlanDetail() {
     },
   });
 
-  const exercisesByDay = trainingPlan.exercises.reduce((acc, ex) => {
+  const exercisesByDay = (trainingPlan?.exercises || []).reduce((acc, ex) => {
     if (!acc[ex.week_day]) acc[ex.week_day] = [];
     acc[ex.week_day].push(ex);
     return acc;
   }, {});
+
+  Object.values(exercisesByDay).forEach((list) =>
+    list.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+  );
+
+  const handleReorder = async (data) => {
+    const exercises = data.map((ex, index) => ({ id: ex.id, order: index }));
+
+    setTrainingPlan((prev) => ({
+      ...prev,
+      exercises: prev.exercises.map((ex) => {
+        const updated = exercises.find((e) => e.id === ex.id);
+        return updated ? { ...ex, order: updated.order } : ex;
+      }),
+    }));
+
+    try {
+      await fetchWithAuth("/admin/training-plans/exercise-detail/reorder/", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ exercises }),
+      });
+    } catch (error) {
+      toastError("Error", "No se pudo guardar el orden");
+      loadPlan();
+    }
+  };
+
+  const renderExerciseCard = useCallback(({ item: ex, drag, isActive }) => (
+    <ScaleDecorator>
+      <View
+        style={[
+          styles.cardContainer,
+          isActive && { opacity: 0.85, elevation: 8 },
+        ]}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Icon
+            name="drag-indicator"
+            size={24}
+            color={t.secondText}
+            style={{ marginRight: 8 }}
+            onLongPress={drag}
+          />
+          <Text style={[styles.exerciseTitle, { flex: 1 }]}>{ex.exercise.name}</Text>
+        </View>
+        <Text style={styles.value}>
+          Series: {ex.sets || "N/A"}
+        </Text>
+        <Text style={styles.value}>
+          Reps: {ex.reps || "N/A"}
+        </Text>
+        <Text style={styles.value}>
+          Descanso: {ex.rest || "N/A"}
+        </Text>
+        {ex.description ? (
+          <Text style={[styles.value, { fontStyle: "italic" }]}>
+            Anotaciones: {ex.description.length > 10 ? ex.description.slice(0, 10) + "..." : ex.description}
+          </Text>
+        ) : null}
+        <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+          <Icon
+            name="edit"
+            size={25}
+            color={t.icon}
+            style={{ marginRight: 8 }}
+            onPress={() => setSelectedExercise(ex)}
+          />
+          <Icon
+            name="delete"
+            size={25}
+            color={t.icon}
+            style={{ marginLeft: 8 }}
+            onPress={() => handleDeleteExercise(ex.id)}
+          />
+        </View>
+      </View>
+    </ScaleDecorator>
+  ), [t, styles]);
+
+  if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
+  if (!trainingPlan) return <LoadingScreen />;
 
   return (
     <View style={{ flex: 1 }}>
@@ -432,33 +512,15 @@ export default function AdminUserTrainingPlanDetail() {
           })}
         </View>
 
-        {exercisesByDay[selectedDay]?.map((ex) => (
-          <View key={ex.id} style={styles.cardContainer}>
-            <Text style={styles.exerciseTitle}>{ex.exercise.name}</Text>
-            <Text style={styles.value}>
-              Series: {ex.sets ? ex.sets : "Sin series"}
-            </Text>
-            <Text style={styles.value}>
-              Reps: {ex.reps === "" ? "Hasta el fallo" : ex.reps === null ? "N/A" : ex.reps}
-            </Text>
-            <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-              <Icon
-                name="edit"
-                size={25}
-                color={t.icon}
-                style={{ marginRight: 8 }}
-                onPress={() => setSelectedExercise(ex)}
-              />
-              <Icon
-                name="delete"
-                size={25}
-                color={t.icon}
-                style={{ marginLeft: 8 }}
-                onPress={() => handleDeleteExercise(ex.id)}
-              />
-            </View>
-          </View>
-        ))}
+        {selectedDay && exercisesByDay[selectedDay]?.length > 0 ? (
+          <DraggableFlatList
+            data={exercisesByDay[selectedDay]}
+            keyExtractor={(item) => String(item.id)}
+            renderItem={renderExerciseCard}
+            onDragEnd={({ data }) => handleReorder(data)}
+            scrollEnabled={false}
+          />
+        ) : null}
 
         <TouchableButton
           title="+ Agregar ejercicio"

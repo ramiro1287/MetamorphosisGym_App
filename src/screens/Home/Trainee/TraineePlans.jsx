@@ -159,11 +159,19 @@ export default function TraineePlans() {
                   <Text style={styles.exerciseTitle}>{ex.exercise.name}</Text>
                 </View>
                 <Text style={styles.exerciseDetail}>
-                  Series: {ex.sets}  |  Repeticiones: {ex.reps ? ex.reps : 'N/A'}
+                  Series: {ex.sets || 'N/A'}
                 </Text>
                 <Text style={styles.exerciseDetail}>
-                  Descanso: {ex.rest ? `${ex.rest} segundos` : "Hasta recuperarse"}
+                  Repeticiones: {ex.reps || 'N/A'}
                 </Text>
+                <Text style={styles.exerciseDetail}>
+                  Descanso: {ex.rest || "N/A"}
+                </Text>
+                {ex.description ? (
+                  <Text style={[styles.value, { fontStyle: "italic" }]}>
+                    Anotaciones: {ex.description.length > 10 ? ex.description.slice(0, 10) + "..." : ex.description}
+                  </Text>
+                ) : null}
               </TouchableOpacity>
             ))}
           </>
@@ -201,10 +209,10 @@ export default function TraineePlans() {
                 Series: {selectedExercise?.sets ? selectedExercise?.sets : "N/A"}
               </Text>
               <Text style={styles.exerciseDetail}>
-                Repeticiones: {selectedExercise?.reps ? selectedExercise?.reps : "Hasta el fallo"}
+                Repeticiones: {selectedExercise?.reps || "N/A"}
               </Text>
               <Text style={styles.exerciseDetail}>
-                Descanso: {selectedExercise?.rest ? `${selectedExercise?.rest} segundos` : "Hasta recuperarse"}
+                Descanso: {selectedExercise?.rest || "N/A"}
               </Text>
               <Text style={[styles.label, { marginTop: 10 }]}>Descripción:</Text>
               <Text style={styles.exerciseDetail}>
