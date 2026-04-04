@@ -7,6 +7,7 @@ import { getToastConfig } from "./components/Toast/Toast";
 import { ConfirmModalProvider } from "./components/Alerts/ConfirmModalAlert";
 import LoadingScreen from "./components/Loading/LoadingScreen";
 import Login from "./screens/Login/Login";
+import TermsAndConditions from "./screens/Login/TermsAndConditions";
 import { mainBackgroundDark, mainBackgroundLight } from "./constants/UI/colors";
 
 function AppContent() {
@@ -17,6 +18,9 @@ function AppContent() {
   }
 
   if (user) {
+    if (!user.terms_accepted) {
+      return <TermsAndConditions />;
+    }
     return <Navigation />;
   } else {
     return (

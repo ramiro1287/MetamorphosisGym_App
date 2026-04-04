@@ -92,7 +92,7 @@ export const GymProvider = ({ children }) => {
   useEffect(() => {
     let intervalId;
 
-    if (user) {
+    if (user && user.terms_accepted) {
       getHasUnreadNotifications();
       intervalId = setInterval(getHasUnreadNotifications, 60000);
     }
