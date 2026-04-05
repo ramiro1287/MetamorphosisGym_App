@@ -33,6 +33,8 @@ export default function AdminAnnouncementCreate() {
   const { isDarkMode, getHasUnreadNotifications } = useContext(GymContext);
   const t = getThemeColors(isDarkMode);
   const common = getCommonStyles(isDarkMode);
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
 
   const handleChange = (key, value) => {
     if (key === "title") setTitleError("");
@@ -203,7 +205,7 @@ export default function AdminAnnouncementCreate() {
           mode="date"
           display="spinner"
           onChange={onChange}
-          minimumDate={new Date()}
+          minimumDate={tomorrow}
         />
       )}
     </ScrollContainer>

@@ -109,7 +109,7 @@ export default function Home() {
       gap: 12,
     },
     adminGridItem: {
-      width: "48%",
+      width: "40%",
       backgroundColor: t.buttonBackground,
       borderRadius: 12,
       paddingVertical: 18,
