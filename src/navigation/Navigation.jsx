@@ -8,6 +8,7 @@ import Toast from "react-native-toast-message";
 import { getToastConfig } from "../components/Toast/Toast";
 import {
   mainBackgroundDark, mainBackgroundLight,
+  navbarBackgroundDark, navbarBackgroundLight,
 } from "../constants/UI/colors";
 
 // ------------------------------------------------- Screens
@@ -58,7 +59,8 @@ export default function Navigation() {
   return (
     <NavigationContainer>
       <StatusBar 
-        barStyle={isDarkMode ? "light-content" : "dark-content" }
+        barStyle={isDarkMode ? "light-content" : "dark-content"}
+        backgroundColor={isDarkMode ? navbarBackgroundDark : navbarBackgroundLight}
         translucent={true}
       />
       <Stack.Navigator screenOptions={{

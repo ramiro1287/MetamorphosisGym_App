@@ -9,7 +9,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import RNPickerSelect from "react-native-picker-select";
+import PickerSelect from "../../../../components/Picker/PickerSelect";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { GymContext } from "../../../../context/GymContext";
@@ -27,7 +27,6 @@ import {
 } from "../../../../constants/payments";
 import {
   buttonTextConfirmDark, inputErrorDark,
-  defaultTextLight,
 } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 import { formatDate, formatPaymentStatus, formatPaymentMethod, getFinalAmount, getMonth } from "../../../../utils/formatters";
@@ -369,23 +368,6 @@ export default function AdminUserPaymentDetail() {
     },
   });
 
-  const pickerSelectStyles = {
-    inputIOS: {
-      fontSize: 18,
-      color: t.text,
-      paddingVertical: 10,
-      paddingHorizontal: 10,
-      borderBottomWidth: 1,
-      borderColor: t.text,
-    },
-    inputAndroid: {
-      fontSize: 18,
-      color: t.text,
-      borderBottomWidth: 1,
-      borderColor: t.text,
-    },
-  };
-
   return (
     <ScrollContainer style={{ padding: 25 }}>
       <Text style={common.titleText}>Cuota de</Text>
@@ -406,17 +388,14 @@ export default function AdminUserPaymentDetail() {
           <Text style={styles.cardRowTitle}>Estado:</Text>
           {isEditing ? (
             <View style={{ flex: 1 }}>
-              <RNPickerSelect
+              <PickerSelect
                 value={editedFields.status ?? payment.status}
                 onValueChange={(value) => handleFieldChange("status", value)}
                 items={[
-                  { label: "Pendiente", value: PayStatusPending, color: defaultTextLight },
-                  { label: "Cancelada", value: PayStatusCanceled, color: defaultTextLight },
-                  { label: "Pagada", value: PayStatusCompleted, color: defaultTextLight },
+                  { label: "Pendiente", value: PayStatusPending },
+                  { label: "Cancelada", value: PayStatusCanceled },
+                  { label: "Pagada", value: PayStatusCompleted },
                 ]}
-                style={pickerSelectStyles}
-                useNativeAndroidPickerStyle={false}
-                placeholder={{}}
               />
             </View>
           ) : (
@@ -450,15 +429,12 @@ export default function AdminUserPaymentDetail() {
           <Text style={styles.cardRowTitle}>Forma de pago:</Text>
           {isEditing ? (
             <View style={{ flex: 1 }}>
-              <RNPickerSelect
+              <PickerSelect
                 value={editedFields.payment_method ?? payment.payment_method}
                 onValueChange={(value) => handleFieldChange("payment_method", value)}
                 items={gymInfo.payment_methods.map((method) => (
-                  { label: formatPaymentMethod(method), value: method, color: defaultTextLight }
+                  { label: formatPaymentMethod(method), value: method }
                 ))}
-                style={pickerSelectStyles}
-                useNativeAndroidPickerStyle={false}
-                placeholder={{}}
               />
             </View>
           ) : (

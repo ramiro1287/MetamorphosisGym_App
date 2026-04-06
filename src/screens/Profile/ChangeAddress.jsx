@@ -7,8 +7,7 @@ import { fetchWithAuth } from "../../services/authService";
 import { toastError, toastSuccess } from "../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../components/Alerts/ConfirmModalAlert";
 import FormContainer from "../../components/Containers/FormContainer";
-import RNPickerSelect from "react-native-picker-select";
-import { defaultTextLight } from "../../constants/UI/colors";
+import PickerSelect from "../../components/Picker/PickerSelect";
 import { getThemeColors, getCommonStyles } from "../../constants/UI/theme";
 
 export default function ChangeAddress() {
@@ -90,42 +89,17 @@ export default function ChangeAddress() {
     },
   });
 
-  const pickerSelectStyles = {
-    inputIOS: {
-      fontSize: 22,
-      color: t.text,
-      paddingVertical: 5,
-      paddingHorizontal: 10,
-      borderWidth: 1,
-      borderRadius: 20,
-      borderColor: t.text,
-    },
-    inputAndroid: {
-      fontSize: 22,
-      color: t.text,
-      borderWidth: 1,
-      borderRadius: 20,
-      paddingVertical: 5,
-      paddingHorizontal: 10,
-      borderColor: t.text,
-    },
-  };
-
   return (
     <FormContainer>
       <Text style={styles.title}>Provincia</Text>
       <View style={[common.passwordContainer, {justifyContent: "center"}]}>
-        <RNPickerSelect
+        <PickerSelect
           value={state}
           onValueChange={(value) => setState(value)}
           items={Object.entries(gymInfo.states).map(([key, label]) => ({
             label,
             value: key,
-            color: defaultTextLight,
           }))}
-          style={pickerSelectStyles}
-          useNativeAndroidPickerStyle={false}
-          placeholder={{}}
         />
       </View>
 

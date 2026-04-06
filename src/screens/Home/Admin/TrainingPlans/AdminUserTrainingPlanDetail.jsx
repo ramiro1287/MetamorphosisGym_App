@@ -3,7 +3,7 @@ import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { View, Text, StyleSheet, TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import RNPickerSelect from "react-native-picker-select";
+import PickerSelect from "../../../../components/Picker/PickerSelect";
 import DraggableFlatList, { ScaleDecorator } from "react-native-draggable-flatlist";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -18,7 +18,6 @@ import EditExerciseModal from "./EditExerciseModal";
 import AddExerciseModal from "./AddExerciseModal";
 import {
   buttonTextConfirmDark, errorButtonTextDark,
-  defaultTextLight,
 } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 import { formatDate, formatPlanStatus } from "../../../../utils/formatters";
@@ -407,17 +406,14 @@ export default function AdminUserTrainingPlanDetail() {
           <Text style={styles.label}>Estado:</Text>
           <View style={styles.editionRow}>
             {showStatusPicker ? (
-                <RNPickerSelect
+                <PickerSelect
                   value={editPlanStatus}
                   onValueChange={(value) => setEditPlanStatus(value)}
                   items={[
-                    { label: "Activo", value: PlanStatusActive, color: defaultTextLight },
-                    { label: "Finalizado", value: PlanStatusFinish, color: defaultTextLight },
-                    { label: "Cancelado", value: PlanStatusCanceled, color: defaultTextLight },
+                    { label: "Activo", value: PlanStatusActive },
+                    { label: "Finalizado", value: PlanStatusFinish },
+                    { label: "Cancelado", value: PlanStatusCanceled },
                   ]}
-                  style={common.pickerSelect}
-                  useNativeAndroidPickerStyle={false}
-                  placeholder={{}}
                 />
             ) : (
               <Text

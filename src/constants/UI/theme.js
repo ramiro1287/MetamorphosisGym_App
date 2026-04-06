@@ -231,26 +231,5 @@ export const getCommonStyles = (isDarkMode) => {
         marginBottom: 10,
       },
     }),
-    // RNPickerSelect styles (nested object, can't go through StyleSheet.create)
-    pickerSelect: {
-      inputIOS: {
-        fontSize: 18,
-        color: t.text,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderWidth: 1,
-        borderRadius: 20,
-        borderColor: t.text,
-      },
-      inputAndroid: {
-        fontSize: 18,
-        color: t.text,
-        borderWidth: 1,
-        borderRadius: 20,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderColor: t.text,
-      },
-    },
   };
 };

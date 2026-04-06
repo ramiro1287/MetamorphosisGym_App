@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useCallback } from "react";
 import { View, Text, TextInput, StyleSheet } from "react-native";
 import debounce from "lodash.debounce";
-import RNPickerSelect from "react-native-picker-select";
+import PickerSelect from "../../../../components/Picker/PickerSelect";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
@@ -10,7 +10,6 @@ import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import NoConnectionScreen from "../../../../components/NoConnection/NoConnectionScreen";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
-import { defaultTextLight } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 import { ExercisesMap } from "../../../../constants/trainingPlans";
 import ExerciseFormModal from "./ExerciseFormModal";
@@ -186,15 +185,14 @@ export default function AadminExercises() {
         <TouchableButton title="+ Nuevo ejercicio" onPress={handleOpenCreate} />
       </View>
 
-      <RNPickerSelect
+      <PickerSelect
         value={filters.type}
         onValueChange={(val) => handleChange("type", val)}
         items={Object.entries(ExercisesMap).map(([type, label]) => ({
-          label, value: type, color: defaultTextLight,
+          label, value: type,
         }))}
-        style={styles.pickerSelect}
-        useNativeAndroidPickerStyle={false}
-        placeholder={{ label: "Filtrar por grupo muscular", value: "" }}
+        placeholder="Filtrar por grupo muscular"
+        style={{ marginBottom: 10 }}
       />
 
       <TextInput

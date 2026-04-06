@@ -1,12 +1,11 @@
 // Ruta sugerida: src/screens/.../ExerciseFormModal.jsx
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { Modal, View, Text, TextInput, StyleSheet } from "react-native";
-import RNPickerSelect from "react-native-picker-select";
+import PickerSelect from "../../../../components/Picker/PickerSelect";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import { GymContext } from "../../../../context/GymContext";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
-import { defaultTextLight } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 import { ExercisesMap } from "../../../../constants/trainingPlans";
 
@@ -163,15 +162,14 @@ export default function ExerciseFormModal({ visible, onClose, initialData, onSav
         <View style={styles.cardContainer}>
           <Text style={styles.title}>{isEdit ? "Editar ejercicio" : "Nuevo ejercicio"}</Text>
 
-          <RNPickerSelect
+          <PickerSelect
             value={form.type}
             onValueChange={(val) => handleChange("type", val)}
             items={Object.entries(ExercisesMap).map(([type, label]) => ({
-              label, value: type, color: defaultTextLight,
+              label, value: type,
             }))}
-            style={styles.pickerSelect}
-            useNativeAndroidPickerStyle={false}
-            placeholder={{ label: "Seleccionar grupo muscular", value: "" }}
+            placeholder="Seleccionar grupo muscular"
+            style={{ marginBottom: 10 }}
           />
 
           <TextInput

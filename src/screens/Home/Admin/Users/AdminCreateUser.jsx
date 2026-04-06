@@ -5,7 +5,7 @@ import {
   TextInput,
   Switch,
 } from "react-native";
-import RNPickerSelect from "react-native-picker-select";
+import PickerSelect from "../../../../components/Picker/PickerSelect";
 import { useNavigation } from "@react-navigation/native";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import { GymContext } from "../../../../context/GymContext";
@@ -14,7 +14,7 @@ import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
 import { TraineeRole } from "../../../../constants/users";
-import { defaultTextLight, buttonTextConfirmDark, errorButtonTextDark } from "../../../../constants/UI/colors";
+import { buttonTextConfirmDark, errorButtonTextDark } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 
 export default function AdminCreateUser() {
@@ -113,7 +113,6 @@ export default function AdminCreateUser() {
     cardInputContainer: common.formInputContainer,
     cardInputLabel: common.formInputLabel,
     cardInput: common.formInput,
-    pickerSelect: common.pickerSelect,
     errorText: common.errorText,
   };
 
@@ -163,35 +162,27 @@ export default function AdminCreateUser() {
         </View>
         <View style={styles.cardInputContainer}>
           <Text style={styles.cardInputLabel}>País del Teléfono:</Text>
-          <RNPickerSelect
+          <PickerSelect
             value={form.country}
             onValueChange={(v) => handleChange("country", v)}
             items={Object.entries(gymInfo.countries || {}).map(([key, value]) => ({
               label: value,
               value: key,
-              color: defaultTextLight,
             }))}
-            style={styles.pickerSelect}
-            useNativeAndroidPickerStyle={false}
-            placeholder={{}}
           />
         </View>
         <View style={styles.cardInputContainer}>
           <Text style={styles.cardInputLabel}>Plan:</Text>
-          <RNPickerSelect
+          <PickerSelect
             value={form.plan_id}
             onValueChange={(v) => handleChange("plan_id", v)}
             items={[
-              { label: "Sin plan", value: null, color: defaultTextLight },
+              { label: "Sin plan", value: null },
               ...(gymInfo.plans?.map((plan) => ({
                 label: plan.name,
                 value: plan.id,
-                color: defaultTextLight,
               })) || []),
             ]}
-            style={styles.pickerSelect}
-            useNativeAndroidPickerStyle={false}
-            placeholder={{}}
           />
         </View>
         {planError && (<Text style={styles.errorText}>{planError}</Text>)}

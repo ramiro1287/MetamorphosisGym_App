@@ -1,14 +1,13 @@
 import React, { useContext, useEffect, useState, useCallback } from "react";
 import { View, Text, Modal, TextInput, StyleSheet } from "react-native";
 import debounce from "lodash.debounce";
-import RNPickerSelect from "react-native-picker-select";
+import PickerSelect from "../../../../components/Picker/PickerSelect";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
 import { GymContext } from "../../../../context/GymContext";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
-import { defaultTextLight } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 import { ExercisesMap } from "../../../../constants/trainingPlans";
 
@@ -162,17 +161,15 @@ export default function AddExerciseModal({ planId, onClose, reload, setSelectedE
         <View style={styles.cardContainer}>
           <Text style={[styles.title, { alignSelf: "center" }]}>Agregar ejercicio</Text>
 
-          <RNPickerSelect
+          <PickerSelect
             value={filters.type}
             onValueChange={(val) => handleChange("type", val)}
             items={Object.entries(ExercisesMap).map(([type, label]) => ({
               label,
               value: type,
-              color: defaultTextLight,
             }))}
-            style={styles.pickerSelect}
-            useNativeAndroidPickerStyle={false}
-            placeholder={{ label: "Filtrar por grupo muscular", value: "" }}
+            placeholder="Filtrar por grupo muscular"
+            style={{ marginBottom: 10 }}
           />
 
           <TextInput

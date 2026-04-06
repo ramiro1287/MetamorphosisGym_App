@@ -1,12 +1,11 @@
 import React, { useContext, useState } from "react";
 import { View, Text, Modal, TextInput, StyleSheet } from "react-native";
-import RNPickerSelect from "react-native-picker-select";
+import PickerSelect from "../../../../components/Picker/PickerSelect";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import { GymContext } from "../../../../context/GymContext";
 import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
-import { defaultTextLight } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 import { WeekDaysMap } from "../../../../constants/trainingPlans";
 
@@ -137,13 +136,10 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
           />
 
           <Text style={styles.cardInputLabel}>Día de la semana</Text>
-          <RNPickerSelect
+          <PickerSelect
             value={formData.week_day}
             onValueChange={(value) => handleChange("week_day", value)}
             items={weekdayOptions}
-            style={common.pickerSelect}
-            placeholder={{}}
-            useNativeAndroidPickerStyle={false}
           />
           {errors.week_day && (<Text style={common.errorText}>{errors.week_day}</Text>)}
 

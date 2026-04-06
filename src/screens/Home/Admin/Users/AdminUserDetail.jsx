@@ -1,7 +1,7 @@
 import React, { useContext, useState, useCallback } from "react";
 import { useFocusEffect } from '@react-navigation/native';
 import { Text, StyleSheet, View, Modal, TextInput } from "react-native";
-import RNPickerSelect from "react-native-picker-select";
+import PickerSelect from "../../../../components/Picker/PickerSelect";
 import { useRoute } from "@react-navigation/native";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import { useNavigation } from "@react-navigation/native";
@@ -19,7 +19,6 @@ import {
 } from "../../../../constants/users";
 import {
   inputErrorDark,
-  defaultTextLight,
 } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 import { formatDate, formatRole, formatUserStatus } from "../../../../utils/formatters";
@@ -424,44 +423,34 @@ export default function AdminUserDetail() {
               </Text>
 
               {editField === "plan" ? (
-                <RNPickerSelect
+                <PickerSelect
                   value={editValue}
                   onValueChange={(value) => setEditValue(value)}
                   items={[
-                    { label: "Sin plan", value: null, color: defaultTextLight },
+                    { label: "Sin plan", value: null },
                     ...gymInfo.plans.map((plan) => ({
                       label: plan.name,
                       value: plan.id,
-                      color: defaultTextLight,
                     })),
                   ]}
-                  style={common.pickerSelect}
-                  useNativeAndroidPickerStyle={false}
-                  placeholder={{}}
                 />
               ) : editField === "is_retired" ? (
-                <RNPickerSelect
+                <PickerSelect
                   value={editValue}
                   onValueChange={(value) => setEditValue(value)}
                   items={[
-                    { label: "No", value: 0, color: defaultTextLight },
-                    { label: "Sí", value: 1, color: defaultTextLight },
+                    { label: "No", value: 0 },
+                    { label: "Sí", value: 1 },
                   ]}
-                  style={common.pickerSelect}
-                  useNativeAndroidPickerStyle={false}
-                  placeholder={{}}
                 />
               ) : editField === "status" ? (
-                <RNPickerSelect
+                <PickerSelect
                   value={editValue}
                   onValueChange={(value) => setEditValue(value)}
                   items={[
-                    { label: "Activo", value: StatusActive, color: defaultTextLight },
-                    { label: "Inactivo", value: StatusDeleted, color: defaultTextLight },
+                    { label: "Activo", value: StatusActive },
+                    { label: "Inactivo", value: StatusDeleted },
                   ]}
-                  style={common.pickerSelect}
-                  useNativeAndroidPickerStyle={false}
-                  placeholder={{}}
                 />
               ) : editField === "full_name" ? (
                 <>

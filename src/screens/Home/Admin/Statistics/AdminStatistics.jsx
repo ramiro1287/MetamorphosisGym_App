@@ -1,6 +1,6 @@
 import React, { useContext, useState, useCallback } from "react";
 import { useRoute, useFocusEffect, useNavigation } from "@react-navigation/native";
-import RNPickerSelect from "react-native-picker-select";
+import PickerSelect from "../../../../components/Picker/PickerSelect";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { GymContext } from "../../../../context/GymContext";
 import { fetchWithAuth } from "../../../../services/authService";
@@ -11,7 +11,6 @@ import { MonthsMap } from "../../../../constants/payments"
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import NoConnectionScreen from "../../../../components/NoConnection/NoConnectionScreen";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
-import { defaultTextLight } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 import { getFinalAmount } from "../../../../utils/formatters";
 import {
@@ -233,17 +232,14 @@ export default function AdminStatistics() {
 
       <View style={styles.rowTitle}>
         <Text style={[common.titleText, { marginTop: 20 }]}>Cuotas </Text>
-        <RNPickerSelect
+        <PickerSelect
           value={paymentStatus}
           onValueChange={(v) => setPaymentStatus(v)}
           items={[
-            { label: "Pagadas", value: PayStatusCompleted, color: defaultTextLight },
-            { label: "Pendientes", value: PayStatusPending, color: defaultTextLight },
-            { label: "Canceladas", value: PayStatusCanceled, color: defaultTextLight },
+            { label: "Pagadas", value: PayStatusCompleted },
+            { label: "Pendientes", value: PayStatusPending },
+            { label: "Canceladas", value: PayStatusCanceled },
           ]}
-          style={common.pickerSelect}
-          useNativeAndroidPickerStyle={false}
-          placeholder={{}}
         />
       </View>
 
