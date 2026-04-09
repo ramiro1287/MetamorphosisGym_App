@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
-import { View, Text, StyleSheet, Platform } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DatePickerModal from "../../components/Picker/DatePickerModal";
 import TouchableButton from "../../components/Buttons/TouchableButton";
 import { GymContext } from "../../context/GymContext";
 import { fetchWithAuth } from "../../services/authService";
@@ -34,22 +34,15 @@ export default function Profile() {
     });
   };
 
-  const onChange = async (event, selectedDate) => {
-    if (event.type === "dismissed") {
-      setShowPicker(false);
-      return;
-    }
+  const onConfirmDate = async (selectedDate) => {
+    setShowPicker(false);
 
     const confirm = await showConfirmModalAlert(
       "¿Estás seguro de cambiar tu fecha de nacimiento?"
     );
-    if (!confirm) {
-      if (Platform.OS === "android") setShowPicker(false);
-      return;
-    }
+    if (!confirm) return;
 
     handleChangeBirthDate(selectedDate);
-    if (Platform.OS === "android") setShowPicker(false);
   };
 
   const handleChangeBirthDate = async (date) => {
@@ -114,101 +107,99 @@ export default function Profile() {
   return (
     <ScrollContainer style={{ padding: 25 }}>
 
-        <View style={common.profileCard}>
-          <View style={styles.headerRow}>
-            <Icon
-              name={isDarkMode ? "light-mode" : "dark-mode"}
-              size={30}
-              color={t.icon}
-              onPress={() => setIsDarkMode(!isDarkMode)}
-              style={{ marginRight: 10 }}
-            />
-            <Icon
-              name="power-settings-new"
-              size={30}
-              color={t.icon}
-              onPress={handleButtonLogout}
-              style={{ marginLeft: 10 }}
-            />
-          </View>
+      <View style={common.profileCard}>
+        <View style={styles.headerRow}>
           <Icon
-            name="account-circle"
-            size={120}
+            name={isDarkMode ? "light-mode" : "dark-mode"}
+            size={30}
             color={t.icon}
+            onPress={() => setIsDarkMode(!isDarkMode)}
+            style={{ marginRight: 10 }}
           />
-          <Text style={styles.userName}>{user.first_name} {user.last_name}</Text>
-          <Text style={styles.userId}>{user.id_number}</Text>
-          <View style={common.infoRow}>
-            <Text style={common.label}>Rol</Text>
-            <Text style={common.value}>{formatRole(user.role)}</Text>
-          </View>
-          <View style={common.infoRow}>
-            <Text style={common.label}>Estado</Text>
-            <Text style={common.value}>{formatUserStatus(user.status, "Desactivado")}</Text>
-          </View>
-          <View style={common.infoRow}>
-            <Text style={common.label}>Plan</Text>
-            <Text style={common.value}>{user.plan ? user.plan?.name : "N/A"}</Text>
-          </View>
-          <View style={common.infoRow}>
-            <Text style={common.label}>Jubilado</Text>
-            <Text style={common.value}>{user.is_retired ? "Si" : "No"}</Text>
-          </View>
-          <View style={common.infoRow}>
-            <Text style={common.label}>Teléfono</Text>
-            <Text style={common.value}>{user.phone ? user.phone : "N/A"}</Text>
-          </View>
-          <View style={common.infoRow}>
-            <Text style={common.label}>Familia</Text>
-            <Text style={common.value}>{user.family ? user.family?.name : "N/A"}</Text>
-          </View>
-          <View style={common.infoRow}>
-            <View style={{ flexDirection: "row" }}>
-              <Text style={common.label}>Dirección</Text>
-              <Icon
-                name="edit"
-                size={25}
-                color={t.icon}
-                onPress={handleChangeAddress}
-                style={{ marginLeft: 5 }}
-              />
-            </View>
-            <Text style={common.value} numberOfLines={2} ellipsizeMode="tail">
-              {user.address ? `${user.address?.address} ${user.address?.city} ${user.address?.state}` : "N/A"}
-            </Text>
-          </View>
-          <View style={common.infoRow}>
-            <View style={{ flexDirection: "row" }}>
-              <Text style={common.label}>Nacimiento</Text>
-              <Icon
-                name="edit"
-                size={25}
-                color={t.icon}
-                onPress={() => setShowPicker(true)}
-                style={{ marginLeft: 5 }}
-              />
-            </View>
-            <Text style={common.value} numberOfLines={2} ellipsizeMode="tail">
-              {user.birth_date ? formatDate(user.birth_date) : "N/A"}
-            </Text>
-          </View>
-
-          {showPicker && (
-            <DateTimePicker
-              value={user.birth_date ? new Date(user.birth_date) : new Date()}
-              mode="date"
-              display="spinner"
-              onChange={onChange}
-              maximumDate={new Date()}
-            />
-          )}
-
-          <TouchableButton
-            title="Cambiar contraseña"
-            onPress={handleChangePassword}
-            style={{ marginTop: 15 }}
+          <Icon
+            name="power-settings-new"
+            size={30}
+            color={t.icon}
+            onPress={handleButtonLogout}
+            style={{ marginLeft: 10 }}
           />
         </View>
+        <Icon
+          name="account-circle"
+          size={120}
+          color={t.icon}
+        />
+        <Text style={styles.userName}>{user.first_name} {user.last_name}</Text>
+        <Text style={styles.userId}>{user.id_number}</Text>
+        <View style={common.infoRow}>
+          <Text style={common.label}>Rol</Text>
+          <Text style={common.value}>{formatRole(user.role)}</Text>
+        </View>
+        <View style={common.infoRow}>
+          <Text style={common.label}>Estado</Text>
+          <Text style={common.value}>{formatUserStatus(user.status, "Desactivado")}</Text>
+        </View>
+        <View style={common.infoRow}>
+          <Text style={common.label}>Plan</Text>
+          <Text style={common.value}>{user.plan ? user.plan?.name : "N/A"}</Text>
+        </View>
+        <View style={common.infoRow}>
+          <Text style={common.label}>Jubilado</Text>
+          <Text style={common.value}>{user.is_retired ? "Si" : "No"}</Text>
+        </View>
+        <View style={common.infoRow}>
+          <Text style={common.label}>Teléfono</Text>
+          <Text style={common.value}>{user.phone ? user.phone : "N/A"}</Text>
+        </View>
+        <View style={common.infoRow}>
+          <Text style={common.label}>Familia</Text>
+          <Text style={common.value}>{user.family ? user.family?.name : "N/A"}</Text>
+        </View>
+        <View style={common.infoRow}>
+          <View style={{ flexDirection: "row" }}>
+            <Text style={common.label}>Dirección</Text>
+            <Icon
+              name="edit"
+              size={25}
+              color={t.icon}
+              onPress={handleChangeAddress}
+              style={{ marginLeft: 5 }}
+            />
+          </View>
+          <Text style={common.value} numberOfLines={2} ellipsizeMode="tail">
+            {user.address ? `${user.address?.address} ${user.address?.city} ${user.address?.state}` : "N/A"}
+          </Text>
+        </View>
+        <View style={common.infoRow}>
+          <View style={{ flexDirection: "row" }}>
+            <Text style={common.label}>Nacimiento</Text>
+            <Icon
+              name="edit"
+              size={25}
+              color={t.icon}
+              onPress={() => setShowPicker(true)}
+              style={{ marginLeft: 5 }}
+            />
+          </View>
+          <Text style={common.value} numberOfLines={2} ellipsizeMode="tail">
+            {user.birth_date ? formatDate(user.birth_date) : "N/A"}
+          </Text>
+        </View>
+
+        <DatePickerModal
+          visible={showPicker}
+          value={user.birth_date ? new Date(user.birth_date) : new Date()}
+          onConfirm={onConfirmDate}
+          onCancel={() => setShowPicker(false)}
+          maximumDate={new Date()}
+        />
+
+        <TouchableButton
+          title="Cambiar contraseña"
+          onPress={handleChangePassword}
+          style={{ marginTop: 15 }}
+        />
+      </View>
 
     </ScrollContainer>
   );

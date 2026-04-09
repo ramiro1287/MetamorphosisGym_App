@@ -234,7 +234,7 @@ export default function Home() {
                 <TouchableOpacity
                   key={item.route}
                   style={styles.adminGridItem}
-                  onPress={() => navigation.navigate(item.route)}
+                  onPress={() => navigation.reset({ index: 1, routes: [{ name: "Home" }, { name: item.route }] })}
                 >
                   <Icon name={item.icon} size={28} color={t.buttonText} />
                   <Text style={styles.adminGridItemText}>{item.title}</Text>

@@ -47,6 +47,7 @@ export default function AddExerciseModal({ planId, onClose, reload, setSelectedE
   };
 
   const handleAddExercise = async (exerciseId) => {
+    onClose();
     const confirm = await showConfirmModalAlert("¿Agregar este ejercicio al plan?");
     if (!confirm) return;
 
@@ -73,8 +74,6 @@ export default function AddExerciseModal({ planId, onClose, reload, setSelectedE
       }
     } catch (error) {
       toastError("Error", "Error de conexión");
-    } finally {
-      onClose();
     }
   };
 

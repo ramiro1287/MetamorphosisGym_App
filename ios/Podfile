@@ -31,5 +31,18 @@ target 'MetamorphosisGym' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # Fix fmt consteval compatibility with Xcode 26+
+    fmt_base = File.join(installer.sandbox.root, 'fmt/include/fmt/base.h')
+    if File.exist?(fmt_base)
+      content = File.read(fmt_base)
+      unless content.include?('Xcode 26')
+        patched = content.sub(
+          "#elif defined(__cpp_consteval)\n#  define FMT_USE_CONSTEVAL 1",
+          "#elif defined(__apple_build_version__) && __apple_build_version__ >= 17000000L\n#  define FMT_USE_CONSTEVAL 0  // consteval is broken in Apple clang 17+ (Xcode 26)\n#elif defined(__cpp_consteval)\n#  define FMT_USE_CONSTEVAL 1"
+        )
+        File.write(fmt_base, patched)
+      end
+    end
   end
 end

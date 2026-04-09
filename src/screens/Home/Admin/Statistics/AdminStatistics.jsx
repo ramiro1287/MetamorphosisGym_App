@@ -1,7 +1,7 @@
 import React, { useContext, useState, useCallback } from "react";
 import { useRoute, useFocusEffect, useNavigation } from "@react-navigation/native";
 import PickerSelect from "../../../../components/Picker/PickerSelect";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DatePickerModal from "../../../../components/Picker/DatePickerModal";
 import { GymContext } from "../../../../context/GymContext";
 import { fetchWithAuth } from "../../../../services/authService";
 import { Text, StyleSheet, View, TouchableOpacity, ActivityIndicator } from "react-native";
@@ -118,11 +118,7 @@ export default function AdminStatistics() {
     finally { setLoadingMore(false); }
   };
 
-  const onChange = (event, selectedDate) => {
-    if (event.type === "dismissed") {
-      setShowPicker(false);
-      return;
-    }
+  const onConfirmDate = (selectedDate) => {
     setQueryDate(selectedDate);
     setShowPicker(false);
   };
@@ -220,15 +216,13 @@ export default function AdminStatistics() {
         </View>
       </View>
 
-      {showPicker && (
-        <DateTimePicker
-          value={queryDate}
-          mode="date"
-          display="spinner"
-          onChange={onChange}
-          minimumDate={new Date(2025, 0, 1)}
-        />
-      )}
+      <DatePickerModal
+        visible={showPicker}
+        value={queryDate}
+        onConfirm={onConfirmDate}
+        onCancel={() => setShowPicker(false)}
+        minimumDate={new Date(2025, 0, 1)}
+      />
 
       <View style={styles.rowTitle}>
         <Text style={[common.titleText, { marginTop: 20 }]}>Cuotas </Text>
@@ -240,6 +234,7 @@ export default function AdminStatistics() {
             { label: "Pendientes", value: PayStatusPending },
             { label: "Canceladas", value: PayStatusCanceled },
           ]}
+          style={{ flex: 1 }}
         />
       </View>
 

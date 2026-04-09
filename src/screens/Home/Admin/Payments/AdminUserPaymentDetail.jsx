@@ -5,12 +5,11 @@ import {
   StyleSheet,
   View,
   Modal,
-  Platform,
   TextInput,
   TouchableOpacity,
 } from "react-native";
 import PickerSelect from "../../../../components/Picker/PickerSelect";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DatePickerModal from "../../../../components/Picker/DatePickerModal";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { GymContext } from "../../../../context/GymContext";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
@@ -217,9 +216,8 @@ export default function AdminUserPaymentDetail() {
     }
   };
 
-  const onChangeDatePaid = (event, selectedDate) => {
-    if (Platform.OS === "android") setShowPicker(false);
-    if (event.type === "dismissed") return;
+  const onConfirmDatePaid = (selectedDate) => {
+    setShowPicker(false);
     handleFieldChange("date_paid", selectedDate);
   };
 
@@ -544,17 +542,15 @@ export default function AdminUserPaymentDetail() {
         ))}
       </View>
 
-      {showPicker && (
-        <DateTimePicker
-          value={editedFields.date_paid instanceof Date
-            ? editedFields.date_paid
-            : (payment.date_paid ? new Date(payment.date_paid) : new Date())}
-          mode="date"
-          display="spinner"
-          onChange={onChangeDatePaid}
-          maximumDate={new Date()}
-        />
-      )}
+      <DatePickerModal
+        visible={showPicker}
+        value={editedFields.date_paid instanceof Date
+          ? editedFields.date_paid
+          : (payment.date_paid ? new Date(payment.date_paid) : new Date())}
+        onConfirm={onConfirmDatePaid}
+        onCancel={() => setShowPicker(false)}
+        maximumDate={new Date()}
+      />
 
       {showModal && (
         <Modal visible transparent animationType="slide" onRequestClose={() => setShowModal(false)}>

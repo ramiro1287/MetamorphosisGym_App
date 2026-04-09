@@ -6,7 +6,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import PickerSelect from "../../../../components/Picker/PickerSelect";
 import DraggableFlatList, { ScaleDecorator } from "react-native-draggable-flatlist";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DatePickerModal from "../../../../components/Picker/DatePickerModal";
 import LoadingScreen from "../../../../components/Loading/LoadingScreen";
 import NoConnectionScreen from "../../../../components/NoConnection/NoConnectionScreen";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
@@ -130,18 +130,13 @@ export default function AdminUserTrainingPlanDetail() {
     }
   };
 
-  const onChange = async (event, selectedDate) => {
-    if (event.type === "dismissed") {
-      setShowDatePicker(false);
-      return;
-    }
+  const onConfirmDate = async (selectedDate) => {
+    setShowDatePicker(false);
 
     const confirm = await showConfirmModalAlert(
       "¿Estás seguro de actualizar el vencimiento del plan de entrenamiento?"
     );
     if (!confirm) return;
-
-    setShowDatePicker(false);
     try {
       const response = await fetchWithAuth(
         `/admin/training-plans/update/${planId}/`,
@@ -243,26 +238,26 @@ export default function AdminUserTrainingPlanDetail() {
     if (editPlanDescription !== null) {
       const trimmedNewValue = editPlanDescription.trim();
       const originalValue = trainingPlan.description?.trim() || "";
-  
+
       if (trimmedNewValue === originalValue) {
         // No hubo cambios, solo cerramos la edición
         setEditPlanDescription(null);
         return;
       }
-  
+
       const confirm = await showConfirmModalAlert("¿Estás seguro de actualizar anotaciones?");
       if (!confirm) {
         setEditPlanDescription(null);
         return;
       }
-  
+
       await updatePlanDescription();
       setEditPlanDescription(null);
     } else {
       // Activamos modo edición
       setEditPlanDescription(trainingPlan.description || "");
     }
-  };  
+  };
 
   const styles = StyleSheet.create({
     cardContainer: {
@@ -299,7 +294,7 @@ export default function AdminUserTrainingPlanDetail() {
       gap: 10,
     },
     rowInput: {
-      flex:1,
+      flex: 1,
       fontSize: 16,
       color: t.text,
       borderBottomWidth: 1,
@@ -406,22 +401,22 @@ export default function AdminUserTrainingPlanDetail() {
           <Text style={styles.label}>Estado:</Text>
           <View style={styles.editionRow}>
             {showStatusPicker ? (
-                <PickerSelect
-                  value={editPlanStatus}
-                  onValueChange={(value) => setEditPlanStatus(value)}
-                  items={[
-                    { label: "Activo", value: PlanStatusActive },
-                    { label: "Finalizado", value: PlanStatusFinish },
-                    { label: "Cancelado", value: PlanStatusCanceled },
-                  ]}
-                />
+              <PickerSelect
+                value={editPlanStatus}
+                onValueChange={(value) => setEditPlanStatus(value)}
+                items={[
+                  { label: "Activo", value: PlanStatusActive },
+                  { label: "Finalizado", value: PlanStatusFinish },
+                  { label: "Cancelado", value: PlanStatusCanceled },
+                ]}
+              />
             ) : (
               <Text
                 style={[
                   styles.value,
                   trainingPlan.status === PlanStatusActive
-                  ? { color: buttonTextConfirmDark }
-                  : { color: errorButtonTextDark }
+                    ? { color: buttonTextConfirmDark }
+                    : { color: errorButtonTextDark }
                 ]}
               >
                 {formatPlanStatus(trainingPlan.status)}
@@ -444,7 +439,7 @@ export default function AdminUserTrainingPlanDetail() {
               size={25}
               color={t.icon}
               style={{ marginLeft: 10 }}
-              onPress={() => {setShowDatePicker(true)}}
+              onPress={() => { setShowDatePicker(true) }}
             />
           </View>
 
@@ -473,12 +468,12 @@ export default function AdminUserTrainingPlanDetail() {
             />
           </View>
           <Icon
-              name="delete"
-              size={25}
-              color={t.icon}
-              style={{ alignSelf: "flex-end" }}
-              onPress={handleDeletePlan}
-            />
+            name="delete"
+            size={25}
+            color={t.icon}
+            style={{ alignSelf: "flex-end" }}
+            onPress={handleDeletePlan}
+          />
         </View>
 
         <View style={styles.daySelectorContainer}>
@@ -497,11 +492,11 @@ export default function AdminUserTrainingPlanDetail() {
                     color: buttonTextConfirmDark,
                     borderWidth: 2,
                     borderColor: buttonTextConfirmDark
-                    } : { borderWidth: 2, }
-                  ]}
+                  } : { borderWidth: 2, }
+                ]}
                 textButtonStyle={[
                   { fontSize: 14 },
-                  selectedDay === intDay ? {color: buttonTextConfirmDark} : {}
+                  selectedDay === intDay ? { color: buttonTextConfirmDark } : {}
                 ]}
               />
             );
@@ -542,15 +537,13 @@ export default function AdminUserTrainingPlanDetail() {
         />
       )}
 
-      {showDatePicker && (
-        <DateTimePicker
-          value={trainingPlan.expiration_date ? new Date(trainingPlan.expiration_date) : new Date()}
-          mode="date"
-          display="spinner"
-          onChange={onChange}
-          minimumDate={new Date(Date.now() + 24 * 60 * 60 * 1000)}
-        />
-      )}
+      <DatePickerModal
+        visible={showDatePicker}
+        value={trainingPlan.expiration_date ? new Date(trainingPlan.expiration_date) : new Date()}
+        onConfirm={onConfirmDate}
+        onCancel={() => setShowDatePicker(false)}
+        minimumDate={new Date(Date.now() + 24 * 60 * 60 * 1000)}
+      />
     </View>
   );
 }

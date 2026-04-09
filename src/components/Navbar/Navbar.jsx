@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GymContext } from "../../context/GymContext";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import {
@@ -12,6 +13,7 @@ import {
 export default function Navbar() {
   const { isDarkMode, hasUnreadNotifications } = useContext(GymContext);
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
   const handleProfile = () => {
     const currentRoute = navigation.getState()?.routes?.slice(-1)[0]?.name;
@@ -36,8 +38,8 @@ export default function Navbar() {
 
   const styles = StyleSheet.create({
     rootContainer: {
-      paddingTop: StatusBar.currentHeight || 24,
-      height: (StatusBar.currentHeight || 24) + 56,
+      paddingTop: insets.top,
+      height: insets.top + 56,
       backgroundColor: isDarkMode ? navbarBackgroundDark : navbarBackgroundLight,
       flexDirection: "row",
       alignItems: "center",

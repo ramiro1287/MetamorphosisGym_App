@@ -6,7 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DatePickerModal from "../../../../components/Picker/DatePickerModal";
 import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import ScrollContainer from "../../../../components/Containers/ScrollContainer";
@@ -79,12 +79,7 @@ export default function AdminUserTrainingPlanCreate() {
     }
   };
 
-  const onChange = async (event, selectedDate) => {
-    if (event.type === "dismissed") {
-      setShowPicker(false);
-      return;
-    }
-
+  const onConfirmDate = (selectedDate) => {
     setShowPicker(false);
     setForm({ ...form, expiration_date: selectedDate });
   };
@@ -107,10 +102,10 @@ export default function AdminUserTrainingPlanCreate() {
           <Text style={common.formInputLabel}>Fecha de expiración:</Text>
           <TouchableOpacity style={styles.dateInput} onPress={() => setShowPicker(true)}>
             <Text style={common.formInputLabel}>
-            {form.expiration_date
-              ? `${String(form.expiration_date.getDate()).padStart(2, '0')}/${String(form.expiration_date.getMonth() + 1).padStart(2, '0')}/${form.expiration_date.getFullYear()}`
-              : ""
-            }
+              {form.expiration_date
+                ? `${String(form.expiration_date.getDate()).padStart(2, '0')}/${String(form.expiration_date.getMonth() + 1).padStart(2, '0')}/${form.expiration_date.getFullYear()}`
+                : ""
+              }
             </Text>
           </TouchableOpacity>
         </View>
@@ -132,15 +127,13 @@ export default function AdminUserTrainingPlanCreate() {
         style={{ alignSelf: "center", marginVertical: 20 }}
       />
 
-      {showPicker && (
-        <DateTimePicker
-          value={form.expiration_date ? new Date(form.expiration_date) : new Date()}
-          mode="date"
-          display="spinner"
-          onChange={onChange}
-          minimumDate={new Date(Date.now() + 24 * 60 * 60 * 1000)}
-        />
-      )}
+      <DatePickerModal
+        visible={showPicker}
+        value={form.expiration_date ? new Date(form.expiration_date) : new Date()}
+        onConfirm={onConfirmDate}
+        onCancel={() => setShowPicker(false)}
+        minimumDate={new Date(Date.now() + 24 * 60 * 60 * 1000)}
+      />
     </ScrollContainer>
   );
 }

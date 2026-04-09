@@ -34,11 +34,12 @@ export default function AdminUserPlans() {
       return;
     }
 
+    setShowModal(false);
+
     const confirm = await showConfirmModalAlert(
       "¿Estás seguro de actualizar el precio del plan?"
     );
     if (!confirm) {
-      setShowModal(false);
       setPlan(null);
       setPlanError("");
       return;
@@ -56,17 +57,14 @@ export default function AdminUserPlans() {
 
       if (response.ok) {
         toastSuccess("Precio actualizado correctamente");
-        setShowModal(false);
         getGymInfo();
         return;
       } else {
-        setShowModal(false);
         setPlan(null);
         toastError("Error", "No se pudo actualizar el precio");
         return;
       }
     } catch (error) {
-      setShowModal(false);
       setPlan(null);
       toastError("Error", "Error de conexión");
     }
@@ -112,7 +110,7 @@ export default function AdminUserPlans() {
                 keyboardType="numeric"
                 value={plan.price}
                 onChangeText={(txt) => {
-                  setPlan({ ...plan, price: txt});
+                  setPlan({ ...plan, price: txt });
                   setPlanError("");
                 }}
                 style={common.modalCardTextInput}

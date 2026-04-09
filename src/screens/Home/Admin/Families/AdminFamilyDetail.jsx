@@ -80,13 +80,12 @@ export default function AdminFamilyDetail() {
       if (hasError) return;
     }
 
+    setShowModal(false);
+
     const confirm = await showConfirmModalAlert(
-        "¿Estás seguro de actualizar el campo de la familia?"
+      "¿Estás seguro de actualizar el campo de la familia?"
     );
-    if (!confirm) {
-        setShowModal(false);
-        return;
-    }
+    if (!confirm) return;
 
     if (editField === "description" && !editValue.trim()) {
       payload = { [editField]: null }
@@ -106,21 +105,17 @@ export default function AdminFamilyDetail() {
 
       if (response.ok) {
         toastSuccess("Campo actualizado correctamente");
-        setShowModal(false);
         loadFamily();
         return;
       } if (response.status === 400) {
-        setShowModal(false);
         const { data } = await response.json();
         toastError(data.error_detail);
         return;
       } else {
-        setShowModal(false);
         toastError("Error", "No se pudo actualizar el campo");
         return;
       }
     } catch (error) {
-      setShowModal(false);
       toastError("Error", "Error de conexión");
     }
   };

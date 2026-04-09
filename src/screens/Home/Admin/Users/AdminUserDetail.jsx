@@ -14,8 +14,8 @@ import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
 import {
-    AdminRole, CoachRole, TraineeRole,
-    StatusActive, StatusDeleted,
+  AdminRole, CoachRole, TraineeRole,
+  StatusActive, StatusDeleted,
 } from "../../../../constants/users";
 import {
   inputErrorDark,
@@ -30,7 +30,7 @@ export default function AdminUserDetail() {
   const [editValueError, setEditValueError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
-  
+
   const { isDarkMode, gymInfo, user } = useContext(GymContext);
   const navigation = useNavigation();
   const route = useRoute();
@@ -72,7 +72,7 @@ export default function AdminUserDetail() {
   const handleResetPassword = async () => {
     const { idNumber } = route.params || {};
     const confirm = await showConfirmModalAlert(
-        "¿Estás seguro de restablecer la contraseña del usuario?"
+      "¿Estás seguro de restablecer la contraseña del usuario?"
     );
     if (!confirm) return;
 
@@ -100,19 +100,19 @@ export default function AdminUserDetail() {
 
     switch (field) {
       case "full_name":
-      currentValue = {
-        first_name: userDetail.first_name,
-        last_name: userDetail.last_name,
-      };
-      break;
+        currentValue = {
+          first_name: userDetail.first_name,
+          last_name: userDetail.last_name,
+        };
+        break;
       case "plan":
-      currentValue = userDetail.plan?.id || null;
-      break;
+        currentValue = userDetail.plan?.id || null;
+        break;
       case "is_retired":
-      currentValue = userDetail.is_retired ? 1 : 0;
-      break;
+        currentValue = userDetail.is_retired ? 1 : 0;
+        break;
       default:
-      currentValue = userDetail[field] || "";
+        currentValue = userDetail[field] || "";
     }
 
     setEditValue(currentValue);
@@ -150,13 +150,12 @@ export default function AdminUserDetail() {
       payload[editField] = editValue;
     }
 
+    setShowModal(false);
+
     const confirm = await showConfirmModalAlert(
-        "¿Estás seguro de actualizar el campo del usuario?"
+      "¿Estás seguro de actualizar el campo del usuario?"
     );
-    if (!confirm) {
-        setShowModal(false);
-        return;
-    }
+    if (!confirm) return;
 
     try {
       const response = await fetchWithAuth(
@@ -170,21 +169,17 @@ export default function AdminUserDetail() {
 
       if (response.ok) {
         toastSuccess("Campo actualizado correctamente");
-        setShowModal(false);
         loadUser();
         return;
       } if (response.status === 400) {
-        setShowModal(false);
         const { data } = await response.json();
         toastError(data.error_detail);
         return;
       } else {
-        setShowModal(false);
         toastError("Error", "No se pudo actualizar el campo");
         return;
       }
     } catch (error) {
-      setShowModal(false);
       toastError("Error", "Error de conexión");
     }
   };
@@ -229,29 +224,29 @@ export default function AdminUserDetail() {
   };
 
   const styles = StyleSheet.create({
-      userName: {
-        fontSize: 22,
-        fontWeight: "bold",
-        color: t.text,
-      },
-      userId: {
-        fontSize: 16,
-        color: t.secondText,
-        marginBottom: 20,
-      },
-      buttonsCardContainer: {
-        backgroundColor: t.secondBackground,
-        borderRadius: 20,
-        padding: 20,
-        alignItems: "center",
-        width: "100%",
-        marginTop: 25,
-        flexDirection: "row",
-        flexWrap: "wrap",
-        justifyContent: "center",
-        gap: 15,
-      },
-    });
+    userName: {
+      fontSize: 22,
+      fontWeight: "bold",
+      color: t.text,
+    },
+    userId: {
+      fontSize: 16,
+      color: t.secondText,
+      marginBottom: 20,
+    },
+    buttonsCardContainer: {
+      backgroundColor: t.secondBackground,
+      borderRadius: 20,
+      padding: 20,
+      alignItems: "center",
+      width: "100%",
+      marginTop: 25,
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "center",
+      gap: 15,
+    },
+  });
 
   return (
     <ScrollContainer style={{ padding: 25 }}>
@@ -267,7 +262,7 @@ export default function AdminUserDetail() {
           </Text>
           {
             (user.role === CoachRole && userDetail.role === TraineeRole)
-            || user.role === AdminRole ? (
+              || user.role === AdminRole ? (
               <Icon
                 name="edit"
                 size={22}
@@ -288,7 +283,7 @@ export default function AdminUserDetail() {
             <Text style={common.label}>Estado</Text>
             {
               (user.role === CoachRole && userDetail.role === TraineeRole)
-              || user.role === AdminRole && user.id_number !== userDetail.id_number ? (
+                || user.role === AdminRole && user.id_number !== userDetail.id_number ? (
                 <Icon
                   name="edit"
                   size={22}
@@ -301,8 +296,8 @@ export default function AdminUserDetail() {
           </View>
           <Text
             style={[
-                common.value,
-                userDetail.status === StatusDeleted && { color: inputErrorDark }
+              common.value,
+              userDetail.status === StatusDeleted && { color: inputErrorDark }
             ]}
           >
             {formatUserStatus(userDetail.status)}
@@ -313,7 +308,7 @@ export default function AdminUserDetail() {
             <Text style={common.label}>Plan</Text>
             {
               (user.role === CoachRole && userDetail.role === TraineeRole)
-              || user.role === AdminRole ? (
+                || user.role === AdminRole ? (
                 <Icon
                   name="edit"
                   size={22}
@@ -333,7 +328,7 @@ export default function AdminUserDetail() {
             <Text style={common.label}>Jubilado</Text>
             {
               (user.role === CoachRole && userDetail.role === TraineeRole)
-              || user.role === AdminRole ? (
+                || user.role === AdminRole ? (
                 <Icon
                   name="edit"
                   size={22}
@@ -351,7 +346,7 @@ export default function AdminUserDetail() {
             <Text style={common.label}>Teléfono</Text>
             {
               (user.role === CoachRole && userDetail.role === TraineeRole)
-              || user.role === AdminRole ? (
+                || user.role === AdminRole ? (
                 <Icon
                   name="edit"
                   size={22}
@@ -377,8 +372,8 @@ export default function AdminUserDetail() {
           <Text style={common.value} numberOfLines={2} ellipsizeMode="tail">
             {
               userDetail.address
-              ? `${userDetail.address?.address} ${userDetail.address?.city} ${userDetail.address?.state}`
-              : "N/A"
+                ? `${userDetail.address?.address} ${userDetail.address?.city} ${userDetail.address?.state}`
+                : "N/A"
             }
           </Text>
         </View>
@@ -457,8 +452,8 @@ export default function AdminUserDetail() {
                   <TextInput
                     value={editValue?.first_name}
                     onChangeText={(txt) => {
-                        setEditValue(prev => ({ ...prev, first_name: txt}));
-                        setEditValueError(prev => ({ ...prev, first_name: ""}));
+                      setEditValue(prev => ({ ...prev, first_name: txt }));
+                      setEditValueError(prev => ({ ...prev, first_name: "" }));
                     }}
                     style={common.modalCardTextInput}
                     placeholder="Nombre"
@@ -466,14 +461,14 @@ export default function AdminUserDetail() {
                   />
                   {
                     editValueError?.first_name
-                    ? <Text style={common.errorText}>{editValueError.first_name}</Text>
-                    : null
+                      ? <Text style={common.errorText}>{editValueError.first_name}</Text>
+                      : null
                   }
                   <TextInput
                     value={editValue?.last_name}
                     onChangeText={(txt) => {
-                        setEditValue(prev => ({ ...prev, last_name: txt}));
-                        setEditValueError(prev => ({ ...prev, last_name: ""}));
+                      setEditValue(prev => ({ ...prev, last_name: txt }));
+                      setEditValueError(prev => ({ ...prev, last_name: "" }));
                     }}
                     style={common.modalCardTextInput}
                     placeholder="Apellido"
@@ -481,8 +476,8 @@ export default function AdminUserDetail() {
                   />
                   {
                     editValueError?.last_name
-                    ? <Text style={common.errorText}>{editValueError.last_name}</Text>
-                    : null
+                      ? <Text style={common.errorText}>{editValueError.last_name}</Text>
+                      : null
                   }
                 </>
               ) : (
@@ -496,8 +491,8 @@ export default function AdminUserDetail() {
                   />
                   {
                     editValueError
-                    ? <Text style={common.errorText}>{editValueError}</Text>
-                    : null
+                      ? <Text style={common.errorText}>{editValueError}</Text>
+                      : null
                   }
                 </>
               )}

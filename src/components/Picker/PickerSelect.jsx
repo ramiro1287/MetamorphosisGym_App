@@ -101,7 +101,6 @@ export default function PickerSelect({
 const getStyles = (t) =>
   StyleSheet.create({
     trigger: {
-      flex: 1,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",

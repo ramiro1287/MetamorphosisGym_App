@@ -4,9 +4,8 @@ import {
   StyleSheet,
   View,
   TextInput,
-  Platform,
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DatePickerModal from "../../../components/Picker/DatePickerModal";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import ScrollContainer from "../../../components/Containers/ScrollContainer";
@@ -115,9 +114,9 @@ export default function AdminAnnouncementCreate() {
     return utc.toISOString().slice(0, 10);
   }
 
-  const onChange = (_event, selectedDate) => {
+  const onConfirmDate = (selectedDate) => {
     setExpirationDateError("");
-    if (Platform.OS === "android") setShowPicker(false);
+    setShowPicker(false);
     if (!selectedDate) return;
     setForm((prev) => ({ ...prev, expiration_date: selectedDate }));
   };
@@ -199,15 +198,13 @@ export default function AdminAnnouncementCreate() {
         />
       </View>
 
-      {showPicker && (
-        <DateTimePicker
-          value={form.expiration_date ?? new Date()}
-          mode="date"
-          display="spinner"
-          onChange={onChange}
-          minimumDate={tomorrow}
-        />
-      )}
+      <DatePickerModal
+        visible={showPicker}
+        value={form.expiration_date ?? new Date()}
+        onConfirm={onConfirmDate}
+        onCancel={() => setShowPicker(false)}
+        minimumDate={tomorrow}
+      />
     </ScrollContainer>
   );
 }

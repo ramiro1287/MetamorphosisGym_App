@@ -60,14 +60,14 @@ export default function ChangeAddress() {
       } else {
         toastError("Error", "No se pudo cambiar tu dirección");
       }
-      } catch (error) {
-        toastError("Error", "Error de conexión");
-      } finally {
-        setLoading(false);
-        setState("AR-X");
-        setCity("Cruz Del Eje");
-        setAddress("");
-      }
+    } catch (error) {
+      toastError("Error", "Error de conexión");
+    } finally {
+      setLoading(false);
+      setState("AR-X");
+      setCity("Cruz Del Eje");
+      setAddress("");
+    }
   };
 
   const styles = StyleSheet.create({
@@ -92,7 +92,7 @@ export default function ChangeAddress() {
   return (
     <FormContainer>
       <Text style={styles.title}>Provincia</Text>
-      <View style={[common.passwordContainer, {justifyContent: "center"}]}>
+      <View style={[common.passwordContainer, { justifyContent: "center" }]}>
         <PickerSelect
           value={state}
           onValueChange={(value) => setState(value)}
@@ -100,6 +100,7 @@ export default function ChangeAddress() {
             label,
             value: key,
           }))}
+          style={{ flex: 1 }}
         />
       </View>
 

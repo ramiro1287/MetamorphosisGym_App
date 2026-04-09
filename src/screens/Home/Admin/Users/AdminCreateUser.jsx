@@ -169,6 +169,7 @@ export default function AdminCreateUser() {
               label: value,
               value: key,
             }))}
+            style={{ flex: 1 }}
           />
         </View>
         <View style={styles.cardInputContainer}>
@@ -183,6 +184,7 @@ export default function AdminCreateUser() {
                 value: plan.id,
               })) || []),
             ]}
+            style={{ flex: 1 }}
           />
         </View>
         {planError && (<Text style={styles.errorText}>{planError}</Text>)}

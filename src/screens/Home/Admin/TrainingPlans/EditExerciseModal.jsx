@@ -18,7 +18,7 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
     description: exercise.description || "",
     week_day: exercise.week_day,
     sets: exercise.sets ? String(exercise.sets) : "",
-    reps: exercise.reps ? String(exercise.reps): "",
+    reps: exercise.reps ? String(exercise.reps) : "",
     rest: exercise.rest !== null ? String(exercise.rest) : "",
   });
 
@@ -60,6 +60,7 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
 
   const handleSave = async () => {
     if (!validate()) return;
+    onClose();
     const confirm = await showConfirmModalAlert("¿Desea guardar los cambios del ejercicio?");
     if (!confirm) return;
 
@@ -80,7 +81,6 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
       if (response.ok) {
         toastSuccess("Ejercicio actualizado correctamente");
         reload();
-        onClose();
       } else {
         toastError("Error", "No se pudo actualizar el ejercicio");
       }
