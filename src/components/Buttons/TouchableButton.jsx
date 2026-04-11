@@ -21,12 +21,17 @@ export default function TouchableButton({
 
   const styles = StyleSheet.create({
     button: {
-      paddingVertical: 5,
-      paddingHorizontal: 12,
-      borderRadius: 10,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 14,
       alignItems: "center",
       justifyContent: "center",
       flexDirection: "row",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.15,
+      shadowRadius: 4,
+      elevation: 3,
     },
     defaultButton: {
       backgroundColor: isDarkMode ? buttonBackgroundDark : buttonBackgroundLight,
@@ -36,8 +41,9 @@ export default function TouchableButton({
     },
     buttonText: {
       color: isDarkMode ? defaultButtonTextDark : defaultButtonTextLight,
-      fontSize: 18,
-      fontWeight: "bold",
+      fontSize: 16,
+      fontWeight: "600",
+      letterSpacing: 0.3,
     },
     buttonDisabled: {
       opacity: 0.6,
@@ -49,6 +55,7 @@ export default function TouchableButton({
 
   return (
     <TouchableOpacity
+      activeOpacity={0.7}
       style={[
         styles.button,
         variant === "error" ? styles.errorButton : styles.defaultButton,

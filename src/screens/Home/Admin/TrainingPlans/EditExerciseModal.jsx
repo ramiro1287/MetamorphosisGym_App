@@ -7,6 +7,7 @@ import { fetchWithAuth } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
+import { defaultTextLight } from "../../../../constants/UI/colors";
 import { WeekDaysMap } from "../../../../constants/trainingPlans";
 
 export default function EditExerciseModal({ exercise, onClose, reload }) {

@@ -97,6 +97,14 @@ export default function TraineePlans() {
       alignItems: "center",
       marginBottom: 6,
     },
+    exerciseCard: {
+      borderLeftWidth: 3,
+      borderLeftColor: buttonTextConfirmDark,
+    },
+    exerciseCardContent: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
   });
 
   const exercisesByDay = trainingPlan?.exercises.reduce((acc, ex) => {
@@ -116,6 +124,8 @@ export default function TraineePlans() {
               <Text style={styles.value}>{trainingPlan.coach}</Text>
               <Text style={styles.label}>Válido hasta:</Text>
               <Text style={styles.value}>{formatDate(trainingPlan.expiration_date, "Sin vencimiento")}</Text>
+              <Text style={styles.label}>Anotaciones Generales:</Text>
+              <Text style={styles.value}>{trainingPlan.description}</Text>
             </View>
 
             <View style={styles.daySelectorContainer}>
@@ -148,30 +158,36 @@ export default function TraineePlans() {
             {exercisesByDay[selectedDay]?.map((ex) => (
               <TouchableOpacity
                 key={ex.id}
-                style={common.cardContainer}
+                activeOpacity={0.6}
+                style={[common.cardContainer, styles.exerciseCard]}
                 onPress={() => {
                   setSelectedExercise(ex);
                   setModalVisible(true);
                 }}
               >
-                <View style={styles.iconRow}>
-                  <Icon name="bolt" size={25} color={t.icon} />
-                  <Text style={styles.exerciseTitle}>{ex.exercise.name}</Text>
+                <View style={styles.exerciseCardContent}>
+                  <View style={{ flex: 1 }}>
+                    <View style={styles.iconRow}>
+                      <Icon name="bolt" size={25} color={t.icon} />
+                      <Text style={styles.exerciseTitle}>{ex.exercise.name}</Text>
+                    </View>
+                    <Text style={styles.exerciseDetail}>
+                      Series: {ex.sets || 'N/A'}
+                    </Text>
+                    <Text style={styles.exerciseDetail}>
+                      Repeticiones: {ex.reps || 'N/A'}
+                    </Text>
+                    <Text style={styles.exerciseDetail}>
+                      Descanso: {ex.rest || "N/A"}
+                    </Text>
+                    {ex.description ? (
+                      <Text style={[styles.value, { fontStyle: "italic" }]}>
+                        Anotaciones: {ex.description.length > 10 ? ex.description.slice(0, 10) + "..." : ex.description}
+                      </Text>
+                    ) : null}
+                  </View>
+                  <Icon name="chevron-right" size={24} color={t.secondText} />
                 </View>
-                <Text style={styles.exerciseDetail}>
-                  Series: {ex.sets || 'N/A'}
-                </Text>
-                <Text style={styles.exerciseDetail}>
-                  Repeticiones: {ex.reps || 'N/A'}
-                </Text>
-                <Text style={styles.exerciseDetail}>
-                  Descanso: {ex.rest || "N/A"}
-                </Text>
-                {ex.description ? (
-                  <Text style={[styles.value, { fontStyle: "italic" }]}>
-                    Anotaciones: {ex.description.length > 10 ? ex.description.slice(0, 10) + "..." : ex.description}
-                  </Text>
-                ) : null}
               </TouchableOpacity>
             ))}
           </>

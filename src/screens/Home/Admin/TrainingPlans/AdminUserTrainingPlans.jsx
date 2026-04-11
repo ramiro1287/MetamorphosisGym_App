@@ -130,16 +130,16 @@ export default function AdminUserTrainingPlans() {
       marginTop: 20,
       marginBottom: 0,
     },
-    addButton: {
-      ...common.createButton,
-      marginVertical: 20,
-    },
   });
 
   return (
     <View style={{ flex: 1, paddingHorizontal: 25 }}>
       <Text style={styles.titleText}>Planes de {fullName}</Text>
-      <TouchableButton title="Agregar plan" onPress={handleCreateTrainingPlan} style={styles.addButton} />
+      <TouchableButton
+        title="Agregar plan"
+        onPress={handleCreateTrainingPlan}
+        style={{ alignSelf: "flex-end", marginVertical: 20 }}
+      />
 
       <ScrollContainer
         onEndReached={handleLoadMore}
@@ -169,8 +169,8 @@ export default function AdminUserTrainingPlans() {
               </View>
               {plan.description ? (
                 <View style={common.cardRowContainer}>
-                  <Text style={common.cardRowTitle}>Anotaciones:</Text>
-                  <Text style={common.cardRowText}>{plan.description}</Text>
+                  <Text style={common.cardRowTitle}>Anotaciones Generales:</Text>
+                  <Text style={common.cardRowText}>{plan.description.length > 10 ? plan.description.slice(0, 10) + "..." : plan.description}</Text>
                 </View>
               ) : null}
             </TouchableOpacity>

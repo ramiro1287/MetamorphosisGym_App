@@ -217,12 +217,6 @@ export const getCommonStyles = (isDarkMode) => {
         borderBottomWidth: 1,
         borderColor: t.text,
       },
-      // Create/add button at top-right
-      createButton: {
-        alignSelf: "flex-end",
-        paddingVertical: 2,
-        paddingHorizontal: 5,
-      },
       // Password container
       passwordContainer: {
         flexDirection: "row",

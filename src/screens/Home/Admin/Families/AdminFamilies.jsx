@@ -94,7 +94,7 @@ export default function AdminFamilies() {
       <TouchableButton
         title="Nueva Familia"
         onPress={handleCreateFamily}
-        style={[common.createButton, { marginBottom: 20 }]}
+        style={{ alignSelf: "flex-end", marginBottom: 20 }}
       />
       <ScrollContainer>
         {families.length ? families.map((family) => (

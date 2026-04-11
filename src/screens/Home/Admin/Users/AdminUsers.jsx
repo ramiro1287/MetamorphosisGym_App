@@ -154,7 +154,6 @@ export default function AdminUsers() {
       marginRight: 6,
     },
     cardRowText: { fontSize: 16, color: t.text },
-    createButton: { alignSelf: "flex-end", marginBottom: 20, paddingVertical: 2, paddingHorizontal: 5 },
     cardContent: {
       flexDirection: "row",
       alignItems: "stretch",
@@ -181,7 +180,7 @@ export default function AdminUsers() {
   return (
     <View style={{ flex: 1, paddingHorizontal: 25 }}>
       <Text style={common.titleText}>Usuarios</Text>
-      <TouchableButton title="Nuevo Usuario" onPress={handleCreateUser} style={styles.createButton} />
+      <TouchableButton title="Nuevo Usuario" onPress={handleCreateUser} style={{ alignSelf: "flex-end", marginBottom: 10 }} />
 
       <TextInput
         style={common.searchInput}

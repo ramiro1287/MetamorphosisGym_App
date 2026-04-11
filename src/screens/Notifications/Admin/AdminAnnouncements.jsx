@@ -151,7 +151,7 @@ export default function AdminAnnouncements() {
       <TouchableButton
         title="Nuevo Anuncio"
         onPress={handleCreateAnnouncement}
-        style={common.createButton}
+        style={{ alignSelf: "flex-end" }}
       />
       <ScrollContainer style={{ marginTop: 20 }}>
         {announcements.length ? announcements.map((annc) => (

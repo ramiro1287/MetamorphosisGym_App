@@ -345,11 +345,6 @@ export default function AdminUserPaymentDetail() {
       borderRightWidth: 3,
       borderLeftWidth: 3,
     },
-    penaltybutton: {
-      alignSelf: "flex-end",
-      paddingVertical: 2,
-      paddingHorizontal: 5,
-    },
     editHeader: {
       flexDirection: "row",
       justifyContent: "flex-end",
@@ -499,8 +494,7 @@ export default function AdminUserPaymentDetail() {
             <TouchableButton
               title={penalty.enabled ? "Desactivar" : "Activar"}
               onPress={() => handleUpdatePenalty(null, penalty.id, penalty.enabled)}
-              style={styles.penaltybutton}
-              textButtonStyle={{ fontSize: 16 }}
+              style={{ alignSelf: "flex-end" }}
             />
           </View>
         ))}
@@ -535,8 +529,7 @@ export default function AdminUserPaymentDetail() {
             <TouchableButton
               title={discount.enabled ? "Desactivar" : "Activar"}
               onPress={() => handleUpdateDiscount(null, discount.id, discount.enabled)}
-              style={styles.penaltybutton}
-              textButtonStyle={{ fontSize: 16 }}
+              style={{ alignSelf: "flex-end" }}
             />
           </View>
         ))}
