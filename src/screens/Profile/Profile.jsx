@@ -132,6 +132,10 @@ export default function Profile() {
         <Text style={styles.userName}>{user.first_name} {user.last_name}</Text>
         <Text style={styles.userId}>{user.id_number}</Text>
         <View style={common.infoRow}>
+          <Text style={common.label}>Email</Text>
+          <Text style={common.value}>{user.email ? user.email : "N/A"}</Text>
+        </View>
+        <View style={common.infoRow}>
           <Text style={common.label}>Rol</Text>
           <Text style={common.value}>{formatRole(user.role)}</Text>
         </View>

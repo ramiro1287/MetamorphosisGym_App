@@ -1,7 +1,6 @@
 import {
   PayStatusPending, PayStatusCompleted, PayStatusCanceled, PayStatusProcessing,
-  PayMethodMercadoPago, PayMethodBrubank, PayMethodBankTransfer,
-  PayMethodCash, PayMethodDebit, MonthsMap,
+  MonthsMap,
 } from "../constants/payments";
 import { AdminRole, CoachRole, StatusDeleted } from "../constants/users";
 import {
@@ -43,17 +42,6 @@ export const formatPaymentStatus = (status) => {
     [PayStatusProcessing]: "Procesando",
   };
   return map[status] || "Error";
-};
-
-export const formatPaymentMethod = (method) => {
-  const map = {
-    [PayMethodMercadoPago]: "Mercado Pago",
-    [PayMethodBrubank]: "Brubank",
-    [PayMethodBankTransfer]: "Transferencia",
-    [PayMethodCash]: "Efectivo",
-    [PayMethodDebit]: "Debito",
-  };
-  return map[method] || "Sin forma de pago";
 };
 
 export const formatExerciseType = (type) => {

@@ -1,6 +1,6 @@
 import React, { useContext, useState, useCallback } from "react";
 import { useFocusEffect } from '@react-navigation/native';
-import { Text, StyleSheet, View } from "react-native";
+import { Text, StyleSheet, View, Linking } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { GymContext } from "../../../context/GymContext";
 import ScrollContainer from "../../../components/Containers/ScrollContainer";
@@ -9,15 +9,17 @@ import LoadingScreen from "../../../components/Loading/LoadingScreen";
 import NoConnectionScreen from "../../../components/NoConnection/NoConnectionScreen";
 import { fetchWithAuth } from "../../../services/authService";
 import { toastError } from "../../../components/Toast/Toast";
-import { PayStatusCanceled, PayStatusCompleted } from "../../../constants/payments";
+import { PayStatusCanceled, PayStatusCompleted, PayStatusPending, PayStatusProcessing } from "../../../constants/payments";
 import { buttonTextConfirmDark, inputErrorDark } from "../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../constants/UI/theme";
-import { formatDate, formatPaymentStatus, formatPaymentMethod, getFinalAmount, getMonth } from "../../../utils/formatters";
+import { formatDate, formatPaymentStatus, getFinalAmount, getMonth } from "../../../utils/formatters";
+import TouchableButton from "../../../components/Buttons/TouchableButton";
 
 export default function PaymentDetail() {
   const [payment, setPayment] = useState(null);
   const [connectionError, setConnectionError] = useState(false);
-  const { isDarkMode } = useContext(GymContext);
+  const [isProcessingPay, setIsProcessingPay] = useState(false);
+  const { isDarkMode, user } = useContext(GymContext);
   const route = useRoute();
 
   const t = getThemeColors(isDarkMode);
@@ -50,6 +52,44 @@ export default function PaymentDetail() {
   const handleRetry = () => {
     setConnectionError(false);
     loadPayment();
+  };
+
+  const handleRedirectToPayment = () => {
+    try {
+      Linking.openURL(payment.payment_url);
+    } catch (error) {
+      toastError("Error", "Error al abrir el comprobante");
+    }
+  };
+
+  const handleCheckout = async () => {
+    if (!user.email) {
+      toastError("Necesitas un email", "Por favor, contacta a un entrenador.");
+      return;
+    }
+
+    setIsProcessingPay(true);
+    try {
+      const response = await fetchWithAuth(`/payments/checkout/${payment.id}/`, {
+        method: "POST",
+      });
+      if (response.ok) {
+        const { data } = await response.json();
+        setPayment(data);
+        if (data.payment_url) {
+          Linking.openURL(data.payment_url);
+        } else {
+          toastError("Error", "No se encontró el link de pago");
+        }
+      } else {
+        const errorData = await response.json();
+        toastError("Error", errorData.error_detail || "No se pudo iniciar el pago");
+      }
+    } catch (error) {
+      toastError("Error", "Error de conexión al procesar el pago");
+    } finally {
+      setIsProcessingPay(false);
+    }
   };
 
   if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
@@ -88,7 +128,7 @@ export default function PaymentDetail() {
         <View style={[common.cardRowContainer, styles.cardRowContainer]}>
           <Text style={[common.cardRowTitle, styles.cardRowTitle]}>Forma de pago:</Text>
           <Text style={[common.cardRowText, styles.cardRowText]}>
-            {payment.payment_method ? formatPaymentMethod(payment.payment_method) : "N/A"}
+            {payment.payment_method ? payment.payment_method.name : "N/A"}
           </Text>
         </View>
         <View style={[common.cardRowContainer, styles.cardRowContainer]}>
@@ -103,14 +143,34 @@ export default function PaymentDetail() {
           <Text style={[common.cardRowTitle, styles.cardRowTitle]}>Mes correspondiente:</Text>
           <Text style={[common.cardRowText, styles.cardRowText]}>{getMonth(payment.created_at)}</Text>
         </View>
+        {payment.payment_url && payment.status === PayStatusCompleted && payment.payment_method?.name?.toLowerCase().includes("mercado") && (
+          <View style={styles.cardRowContainer}>
+            <TouchableButton
+              title="Ver comprobante"
+              onPress={() => handleRedirectToPayment()}
+              icon={<Icon name="receipt" size={22} color={t.buttonText} />}
+            />
+          </View>
+        )}
 
-        {payment.penalties.length > 0 && (
+        {(payment.status === PayStatusPending || payment.status === PayStatusProcessing) && (
+          <View style={styles.cardRowContainer}>
+            <TouchableButton
+              title={(payment.payment_url && payment.status === PayStatusProcessing) ? "Continuar con el pago" : "Pagar cuota"}
+              onPress={handleCheckout}
+              loading={isProcessingPay}
+              icon={<Icon name="payment" size={22} color={t.buttonText} />}
+            />
+          </View>
+        )}
+
+        {payment && payment.penalties && payment.penalties.length > 0 && (
           <View style={{ flex: 1, alignItems: "center", marginTop: 20 }}>
             <Text style={[common.cardRowText, styles.cardRowText]}>Penalizaciónes aplicadas</Text>
           </View>
         )}
-        {payment.penalties.length > 0 && payment.penalties.map((penalty, index) => (
-          <View key={penalty.id} style={{flex: 1}}>
+        {payment && payment.penalties && payment.penalties.length > 0 && payment.penalties.map((penalty, index) => (
+          <View key={penalty.id} style={{ flex: 1 }}>
             <Text style={[common.cardRowTitle, styles.cardRowTitle]}>{index + 1}) {penalty.penalty.description}</Text>
             <View style={{ flex: 1, flexDirection: "row" }}>
               <Text style={[common.cardRowText, styles.cardRowText, { flex: 0, marginRight: 5, color: inputErrorDark }]}>
@@ -121,13 +181,13 @@ export default function PaymentDetail() {
           </View>
         ))}
 
-        {payment.discounts.length > 0 && (
+        {payment && payment.discounts && payment.discounts.length > 0 && (
           <View style={{ flex: 1, alignItems: "center", marginTop: 20 }}>
             <Text style={[common.cardRowText, styles.cardRowText]}>Descuentos aplicados</Text>
           </View>
         )}
-        {payment.discounts.length > 0 && payment.discounts.map((discount, index) => (
-          <View key={discount.id} style={{flex: 1}}>
+        {payment && payment.discounts && payment.discounts.length > 0 && payment.discounts.map((discount, index) => (
+          <View key={discount.id} style={{ flex: 1 }}>
             <Text style={[common.cardRowTitle, styles.cardRowTitle]}>{index + 1}) {discount.discount.description}</Text>
             <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
               <Text style={[common.cardRowText, styles.cardRowText, { flex: 0, marginRight: 5, color: buttonTextConfirmDark }]}>

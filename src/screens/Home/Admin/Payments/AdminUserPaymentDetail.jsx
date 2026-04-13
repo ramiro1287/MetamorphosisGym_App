@@ -7,6 +7,7 @@ import {
   Modal,
   TextInput,
   TouchableOpacity,
+  Linking,
 } from "react-native";
 import PickerSelect from "../../../../components/Picker/PickerSelect";
 import DatePickerModal from "../../../../components/Picker/DatePickerModal";
@@ -28,7 +29,7 @@ import {
   buttonTextConfirmDark, inputErrorDark,
 } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
-import { formatDate, formatPaymentStatus, formatPaymentMethod, getFinalAmount, getMonth } from "../../../../utils/formatters";
+import { formatDate, formatPaymentStatus, getFinalAmount, getMonth } from "../../../../utils/formatters";
 
 export default function AdminUserPaymentDetail() {
   const [payment, setPayment] = useState(null);
@@ -111,7 +112,7 @@ export default function AdminUserPaymentDetail() {
     } else {
       setIsEditing(true);
       if (!payment.payment_method && gymInfo.payment_methods?.length) {
-        setEditedFields(prev => ({ ...prev, payment_method: gymInfo.payment_methods[0] }));
+        setEditedFields(prev => ({ ...prev, payment_method_id: gymInfo.payment_methods[0].id }));
       }
     }
   };
@@ -315,6 +316,14 @@ export default function AdminUserPaymentDetail() {
     }
   };
 
+  const handleRedirectToPayment = () => {
+    try {
+      Linking.openURL(payment.payment_url);
+    } catch (error) {
+      toastError("Error al abrir el comprobante");
+    }
+  };
+
   const styles = StyleSheet.create({
     cardRowContainer: {
       flex: 1,
@@ -423,16 +432,16 @@ export default function AdminUserPaymentDetail() {
           {isEditing ? (
             <View style={{ flex: 1 }}>
               <PickerSelect
-                value={editedFields.payment_method ?? payment.payment_method}
-                onValueChange={(value) => handleFieldChange("payment_method", value)}
+                value={editedFields.payment_method_id ?? (payment.payment_method ? payment.payment_method.id : null)}
+                onValueChange={(value) => handleFieldChange("payment_method_id", value)}
                 items={gymInfo.payment_methods.map((method) => (
-                  { label: formatPaymentMethod(method), value: method }
+                  { label: method.name, value: method.id }
                 ))}
               />
             </View>
           ) : (
             <Text style={styles.cardRowText}>
-              {payment.payment_method ? formatPaymentMethod(payment.payment_method) : "N/A"}
+              {payment.payment_method ? payment.payment_method.name : "N/A"}
             </Text>
           )}
         </View>
@@ -463,6 +472,15 @@ export default function AdminUserPaymentDetail() {
             {getMonth(payment.created_at)} {new Date(payment.created_at).getFullYear()}
           </Text>
         </View>
+        {payment.payment_url && payment.status === PayStatusCompleted && payment.payment_method?.name?.toLowerCase().includes("mercado") && (
+          <View style={styles.cardRowContainer}>
+            <TouchableButton
+              title="Ver comprobante"
+              onPress={() => handleRedirectToPayment()}
+              icon={<Icon name="receipt" size={22} color={t.buttonText} />}
+            />
+          </View>
+        )}
 
         {payment.penalties.length > 0 && (
           <View style={{ flex: 1, alignItems: "center", marginTop: 20 }}>

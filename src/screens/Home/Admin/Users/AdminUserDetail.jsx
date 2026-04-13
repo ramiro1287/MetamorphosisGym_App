@@ -139,6 +139,19 @@ export default function AdminUserDetail() {
 
       payload.first_name = editValue.first_name;
       payload.last_name = editValue.last_name;
+    } else if (editField === "email") {
+      if (!editValue.trim()) {
+        setEditValueError("El email no puede estar vacío");
+        hasError = true;
+      } else {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(editValue)) {
+          setEditValueError("El email no es válido");
+          hasError = true;
+        }
+      }
+      if (hasError) return;
+      payload.email = editValue;
     } else if (editField === "plan") {
       payload.plan_id = editValue;
     } else if (editField === "phone") {
@@ -274,6 +287,21 @@ export default function AdminUserDetail() {
           }
         </View>
         <Text style={styles.userId}>{userDetail.id_number}</Text>
+        <View style={common.infoRow}>
+          <Text style={common.label}>Email</Text>
+          {
+            user.role === AdminRole || user.role === CoachRole ? (
+              <Icon
+                name="edit"
+                size={22}
+                color={t.icon}
+                onPress={() => handleEditionModal("email")}
+                style={{ marginLeft: 5 }}
+              />
+            ) : null
+          }
+          <Text style={common.value}>{userDetail.email ? userDetail.email : "N/A"}</Text>
+        </View>
         <View style={common.infoRow}>
           <Text style={common.label}>Rol</Text>
           <Text style={common.value}>{formatRole(userDetail.role)}</Text>
