@@ -54,14 +54,6 @@ export default function PaymentDetail() {
     loadPayment();
   };
 
-  const handleRedirectToPayment = () => {
-    try {
-      Linking.openURL(payment.payment_url);
-    } catch (error) {
-      toastError("Error", "Error al abrir el comprobante");
-    }
-  };
-
   const handleCheckout = async () => {
     if (!user.email) {
       toastError("Necesitas un email", "Por favor, contacta a un entrenador.");
@@ -143,15 +135,6 @@ export default function PaymentDetail() {
           <Text style={[common.cardRowTitle, styles.cardRowTitle]}>Mes correspondiente:</Text>
           <Text style={[common.cardRowText, styles.cardRowText]}>{getMonth(payment.created_at)}</Text>
         </View>
-        {payment.payment_url && payment.status === PayStatusCompleted && payment.payment_method?.name?.toLowerCase().includes("mercado") && (
-          <View style={styles.cardRowContainer}>
-            <TouchableButton
-              title="Ver comprobante"
-              onPress={() => handleRedirectToPayment()}
-              icon={<Icon name="receipt" size={22} color={t.buttonText} />}
-            />
-          </View>
-        )}
 
         {(payment.status === PayStatusPending || payment.status === PayStatusProcessing) && (
           <View style={styles.cardRowContainer}>

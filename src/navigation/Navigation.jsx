@@ -56,8 +56,17 @@ const Stack = createStackNavigator();
 export default function Navigation() {
   const { isDarkMode } = useContext(GymContext);
 
+  const linking = {
+    prefixes: ["metamorphosisgym://"],
+    config: {
+      screens: {
+        TraineePayments: "payment",
+      },
+    },
+  };
+
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <StatusBar 
         barStyle={isDarkMode ? "light-content" : "dark-content"}
         backgroundColor={isDarkMode ? navbarBackgroundDark : navbarBackgroundLight}

@@ -24,6 +24,7 @@ import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModa
 import {
   PayStatusCanceled, PayStatusCompleted,
   PayStatusPending,
+  PayStatusProcessing,
 } from "../../../../constants/payments";
 import {
   buttonTextConfirmDark, inputErrorDark,
@@ -316,11 +317,24 @@ export default function AdminUserPaymentDetail() {
     }
   };
 
-  const handleRedirectToPayment = () => {
+  const handleSyncPayment = async () => {
     try {
-      Linking.openURL(payment.payment_url);
+      const response = await fetchWithAuth(
+        `/admin/payments/mercadopago/sync/${payment.id}/`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (response.ok) {
+        toastSuccess("Pago sincronizado");
+        loadPayment();
+      } else {
+        toastError("Error", "No se pudo sincronizar el pago");
+      }
     } catch (error) {
-      toastError("Error al abrir el comprobante");
+      toastError("Error", "Error de conexión");
     }
   };
 
@@ -472,12 +486,12 @@ export default function AdminUserPaymentDetail() {
             {getMonth(payment.created_at)} {new Date(payment.created_at).getFullYear()}
           </Text>
         </View>
-        {payment.payment_url && payment.status === PayStatusCompleted && payment.payment_method?.name?.toLowerCase().includes("mercado") && (
+        {payment.payment_url && payment.status === PayStatusProcessing && payment.payment_method?.name?.toLowerCase().includes("mercado") && (
           <View style={styles.cardRowContainer}>
             <TouchableButton
-              title="Ver comprobante"
-              onPress={() => handleRedirectToPayment()}
-              icon={<Icon name="receipt" size={22} color={t.buttonText} />}
+              title="Sincronizar Pago"
+              onPress={() => handleSyncPayment()}
+              icon={<Icon name="sync" size={22} color={t.buttonText} />}
             />
           </View>
         )}
