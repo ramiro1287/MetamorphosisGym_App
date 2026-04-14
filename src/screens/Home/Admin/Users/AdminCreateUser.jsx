@@ -32,11 +32,13 @@ export default function AdminCreateUser() {
     plan_id: gymInfo?.plans?.[0]?.id || null,
     phone: "",
     country: "AR",
+    email: "",
   });
   const [idNumberError, setIdNumberError] = useState("");
   const [firstNameError, setFirstNameError] = useState("");
   const [lastNameError, setLastNameError] = useState("");
   const [planError, setPlanError] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (key, value) => {
@@ -44,6 +46,7 @@ export default function AdminCreateUser() {
     if (key === "first_name") setFirstNameError("");
     if (key === "last_name") setLastNameError("");
     if (key === "plan_id") setPlanError("");
+    if (key === "email") setEmailError("");
 
     setForm({ ...form, [key]: value });
   };
@@ -74,9 +77,18 @@ export default function AdminCreateUser() {
       hasError = true;
     }
 
+    if (!form.email) {
+      setEmailError("Ingresar email");
+      hasError = true;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      setEmailError("El email debe ser válido");
+      hasError = true;
+    }
+
     if (hasError) return;
 
     if (form.phone === "") form.phone = null;
+    if (form.email === "") form.email = null;
 
     const confirm = await showConfirmModalAlert(
       "¿Estás seguro de crear el nuevo usuario?"
@@ -132,6 +144,18 @@ export default function AdminCreateUser() {
           />
         </View>
         {idNumberError && (<Text style={styles.errorText}>{idNumberError}</Text>)}
+        <View style={styles.cardInputContainer}>
+          <Text style={styles.cardInputLabel}>Email:</Text>
+          <TextInput
+            style={styles.cardInput}
+            value={form.email}
+            onChangeText={(v) => handleChange("email", v)}
+            keyboardType="email-address"
+            inputMode="email"
+            maxLength={128}
+          />
+        </View>
+        {emailError && (<Text style={styles.errorText}>{emailError}</Text>)}
         <View style={styles.cardInputContainer}>
           <Text style={styles.cardInputLabel}>Nombre:</Text>
           <TextInput
