@@ -37,7 +37,11 @@ import AdminUserPaymentDetail from "../screens/Home/Admin/Payments/AdminUserPaym
 import AdminUserTrainingPlans from "../screens/Home/Admin/TrainingPlans/AdminUserTrainingPlans";
 import AdminUserTrainingPlanCreate from "../screens/Home/Admin/TrainingPlans/AdminUserTrainingPlanCreate";
 import AdminUserTrainingPlanDetail from "../screens/Home/Admin/TrainingPlans/AdminUserTrainingPlanDetail";
+import AdminUserTrainingPlanAssign from "../screens/Home/Admin/TrainingPlans/AdminUserTrainingPlanAssign";
 import AdminExercises from "../screens/Home/Admin/TrainingPlans/AdminExercises";
+import AdminTrainingPlans from "../screens/Home/Admin/TrainingPlans/Templates/AdminTrainingPlans";
+import AdminTrainingPlanCreate from "../screens/Home/Admin/TrainingPlans/Templates/AdminTrainingPlanCreate";
+import AdminTrainingPlanDetail from "../screens/Home/Admin/TrainingPlans/Templates/AdminTrainingPlanDetail";
 // Admin Statistics Screens
 import AdminStatistics from "../screens/Home/Admin/Statistics/AdminStatistics";
 
@@ -67,7 +71,7 @@ export default function Navigation() {
 
   return (
     <NavigationContainer linking={linking}>
-      <StatusBar 
+      <StatusBar
         barStyle={isDarkMode ? "light-content" : "dark-content"}
         backgroundColor={isDarkMode ? navbarBackgroundDark : navbarBackgroundLight}
         translucent={true}
@@ -99,7 +103,11 @@ export default function Navigation() {
         <Stack.Screen name="AdminUserTrainingPlans" component={AdminUserTrainingPlans} />
         <Stack.Screen name="AdminUserTrainingPlanCreate" component={AdminUserTrainingPlanCreate} />
         <Stack.Screen name="AdminUserTrainingPlanDetail" component={AdminUserTrainingPlanDetail} />
+        <Stack.Screen name="AdminUserTrainingPlanAssign" component={AdminUserTrainingPlanAssign} />
         <Stack.Screen name="AdminExercises" component={AdminExercises} />
+        <Stack.Screen name="AdminTrainingPlans" component={AdminTrainingPlans} />
+        <Stack.Screen name="AdminTrainingPlanCreate" component={AdminTrainingPlanCreate} />
+        <Stack.Screen name="AdminTrainingPlanDetail" component={AdminTrainingPlanDetail} />
         {/* Admin Statistics Screens */}
         <Stack.Screen name="AdminStatistics" component={AdminStatistics} />
 

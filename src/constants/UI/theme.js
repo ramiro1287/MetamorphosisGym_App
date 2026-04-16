@@ -60,8 +60,10 @@ export const getCommonStyles = (isDarkMode) => {
         padding: 15,
         width: "100%",
         marginBottom: 20,
-        borderRightWidth: 3,
-        borderLeftWidth: 3,
+        borderTopWidth: 1,
+        borderBottomWidth: 1,
+        borderRightWidth: 4,
+        borderLeftWidth: 4,
       },
       // Row inside a card (horizontal)
       cardRowContainer: {

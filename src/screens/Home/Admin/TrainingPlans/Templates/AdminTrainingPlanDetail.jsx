@@ -3,58 +3,52 @@ import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { View, Text, StyleSheet, TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import PickerSelect from "../../../../components/Picker/PickerSelect";
 import DraggableFlatList, { ScaleDecorator } from "react-native-draggable-flatlist";
-import ScrollContainer from "../../../../components/Containers/ScrollContainer";
-import DatePickerModal from "../../../../components/Picker/DatePickerModal";
-import LoadingScreen from "../../../../components/Loading/LoadingScreen";
-import NoConnectionScreen from "../../../../components/NoConnection/NoConnectionScreen";
-import TouchableButton from "../../../../components/Buttons/TouchableButton";
-import { GymContext } from "../../../../context/GymContext";
-import { fetchWithAuth } from "../../../../services/authService";
-import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
-import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
-import EditExerciseModal from "./EditExerciseModal";
-import AddExerciseModal from "./AddExerciseModal";
-import {
-  buttonTextConfirmDark, errorButtonTextDark,
-} from "../../../../constants/UI/colors";
-import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
-import { formatDate, formatPlanStatus } from "../../../../utils/formatters";
-import {
-  WeekDaysMap, PlanStatusActive,
-  PlanStatusFinish, PlanStatusCanceled,
-} from "../../../../constants/trainingPlans";
+import ScrollContainer from "../../../../../components/Containers/ScrollContainer";
+import LoadingScreen from "../../../../../components/Loading/LoadingScreen";
+import NoConnectionScreen from "../../../../../components/NoConnection/NoConnectionScreen";
+import TouchableButton from "../../../../../components/Buttons/TouchableButton";
+import { GymContext } from "../../../../../context/GymContext";
+import { fetchWithAuth } from "../../../../../services/authService";
+import { toastError, toastSuccess } from "../../../../../components/Toast/Toast";
+import { showConfirmModalAlert } from "../../../../../components/Alerts/ConfirmModalAlert";
+import AddTemplateExerciseModal from "./AddTemplateExerciseModal";
+import EditTemplateExerciseModal from "./EditTemplateExerciseModal";
+import { getThemeColors, getCommonStyles } from "../../../../../constants/UI/theme";
+import { WeekDaysMap } from "../../../../../constants/trainingPlans";
+import { buttonTextConfirmDark } from "../../../../../constants/UI/colors";
 
-export default function AdminUserTrainingPlanDetail() {
-  const [trainingPlan, setTrainingPlan] = useState(null);
+export default function AdminTrainingPlanDetail() {
+  const [template, setTemplate] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState(null);
-  const [editPlanStatus, setEditPlanStatus] = useState(null);
-  const [editPlanDescription, setEditPlanDescription] = useState(null);
+
+  const [editTitle, setEditTitle] = useState(null);
+  const [editDescription, setEditDescription] = useState(null);
+
   const [showAddExerciseModal, setShowAddExerciseModal] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showStatusPicker, setShowStatusPicker] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
 
   const { isDarkMode } = useContext(GymContext);
   const navigation = useNavigation();
   const route = useRoute();
-  const { idNumber, planId, fullName } = route.params || {};
+  const { templateId } = route.params || {};
   const t = getThemeColors(isDarkMode);
   const common = getCommonStyles(isDarkMode);
 
   useFocusEffect(useCallback(() => {
     setConnectionError(false);
-    loadPlan();
+    loadTemplate();
   }, []));
 
-  const loadPlan = async () => {
+  const loadTemplate = async () => {
     try {
-      const response = await fetchWithAuth(`/admin/training-plans/detail/${planId}/`);
+      const response = await fetchWithAuth(`/admin/training-plans/templates/detail/${templateId}/`);
       if (response.ok) {
         const { data } = await response.json();
-        setTrainingPlan(data);
+        setTemplate(data);
+      } else {
+        throw new Error('Not found')
       }
     } catch (error) {
       if (error.message === 'Network request failed') {
@@ -67,7 +61,7 @@ export default function AdminUserTrainingPlanDetail() {
 
   const handleRetry = () => {
     setConnectionError(false);
-    loadPlan();
+    loadTemplate();
   };
 
   const handleDeleteExercise = async (exerciseId) => {
@@ -78,13 +72,13 @@ export default function AdminUserTrainingPlanDetail() {
 
     try {
       const response = await fetchWithAuth(
-        `/admin/training-plans/exercise-detail/${exerciseId}/`,
+        `/admin/training-plans/templates/exercise-detail/${exerciseId}/`,
         { method: "DELETE" }
       );
 
       if (response.ok) {
         toastSuccess("Ejercicio eliminado");
-        loadPlan();
+        loadTemplate();
       } else {
         toastError("Error", "No se pudo eliminar el ejercicio");
       }
@@ -93,30 +87,27 @@ export default function AdminUserTrainingPlanDetail() {
     }
   };
 
-  const handleDeletePlan = async () => {
+  const handleDeleteTemplate = async () => {
     const confirm = await showConfirmModalAlert(
-      "¿Estás seguro de eliminar el plan de entrenamiento?"
+      "¿Estás seguro de eliminar esta plantilla de entrenamiento?"
     );
     if (!confirm) return;
 
     try {
       const response = await fetchWithAuth(
-        `/admin/training-plans/update/${planId}/`,
+        `/admin/training-plans/templates/detail/${templateId}/`,
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({}),
         }
       );
       if (response.ok) {
-        toastSuccess("Plan eliminado correctamente");
+        toastSuccess("Plantilla eliminada correctamente");
         navigation.reset({
-          index: 3,
+          index: 1,
           routes: [
             { name: "Home" },
-            { name: "AdminUsers" },
-            { name: "AdminUserDetail", params: { idNumber } },
-            { name: "AdminUserTrainingPlans", params: { idNumber, fullName } },
+            { name: "AdminTrainingPlans" },
           ]
         });
       }
@@ -130,132 +121,79 @@ export default function AdminUserTrainingPlanDetail() {
     }
   };
 
-  const onConfirmDate = async (selectedDate) => {
-    setShowDatePicker(false);
-
-    const confirm = await showConfirmModalAlert(
-      "¿Estás seguro de actualizar el vencimiento del plan de entrenamiento?"
-    );
-    if (!confirm) return;
+  const updateTemplateField = async (field, value) => {
     try {
+      const body = {};
+      body[field] = value;
       const response = await fetchWithAuth(
-        `/admin/training-plans/update/${planId}/`,
+        `/admin/training-plans/templates/detail/${templateId}/`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ expiration_date: selectedDate }),
+          body: JSON.stringify(body),
         }
       );
       if (response.ok) {
-        toastSuccess("Fecha actualizada correctamente");
-        loadPlan();
+        toastSuccess("Actualizado correctamente");
+        loadTemplate();
       }
       else if (response.status === 400) {
         const { data } = await response.json();
         toastError("", data.error_detail);
-        return;
       }
     } catch (error) {
       toastError("Error", "Error de conexión");
     }
   };
 
-  const updatePlanStatus = async () => {
-    try {
-      const response = await fetchWithAuth(
-        `/admin/training-plans/update/${planId}/`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: editPlanStatus }),
-        }
-      );
-      if (response.ok) {
-        toastSuccess("Estado actualizado correctamente");
-        loadPlan();
-      }
-      else if (response.status === 400) {
-        const { data } = await response.json();
-        toastError("", data.error_detail);
+  const handleUpdateTitle = async () => {
+    if (editTitle !== null) {
+      const trimmedNewValue = editTitle.trim();
+      const originalValue = template.title?.trim() || "";
+
+      if (trimmedNewValue === originalValue) {
+        setEditTitle(null);
         return;
       }
-    } catch (error) {
-      toastError("Error", "Error de conexión");
-    }
-  };
 
-  const handleEditStatus = async () => {
-    if (showStatusPicker) {
-      if (editPlanStatus === trainingPlan.status) {
-        setEditPlanStatus("");
-        setShowStatusPicker(false);
-      } else {
-        const confirm = await showConfirmModalAlert(
-          "¿Estás seguro de cambiar el estado del plan?"
-        );
-        if (!confirm) {
-          setShowStatusPicker(false);
-          return
-        } else {
-          updatePlanStatus();
-          setShowStatusPicker(false);
-        }
+      if (!trimmedNewValue) {
+        toastError("Error", "El título no puede estar vacío");
+        return;
       }
+
+      const confirm = await showConfirmModalAlert("¿Estás seguro de actualizar el título?");
+      if (!confirm) {
+        setEditTitle(null);
+        return;
+      }
+
+      await updateTemplateField("title", trimmedNewValue);
+      setEditTitle(null);
     } else {
-      setEditPlanStatus(trainingPlan.status);
-      setShowStatusPicker(true);
-    }
-  };
-
-  const updatePlanDescription = async () => {
-    try {
-      const response = await fetchWithAuth(
-        `/admin/training-plans/update/${planId}/`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            description: editPlanDescription === "" ? null : editPlanDescription
-          }),
-        }
-      );
-      if (response.ok) {
-        toastSuccess("Anotaciones actualizada correctamente");
-        loadPlan();
-      }
-      else if (response.status === 400) {
-        const { data } = await response.json();
-        toastError("", data.error_detail);
-        return;
-      }
-    } catch (error) {
-      toastError("Error", "Error de conexión");
+      setEditTitle(template.title);
     }
   };
 
   const handleUpdateDescription = async () => {
-    // Si está en modo edición (es decir, editPlanDescription no es null)
-    if (editPlanDescription !== null) {
-      const trimmedNewValue = editPlanDescription.trim();
-      const originalValue = trainingPlan.description?.trim() || "";
+    if (editDescription !== null) {
+      const trimmedNewValue = editDescription.trim();
+      const originalValue = template.description?.trim() || "";
 
       if (trimmedNewValue === originalValue) {
-        // No hubo cambios, solo cerramos la edición
-        setEditPlanDescription(null);
+        setEditDescription(null);
         return;
       }
 
       const confirm = await showConfirmModalAlert("¿Estás seguro de actualizar anotaciones?");
       if (!confirm) {
-        setEditPlanDescription(null);
+        setEditDescription(null);
         return;
       }
 
-      await updatePlanDescription();
-      setEditPlanDescription(null);
+      await updateTemplateField("description", trimmedNewValue === "" ? null : trimmedNewValue);
+      setEditDescription(null);
     } else {
-      // Activamos modo edición
-      setEditPlanDescription(trainingPlan.description || "");
+      setEditDescription(template.description || "");
     }
   };
 
@@ -305,7 +243,7 @@ export default function AdminUserTrainingPlanDetail() {
     },
   });
 
-  const exercisesByDay = (trainingPlan?.exercises || []).reduce((acc, ex) => {
+  const exercisesByDay = (template?.exercises || []).reduce((acc, ex) => {
     if (!acc[ex.week_day]) acc[ex.week_day] = [];
     acc[ex.week_day].push(ex);
     return acc;
@@ -318,7 +256,7 @@ export default function AdminUserTrainingPlanDetail() {
   const handleReorder = async (data) => {
     const exercises = data.map((ex, index) => ({ id: ex.id, order: index }));
 
-    setTrainingPlan((prev) => ({
+    setTemplate((prev) => ({
       ...prev,
       exercises: prev.exercises.map((ex) => {
         const updated = exercises.find((e) => e.id === ex.id);
@@ -327,14 +265,14 @@ export default function AdminUserTrainingPlanDetail() {
     }));
 
     try {
-      await fetchWithAuth("/admin/training-plans/exercise-detail/reorder/", {
+      await fetchWithAuth("/admin/training-plans/templates/exercise-detail/reorder/", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ exercises }),
       });
     } catch (error) {
       toastError("Error", "No se pudo guardar el orden");
-      loadPlan();
+      loadTemplate();
     }
   };
 
@@ -391,81 +329,55 @@ export default function AdminUserTrainingPlanDetail() {
   ), [t, styles]);
 
   if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
-  if (!trainingPlan) return <LoadingScreen />;
+  if (!template) return <LoadingScreen />;
 
   return (
     <View style={{ flex: 1 }}>
-      <Text style={[common.titleText, { fontSize: 20, marginBottom: 0 }]}>Plan de ejercitación de</Text>
-      <Text style={[common.titleText, { marginBottom: 15 }]}>{fullName}</Text>
+      <Text style={[common.titleText, { fontSize: 20, marginBottom: 15 }]}>Detalle de Plantilla</Text>
+
       <ScrollContainer style={{ paddingHorizontal: 25, alignItems: "none" }}>
         <View style={styles.cardContainer}>
-          <Text style={styles.label}>Entrenador:</Text>
-          <Text style={[styles.value, { marginBottom: 10 }]}>{trainingPlan.coach}</Text>
-          <Text style={styles.label}>Estado:</Text>
+          <Text style={styles.label}>Título:</Text>
           <View style={styles.editionRow}>
-            {showStatusPicker ? (
-              <PickerSelect
-                style={{ flex: 1 }}
-                value={editPlanStatus}
-                onValueChange={(value) => setEditPlanStatus(value)}
-                items={[
-                  { label: "Activo", value: PlanStatusActive },
-                  { label: "Finalizado", value: PlanStatusFinish },
-                  { label: "Cancelado", value: PlanStatusCanceled },
-                ]}
+            {editTitle !== null ? (
+              <TextInput
+                style={styles.rowInput}
+                value={editTitle}
+                onChangeText={(val) => setEditTitle(val)}
+                placeholderTextColor={t.text}
               />
             ) : (
-              <Text
-                style={[
-                  styles.value,
-                  trainingPlan.status === PlanStatusActive
-                    ? { color: buttonTextConfirmDark }
-                    : { color: errorButtonTextDark },
-                  { flexShrink: 1 }
-                ]}
-              >
-                {formatPlanStatus(trainingPlan.status)}
+              <Text style={[styles.value, { flexShrink: 1 }]}>
+                {template.title}
               </Text>
             )}
             <Icon
-              name={showStatusPicker ? "save" : "edit"}
+              name={editTitle !== null ? "save" : "edit"}
               size={25}
               color={t.icon}
               style={{ marginLeft: 10 }}
-              onPress={handleEditStatus}
-            />
-          </View>
-
-          <Text style={styles.label}>Plan válido hasta:</Text>
-          <View style={styles.editionRow}>
-            <Text style={[styles.value, { flexShrink: 1 }]}>{formatDate(trainingPlan.expiration_date, "Sin vencimiento")}</Text>
-            <Icon
-              name="edit"
-              size={25}
-              color={t.icon}
-              style={{ marginLeft: 10 }}
-              onPress={() => { setShowDatePicker(true) }}
+              onPress={handleUpdateTitle}
             />
           </View>
 
           <Text style={styles.label}>Anotaciones:</Text>
           <View style={styles.editionRow}>
-            {editPlanDescription !== null ? (
+            {editDescription !== null ? (
               <TextInput
                 style={styles.rowInput}
-                value={editPlanDescription}
-                onChangeText={(val) => setEditPlanDescription(val)}
+                value={editDescription}
+                onChangeText={(val) => setEditDescription(val)}
                 multiline
                 placeholder="N/A"
                 placeholderTextColor={t.text}
               />
             ) : (
               <Text style={[styles.value, { flexShrink: 1 }]}>
-                {trainingPlan.description ? trainingPlan.description : "N/A"}
+                {template.description ? template.description : "N/A"}
               </Text>
             )}
             <Icon
-              name={editPlanDescription ? "save" : "edit"}
+              name={editDescription !== null ? "save" : "edit"}
               size={25}
               color={t.icon}
               style={{ marginLeft: 10 }}
@@ -477,7 +389,7 @@ export default function AdminUserTrainingPlanDetail() {
             size={25}
             color={t.icon}
             style={{ alignSelf: "flex-end" }}
-            onPress={handleDeletePlan}
+            onPress={handleDeleteTemplate}
           />
         </View>
 
@@ -526,29 +438,21 @@ export default function AdminUserTrainingPlanDetail() {
       </ScrollContainer>
 
       {selectedExercise && (
-        <EditExerciseModal
+        <EditTemplateExerciseModal
           exercise={selectedExercise}
           onClose={() => setSelectedExercise(null)}
-          reload={loadPlan}
+          reload={loadTemplate}
         />
       )}
 
       {showAddExerciseModal && (
-        <AddExerciseModal
-          planId={trainingPlan.id}
+        <AddTemplateExerciseModal
+          templateId={template.id}
           onClose={() => setShowAddExerciseModal(false)}
-          reload={loadPlan}
+          reload={loadTemplate}
           setSelectedExercise={setSelectedExercise}
         />
       )}
-
-      <DatePickerModal
-        visible={showDatePicker}
-        value={trainingPlan.expiration_date ? new Date(trainingPlan.expiration_date) : new Date()}
-        onConfirm={onConfirmDate}
-        onCancel={() => setShowDatePicker(false)}
-        minimumDate={new Date(Date.now() + 24 * 60 * 60 * 1000)}
-      />
     </View>
   );
 }

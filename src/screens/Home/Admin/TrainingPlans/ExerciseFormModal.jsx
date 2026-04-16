@@ -1,4 +1,3 @@
-// Ruta sugerida: src/screens/.../ExerciseFormModal.jsx
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { Modal, View, Text, TextInput, StyleSheet } from "react-native";
 import PickerSelect from "../../../../components/Picker/PickerSelect";

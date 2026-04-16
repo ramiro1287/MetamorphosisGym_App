@@ -227,6 +227,7 @@ export default function Home() {
               { title: "Ejercicios", icon: "activity", route: "AdminExercises", show: user.role === AdminRole },
               { title: "Planes Mensuales", icon: "calendar", route: "AdminUserPlans", show: user.role === AdminRole },
               { title: "Estadísticas", icon: "bar-chart-2", route: "AdminStatistics", show: user.role === AdminRole },
+              { title: "Planes Entrenamiento", icon: "clipboard", route: "AdminTrainingPlans", show: user.role === AdminRole },
               { title: "Anuncios", icon: "message-square", route: "AdminAnnouncements", show: user.role === AdminRole },
             ]
               .filter(item => item.show)

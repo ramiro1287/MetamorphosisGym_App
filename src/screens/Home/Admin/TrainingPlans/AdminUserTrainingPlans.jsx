@@ -114,6 +114,24 @@ export default function AdminUserTrainingPlans() {
     });
   };
 
+  const handleAssignExistingTrainingPlan = () => {
+    const activePlan = trainingPlans.some(p => p.status === PlanStatusActive);
+    if (activePlan) {
+      toastInfo("Ya existe un plan activo");
+      return;
+    }
+    navigation.reset({
+      index: 4,
+      routes: [
+        { name: "Home" },
+        { name: "AdminUsers" },
+        { name: "AdminUserDetail", params: { idNumber } },
+        { name: "AdminUserTrainingPlans", params: { idNumber, fullName } },
+        { name: "AdminUserTrainingPlanAssign", params: { idNumber, fullName } },
+      ]
+    });
+  };
+
   const handleRetry = async () => {
     setConnectionError(false);
     setLoading(true);
@@ -136,9 +154,14 @@ export default function AdminUserTrainingPlans() {
     <View style={{ flex: 1, paddingHorizontal: 25 }}>
       <Text style={styles.titleText}>Planes de {fullName}</Text>
       <TouchableButton
-        title="Agregar plan"
+        title="Asignar plan existente"
+        onPress={handleAssignExistingTrainingPlan}
+        style={{ alignSelf: "flex-end", marginVertical: 10 }}
+      />
+      <TouchableButton
+        title="Crear plan personalizado"
         onPress={handleCreateTrainingPlan}
-        style={{ alignSelf: "flex-end", marginVertical: 20 }}
+        style={{ alignSelf: "flex-end", marginVertical: 10 }}
       />
 
       <ScrollContainer
