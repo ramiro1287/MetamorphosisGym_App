@@ -350,8 +350,8 @@ export default function AdminUserTrainingPlanDetail() {
           <Icon
             name="drag-indicator"
             size={24}
-            color={t.secondText}
-            style={{ marginRight: 8 }}
+            color={t.text}
+            style={[common.touchableIconContainer, { padding: 3, marginRight: 5 }]}
             onLongPress={drag}
           />
           <Text style={[styles.exerciseTitle, { flex: 1 }]}>{ex.exercise.name}</Text>
@@ -375,14 +375,14 @@ export default function AdminUserTrainingPlanDetail() {
             name="edit"
             size={25}
             color={t.icon}
-            style={{ marginRight: 8 }}
+            style={[common.touchableIconContainer, { padding: 5 }]}
             onPress={() => setSelectedExercise(ex)}
           />
           <Icon
             name="delete"
             size={25}
             color={t.icon}
-            style={{ marginLeft: 8 }}
+            style={[common.touchableIconContainer, { padding: 5, marginLeft: 5 }]}
             onPress={() => handleDeleteExercise(ex.id)}
           />
         </View>
@@ -431,7 +431,7 @@ export default function AdminUserTrainingPlanDetail() {
               name={showStatusPicker ? "save" : "edit"}
               size={25}
               color={t.icon}
-              style={{ marginLeft: 10 }}
+              style={[common.touchableIconContainer, { padding: 5, marginLeft: 10 }]}
               onPress={handleEditStatus}
             />
           </View>
@@ -443,7 +443,7 @@ export default function AdminUserTrainingPlanDetail() {
               name="edit"
               size={25}
               color={t.icon}
-              style={{ marginLeft: 10 }}
+              style={[common.touchableIconContainer, { padding: 5 }]}
               onPress={() => { setShowDatePicker(true) }}
             />
           </View>
@@ -468,7 +468,7 @@ export default function AdminUserTrainingPlanDetail() {
               name={editPlanDescription ? "save" : "edit"}
               size={25}
               color={t.icon}
-              style={{ marginLeft: 10 }}
+              style={[common.touchableIconContainer, { padding: 5, marginLeft: 10 }]}
               onPress={handleUpdateDescription}
             />
           </View>
@@ -476,7 +476,7 @@ export default function AdminUserTrainingPlanDetail() {
             name="delete"
             size={25}
             color={t.icon}
-            style={{ alignSelf: "flex-end" }}
+            style={[common.touchableIconContainer, { padding: 5, alignSelf: "flex-end", marginTop: 10 }]}
             onPress={handleDeletePlan}
           />
         </View>

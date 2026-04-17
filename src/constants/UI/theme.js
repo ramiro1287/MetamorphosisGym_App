@@ -226,6 +226,13 @@ export const getCommonStyles = (isDarkMode) => {
         width: "80%",
         marginBottom: 10,
       },
+      // Touchable icon container
+      touchableIconContainer: {
+        padding: 8,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: t.text,
+      },
     }),
   };
 };

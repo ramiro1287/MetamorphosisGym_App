@@ -157,6 +157,7 @@ export default function Notifications() {
                       name="delete"
                       size={24}
                       color={t.text}
+                      style={common.touchableIconContainer}
                     />
                   </TouchableOpacity>
                 </View>
@@ -185,6 +186,7 @@ export default function Notifications() {
                     name="delete"
                     size={24}
                     color={t.text}
+                    style={common.touchableIconContainer}
                   />
                 </TouchableOpacity>
               </View>

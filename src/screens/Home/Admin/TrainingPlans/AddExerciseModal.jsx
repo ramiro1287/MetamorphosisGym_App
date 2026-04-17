@@ -115,43 +115,6 @@ export default function AddExerciseModal({ planId, onClose, reload, setSelectedE
       color: t.text,
       marginBottom: 5,
     },
-    pickerSelect: {
-      inputIOS: {
-        fontSize: 16,
-        color: t.text,
-        paddingVertical: 5,
-        paddingHorizontal: 8,
-        borderBottomWidth: 1,
-        borderColor: t.text,
-        borderWidth: 1,
-        borderRadius: 20,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        color: t.text,
-        borderRadius: 12,
-        alignSelf: "center",
-        marginBottom: 10,
-        paddingHorizontal: 10,
-      },
-      inputAndroid: {
-        fontSize: 16,
-        color: t.text,
-        borderBottomWidth: 1,
-        borderColor: t.text,
-        borderWidth: 1,
-        borderRadius: 20,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        color: t.text,
-        borderRadius: 12,
-        alignSelf: "center",
-        marginBottom: 10,
-        paddingHorizontal: 10,
-      },
-      placeholder: {
-        color: t.text,
-      },
-    },
   });
 
   return (

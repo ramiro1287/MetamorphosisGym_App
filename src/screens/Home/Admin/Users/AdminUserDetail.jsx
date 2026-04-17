@@ -281,33 +281,48 @@ export default function AdminUserDetail() {
                 size={22}
                 color={t.icon}
                 onPress={() => handleEditionModal("full_name")}
-                style={{ marginLeft: 5 }}
+                style={[common.touchableIconContainer, { marginLeft: 10, padding: 5 }]}
               />
             ) : null
           }
         </View>
         <Text style={styles.userId}>{userDetail.id_number}</Text>
         <View style={common.infoRow}>
-          <Text style={common.label}>Email</Text>
-          {
-            user.role === AdminRole || user.role === CoachRole ? (
-              <Icon
-                name="edit"
-                size={22}
-                color={t.icon}
-                onPress={() => handleEditionModal("email")}
-                style={{ marginLeft: 5 }}
-              />
-            ) : null
-          }
-          <Text style={common.value}>{userDetail.email ? userDetail.email : "N/A"}</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text style={common.label}>Email</Text>
+            {
+              user.role === AdminRole || user.role === CoachRole ? (
+                <Icon
+                  name="edit"
+                  size={22}
+                  color={t.icon}
+                  onPress={() => handleEditionModal("email")}
+                  style={[common.touchableIconContainer, { marginLeft: 5, padding: 5 }]}
+                />
+              ) : null
+            }
+            <Text style={common.value}>{userDetail.email ? userDetail.email : "N/A"}</Text>
+          </View>
         </View>
         <View style={common.infoRow}>
-          <Text style={common.label}>Rol</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text style={common.label}>Rol</Text>
+            {
+              user.role === AdminRole ? (
+                <Icon
+                  name="edit"
+                  size={22}
+                  color={t.icon}
+                  onPress={() => handleEditionModal("role")}
+                  style={[common.touchableIconContainer, { marginLeft: 5, padding: 5 }]}
+                />
+              ) : null
+            }
+          </View>
           <Text style={common.value}>{formatRole(userDetail.role)}</Text>
         </View>
         <View style={common.infoRow}>
-          <View style={{ flexDirection: "row" }}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={common.label}>Estado</Text>
             {
               (user.role === CoachRole && userDetail.role === TraineeRole)
@@ -317,7 +332,7 @@ export default function AdminUserDetail() {
                   size={22}
                   color={t.icon}
                   onPress={() => handleEditionModal("status")}
-                  style={{ marginLeft: 5 }}
+                  style={[common.touchableIconContainer, { marginLeft: 5, padding: 5 }]}
                 />
               ) : null
             }
@@ -332,7 +347,7 @@ export default function AdminUserDetail() {
           </Text>
         </View>
         <View style={common.infoRow}>
-          <View style={{ flexDirection: "row" }}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={common.label}>Plan</Text>
             {
               (user.role === CoachRole && userDetail.role === TraineeRole)
@@ -342,7 +357,7 @@ export default function AdminUserDetail() {
                   size={22}
                   color={t.icon}
                   onPress={() => handleEditionModal("plan")}
-                  style={{ marginLeft: 5 }}
+                  style={[common.touchableIconContainer, { marginLeft: 5, padding: 5 }]}
                 />
               ) : null
             }
@@ -352,7 +367,7 @@ export default function AdminUserDetail() {
           </Text>
         </View>
         <View style={common.infoRow}>
-          <View style={{ flexDirection: "row" }}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={common.label}>Jubilado</Text>
             {
               (user.role === CoachRole && userDetail.role === TraineeRole)
@@ -362,7 +377,7 @@ export default function AdminUserDetail() {
                   size={22}
                   color={t.icon}
                   onPress={() => handleEditionModal("is_retired")}
-                  style={{ marginLeft: 5 }}
+                  style={[common.touchableIconContainer, { marginLeft: 5, padding: 5 }]}
                 />
               ) : null
             }
@@ -370,7 +385,7 @@ export default function AdminUserDetail() {
           <Text style={common.value}>{userDetail.is_retired ? "Si" : "No"}</Text>
         </View>
         <View style={common.infoRow}>
-          <View style={{ flexDirection: "row" }}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={common.label}>Teléfono</Text>
             {
               (user.role === CoachRole && userDetail.role === TraineeRole)
@@ -380,7 +395,7 @@ export default function AdminUserDetail() {
                   size={22}
                   color={t.icon}
                   onPress={() => handleEditionModal("phone")}
-                  style={{ marginLeft: 5 }}
+                  style={[common.touchableIconContainer, { marginLeft: 5, padding: 5 }]}
                 />
               ) : null
             }

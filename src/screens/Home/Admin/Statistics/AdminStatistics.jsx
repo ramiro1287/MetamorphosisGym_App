@@ -15,6 +15,7 @@ import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme"
 import { getFinalAmount } from "../../../../utils/formatters";
 import {
   PayStatusCompleted, PayStatusPending, PayStatusCanceled,
+  PayStatusProcessing
 } from "../../../../constants/payments";
 
 const PAGE_SIZE = 10;
@@ -198,7 +199,7 @@ export default function AdminStatistics() {
             size={25}
             color={t.icon}
             onPress={() => setShowPicker(true)}
-            style={{ marginLeft: 5 }}
+            style={common.touchableIconContainer}
           />
         </View>
 
@@ -231,7 +232,7 @@ export default function AdminStatistics() {
           onValueChange={(v) => setPaymentStatus(v)}
           items={[
             { label: "Pagadas", value: PayStatusCompleted },
-            { label: "Pendientes", value: PayStatusPending },
+            { label: "Pendientes/Procesando", value: PayStatusPending },
             { label: "Canceladas", value: PayStatusCanceled },
           ]}
           style={{ flex: 1 }}
@@ -250,7 +251,7 @@ export default function AdminStatistics() {
           payments.map((payment) => (
             <TouchableOpacity
               key={payment.id}
-              style={[styles.cardContainer, { marginBottom: 15 }]}
+              style={[common.cardContainerBordered, { marginBottom: 15 }]}
               onPress={() => handlePaymentDetail(payment)}
             >
               <View style={common.cardRowContainer}>
@@ -266,7 +267,7 @@ export default function AdminStatistics() {
                     size={25}
                     color={t.icon}
                     onPress={() => handleNotifyUser(payment.id)}
-                    style={{ marginLeft: 5 }}
+                    style={[common.touchableIconContainer, { padding: 12, marginLeft: 5 }]}
                   />
                 )}
               </View>

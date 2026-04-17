@@ -185,7 +185,7 @@ export default function AdminAnnouncementCreate() {
             size={25}
             color={t.icon}
             onPress={() => setShowPicker(true)}
-            style={{ marginLeft: 5 }}
+            style={common.touchableIconContainer}
           />
         </View>
         {expirationDateError ? <Text style={common.errorText}>{expirationDateError}</Text> : null}

@@ -114,14 +114,14 @@ export default function Profile() {
             size={30}
             color={t.icon}
             onPress={() => setIsDarkMode(!isDarkMode)}
-            style={{ marginRight: 10 }}
+            style={[common.touchableIconContainer, { marginLeft: 10, padding: 5 }]}
           />
           <Icon
             name="power-settings-new"
             size={30}
             color={t.icon}
             onPress={handleButtonLogout}
-            style={{ marginLeft: 10 }}
+            style={[common.touchableIconContainer, { marginLeft: 10, padding: 5 }]}
           />
         </View>
         <Icon
@@ -160,14 +160,14 @@ export default function Profile() {
           <Text style={common.value}>{user.family ? user.family?.name : "N/A"}</Text>
         </View>
         <View style={common.infoRow}>
-          <View style={{ flexDirection: "row" }}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={common.label}>Dirección</Text>
             <Icon
               name="edit"
               size={25}
               color={t.icon}
               onPress={handleChangeAddress}
-              style={{ marginLeft: 5 }}
+              style={[common.touchableIconContainer, { marginLeft: 10, padding: 5 }]}
             />
           </View>
           <Text style={common.value} numberOfLines={2} ellipsizeMode="tail">
@@ -175,14 +175,14 @@ export default function Profile() {
           </Text>
         </View>
         <View style={common.infoRow}>
-          <View style={{ flexDirection: "row" }}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={common.label}>Nacimiento</Text>
             <Icon
               name="edit"
               size={25}
               color={t.icon}
               onPress={() => setShowPicker(true)}
-              style={{ marginLeft: 5 }}
+              style={[common.touchableIconContainer, { marginLeft: 10, padding: 5 }]}
             />
           </View>
           <Text style={common.value} numberOfLines={2} ellipsizeMode="tail">

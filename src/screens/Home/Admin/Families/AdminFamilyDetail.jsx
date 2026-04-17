@@ -199,19 +199,6 @@ export default function AdminFamilyDetail() {
       fontWeight: 500,
       marginTop: 15,
     },
-    memberCardContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      backgroundColor: t.secondBackground,
-      borderColor: t.text,
-      borderRadius: 20,
-      padding: 15,
-      width: "100%",
-      marginBottom: 20,
-      borderRightWidth: 3,
-      borderLeftWidth: 3,
-    },
     memberText: {
       color: t.text,
       fontSize: 18,
@@ -223,27 +210,27 @@ export default function AdminFamilyDetail() {
     <ScrollContainer style={{ padding: 25 }}>
       <View style={common.profileCard}>
         <View style={common.infoRow}>
-          <View style={{ flexDirection: "row" }}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={common.label}>Nombre</Text>
             <Icon
               name="edit"
               size={25}
               color={t.icon}
               onPress={() => handleEditionModal("name")}
-              style={{ marginLeft: 5 }}
+              style={[common.touchableIconContainer, { padding: 5, marginLeft: 10 }]}
             />
           </View>
           <Text style={common.value}>{family.name}</Text>
         </View>
         <View style={common.infoRow}>
-          <View style={{ flexDirection: "row" }}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={common.label}>Descripción</Text>
             <Icon
               name="edit"
               size={25}
               color={t.icon}
               onPress={() => handleEditionModal("description")}
-              style={{ marginLeft: 5 }}
+              style={[common.touchableIconContainer, { padding: 5, marginLeft: 10 }]}
             />
           </View>
           <Text style={common.value}>{family.description ? family.description : "N/A"}</Text>
@@ -253,32 +240,30 @@ export default function AdminFamilyDetail() {
           size={35}
           color={t.icon}
           onPress={handleDeleteFamily}
-          style={{ alignSelf: "flex-end", marginTop: 10, marginRight: 10 }}
+          style={[common.touchableIconContainer, { alignSelf: "flex-end" }]}
         />
       </View>
 
-      {family.members && (
-        <>
-          <Text style={styles.titleText}>Miembros</Text>
-          <Icon
-            name="person-add"
-            size={35}
-            color={t.icon}
-            onPress={handleAddMember}
-            style={{ alignSelf: "flex-end", marginBottom: 20, marginRight: 10 }}
-          />
-        </>
-      )}
+
+      <Text style={styles.titleText}>Miembros</Text>
+      <Icon
+        name="person-add"
+        size={35}
+        color={t.icon}
+        onPress={handleAddMember}
+        style={[common.touchableIconContainer, { alignSelf: "flex-end", marginBottom: 20 }]}
+      />
+
 
       {family.members ? family.members.map((member) => (
-        <View key={member.id_number} style={styles.memberCardContainer}>
+        <View key={member.id_number} style={[common.cardContainerBordered, { flexDirection: "row", alignItems: "center", justifyContent: "space-between" }]}>
           <Text style={styles.memberText}>{member.first_name} {member.last_name}</Text>
           <Icon
             name="delete"
             size={25}
             color={t.icon}
             onPress={() => handleRemoveMember(member.id_number)}
-            style={{ marginLeft: 5 }}
+            style={[common.touchableIconContainer, { padding: 5 }]}
           />
         </View>
       )) : (

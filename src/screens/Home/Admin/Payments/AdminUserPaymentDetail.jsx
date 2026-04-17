@@ -391,11 +391,11 @@ export default function AdminUserPaymentDetail() {
       <View key={payment.id} style={common.cardContainer}>
         <View style={styles.editHeader}>
           <TouchableOpacity onPress={toggleEditMode}>
-            <Icon name={isEditing ? "close" : "edit"} size={26} color={t.icon} />
+            <Icon name={isEditing ? "close" : "edit"} size={26} color={t.icon} style={common.touchableIconContainer} />
           </TouchableOpacity>
           {isEditing && hasChanges && (
             <TouchableOpacity onPress={() => doSaveFields()}>
-              <Icon name="save" size={26} color={buttonTextConfirmDark} />
+              <Icon name="save" size={26} color={buttonTextConfirmDark} style={common.touchableIconContainer} />
             </TouchableOpacity>
           )}
         </View>
@@ -520,7 +520,7 @@ export default function AdminUserPaymentDetail() {
                 size={25}
                 color={t.icon}
                 onPress={() => handleEditionModal("penalty_amount", penalty)}
-                style={{ marginLeft: 10 }}
+                style={common.touchableIconContainer}
               />
             </View>
             <TouchableButton
@@ -555,7 +555,7 @@ export default function AdminUserPaymentDetail() {
                 size={25}
                 color={t.icon}
                 onPress={() => handleEditionModal("discount_amount", discount)}
-                style={{ marginLeft: 10 }}
+                style={common.touchableIconContainer}
               />
             </View>
             <TouchableButton

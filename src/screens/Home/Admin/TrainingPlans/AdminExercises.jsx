@@ -117,18 +117,6 @@ export default function AadminExercises() {
       fontWeight: "bold",
       color: t.text,
     },
-    card: {
-      width: "100%",
-      backgroundColor: t.secondBackground,
-      padding: 15,
-      borderRadius: 15,
-      marginBottom: 10,
-      borderLeftWidth: 3,
-      borderRightWidth: 3,
-      borderBottomWidth: 1,
-      borderTopWidth: 1,
-      borderColor: t.text,
-    },
     cardTitleRow: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -142,33 +130,6 @@ export default function AadminExercises() {
       flex: 1,
     },
     text: { color: t.text, marginBottom: 5 },
-    actionsRow: { flexDirection: "row", justifyContent: "flex-end" },
-    actionIcon: { marginLeft: 12 }
-    ,
-    pickerSelect: {
-      inputIOS: {
-        fontSize: 16,
-        backgroundColor: t.secondBackground,
-        color: t.text,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderWidth: 1,
-        borderRadius: 12,
-        borderColor: t.text,
-        marginBottom: 10,
-      },
-      inputAndroid: {
-        fontSize: 16,
-        backgroundColor: t.secondBackground,
-        color: t.text,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderWidth: 1,
-        borderRadius: 12,
-        borderColor: t.text,
-        marginBottom: 10,
-      },
-    },
   });
 
   const handleRetry = () => {
@@ -205,22 +166,22 @@ export default function AadminExercises() {
 
       <ScrollContainer>
         {exercises.length > 0 ? exercises.map((ex) => (
-          <View key={ex.id} style={styles.card}>
+          <View key={ex.id} style={common.cardContainerBordered}>
             <View style={styles.cardTitleRow}>
               <Text style={styles.cardTitle}>{ex.name}</Text>
-              <View style={styles.actionsRow}>
+              <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
                 <Icon
                   name="edit"
                   size={24}
                   color={t.icon}
-                  style={styles.actionIcon}
+                  style={[common.touchableIconContainer, { marginRight: 10 }]}
                   onPress={() => handleOpenEdit(ex)}
                 />
                 <Icon
                   name="delete"
                   size={24}
                   color={t.icon}
-                  style={styles.actionIcon}
+                  style={common.touchableIconContainer}
                   onPress={() => handleDelete(ex)}
                 />
               </View>

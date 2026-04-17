@@ -176,6 +176,7 @@ export default function AdminAnnouncements() {
                   name="delete"
                   size={24}
                   color={t.text}
+                  style={common.touchableIconContainer}
                 />
               </TouchableOpacity>
             </View>

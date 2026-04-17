@@ -44,10 +44,10 @@ export default function AdminFamilyAdd() {
     try {
       const query = new URLSearchParams();
       query.append("page_size", "10");
-  
+
       if (filters.first_name) query.append("first_name", filters.first_name);
       if (filters.last_name) query.append("last_name", filters.last_name);
-  
+
       const response = await fetchWithAuth(`/admin/users/list/?${query.toString()}`);
       if (response.ok) {
         const { data } = await response.json();
@@ -93,7 +93,7 @@ export default function AdminFamilyAdd() {
     );
     if (!confirm) return;
 
-    const { familyId } = route.params|| {};
+    const { familyId } = route.params || {};
     try {
       const response = await fetchWithAuth(
         "/admin/users/family/add-user/",
@@ -133,19 +133,6 @@ export default function AdminFamilyAdd() {
       fontWeight: 500,
       marginBottom: 15,
     },
-    userCardContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      backgroundColor: t.secondBackground,
-      borderColor: t.text,
-      borderRadius: 20,
-      padding: 15,
-      width: "100%",
-      marginBottom: 20,
-      borderRightWidth: 3,
-      borderLeftWidth: 3,
-    },
     userText: {
       color: t.text,
       fontSize: 18,
@@ -180,14 +167,14 @@ export default function AdminFamilyAdd() {
         />
       </View>
       {users.length ? users.map((usr) => (
-        <View key={usr.id_number} style={styles.userCardContainer}>
+        <View key={usr.id_number} style={[common.cardContainerBordered, { flexDirection: "row", alignItems: "center", justifyContent: "space-between" }]}>
           <Text style={styles.userText}>{usr.first_name} {usr.last_name}</Text>
           <Icon
             name="person-add"
             size={25}
             color={t.icon}
             onPress={() => handleAddMember(usr)}
-            style={{ marginLeft: 5 }}
+            style={common.touchableIconContainer}
           />
         </View>
       )) : (<Text style={styles.titleText}>No se encontraron usuarios</Text>)}

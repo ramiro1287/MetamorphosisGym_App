@@ -16,9 +16,10 @@ import LoadingScreen from "../../../../components/Loading/LoadingScreen";
 import NoConnectionScreen from "../../../../components/NoConnection/NoConnectionScreen";
 import {
   PayStatusCanceled, PayStatusCompleted,
+  PayStatusPending, PayStatusProcessing,
 } from "../../../../constants/payments";
 import {
-  buttonTextConfirmDark, inputErrorDark,
+  buttonTextConfirmDark, inputErrorDark, errorButtonTextDark
 } from "../../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
 import { formatPaymentStatus, getFinalAmount, getMonth } from "../../../../utils/formatters";
@@ -134,7 +135,10 @@ export default function AdminUserPayments() {
           payments.map((payment) => (
             <TouchableOpacity
               key={payment.id}
-              style={common.cardContainer}
+              style={[
+                common.cardContainerBordered,
+                [PayStatusPending, PayStatusProcessing].includes(payment.status) && { borderColor: errorButtonTextDark },
+              ]}
               onPress={() => handlePaymentDetail(payment.id)}
             >
               <View style={common.cardRowContainer}>

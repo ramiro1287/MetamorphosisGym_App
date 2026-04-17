@@ -127,31 +127,6 @@ export default function ExerciseFormModal({ visible, onClose, initialData, onSav
       padding: 10,
       marginBottom: 12,
     },
-    pickerSelect: {
-      inputIOS: {
-        fontSize: 16,
-        backgroundColor: t.secondBackground,
-        color: t.text,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderWidth: 1,
-        borderRadius: 12,
-        borderColor: t.text,
-        marginBottom: 10,
-      },
-      inputAndroid: {
-        fontSize: 16,
-        backgroundColor: t.secondBackground,
-        color: t.text,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderWidth: 1,
-        borderRadius: 12,
-        borderColor: t.text,
-        marginBottom: 10,
-      },
-      placeholder: { color: t.text },
-    },
     actionsRow: { flexDirection: "row", justifyContent: "flex-end", marginTop: 8, gap: 8 },
   });
 
