@@ -1,6 +1,6 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useCallback } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import DatePickerModal from "../../components/Picker/DatePickerModal";
 import TouchableButton from "../../components/Buttons/TouchableButton";
 import { GymContext } from "../../context/GymContext";
@@ -22,6 +22,12 @@ export default function Profile() {
     handleLogout,
   } = useContext(GymContext);
   const navigation = useNavigation();
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshUser();
+    }, [])
+  );
 
   const handleChangePassword = () => {
     navigation.reset({

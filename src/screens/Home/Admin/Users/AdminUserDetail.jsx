@@ -289,6 +289,23 @@ export default function AdminUserDetail() {
         <Text style={styles.userId}>{userDetail.id_number}</Text>
         <View style={common.infoRow}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text style={common.label}>Apodo</Text>
+            {
+              user.role === AdminRole || user.role === CoachRole ? (
+                <Icon
+                  name="edit"
+                  size={22}
+                  color={t.icon}
+                  onPress={() => handleEditionModal("nickname")}
+                  style={[common.touchableIconContainer, { marginLeft: 5, padding: 5 }]}
+                />
+              ) : null
+            }
+            <Text style={common.value}>{userDetail.nickname ? userDetail.nickname : "N/A"}</Text>
+          </View>
+        </View>
+        <View style={common.infoRow}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={common.label}>Email</Text>
             {
               user.role === AdminRole || user.role === CoachRole ? (

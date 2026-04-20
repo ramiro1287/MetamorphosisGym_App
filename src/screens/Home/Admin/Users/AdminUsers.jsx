@@ -227,7 +227,7 @@ export default function AdminUsers() {
                 <View style={styles.cardInfo}>
                   <View style={styles.cardRowContainer}>
                     <Text style={styles.cardRowTitle}>DNI:</Text>
-                    <Text style={styles.cardRowText}>{user.id_number}</Text>
+                    <Text style={styles.cardRowText}>{user.id_number}{user.nickname ? ` (${user.nickname})` : ""}</Text>
                   </View>
                   <View style={styles.cardRowContainer}>
                     <Text style={styles.cardRowTitle}>Nombre:</Text>
