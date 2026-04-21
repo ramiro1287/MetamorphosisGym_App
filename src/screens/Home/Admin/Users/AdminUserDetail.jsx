@@ -139,16 +139,11 @@ export default function AdminUserDetail() {
 
       payload.first_name = editValue.first_name;
       payload.last_name = editValue.last_name;
-    } else if (editField === "email") {
-      if (!editValue.trim()) {
-        setEditValueError("El email no puede estar vacío");
+    } else if (editField === "email" && editValue.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(editValue)) {
+        setEditValueError("El email no es válido");
         hasError = true;
-      } else {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(editValue)) {
-          setEditValueError("El email no es válido");
-          hasError = true;
-        }
       }
       if (hasError) return;
       payload.email = editValue;

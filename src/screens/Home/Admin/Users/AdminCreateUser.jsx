@@ -77,10 +77,7 @@ export default function AdminCreateUser() {
       hasError = true;
     }
 
-    if (!form.email) {
-      setEmailError("Ingresar email");
-      hasError = true;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       setEmailError("El email debe ser válido");
       hasError = true;
     }
@@ -88,7 +85,6 @@ export default function AdminCreateUser() {
     if (hasError) return;
 
     if (form.phone === "") form.phone = null;
-    if (form.email === "") form.email = null;
 
     const confirm = await showConfirmModalAlert(
       "¿Estás seguro de crear el nuevo usuario?"
@@ -149,6 +145,8 @@ export default function AdminCreateUser() {
           <TextInput
             style={styles.cardInput}
             value={form.email}
+            placeholder="Sin e-mail"
+            placeholderTextColor={t.text}
             onChangeText={(v) => handleChange("email", v)}
             keyboardType="email-address"
             inputMode="email"
