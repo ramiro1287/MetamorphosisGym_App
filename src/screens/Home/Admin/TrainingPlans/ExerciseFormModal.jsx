@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { Modal, View, Text, TextInput, StyleSheet } from "react-native";
+import { Modal, View, Text, TextInput, StyleSheet, Image } from "react-native";
+import { launchImageLibrary } from 'react-native-image-picker';
 import PickerSelect from "../../../../components/Picker/PickerSelect";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import { GymContext } from "../../../../context/GymContext";
@@ -13,11 +14,16 @@ export default function ExerciseFormModal({ visible, onClose, initialData, onSav
   const { isDarkMode } = useContext(GymContext);
   const t = getThemeColors(isDarkMode);
   const common = getCommonStyles(isDarkMode);
+
   const [form, setForm] = useState({
     type: "",
     name: "",
     description: "",
+    illustration: null,
   });
+
+  const [newImage, setNewImage] = useState(null);
+  const [imageDeleted, setImageDeleted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -26,10 +32,13 @@ export default function ExerciseFormModal({ visible, onClose, initialData, onSav
         type: initialData.type || "",
         name: initialData.name || "",
         description: initialData.description || "",
+        illustration: initialData.illustration || null,
       });
     } else {
-      setForm({ type: "", name: "", description: "" });
+      setForm({ type: "", name: "", description: "", illustration: null });
     }
+    setNewImage(null);
+    setImageDeleted(false);
   }, [initialData, isEdit, visible]);
 
   const isValid = useMemo(() => {
@@ -40,6 +49,24 @@ export default function ExerciseFormModal({ visible, onClose, initialData, onSav
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  const handleSelectImage = async () => {
+    const result = await launchImageLibrary({
+      mediaType: 'photo',
+      quality: 0.8,
+    });
+
+    if (!result.didCancel && result.assets && result.assets.length > 0) {
+      setNewImage(result.assets[0]);
+      setImageDeleted(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setNewImage(null);
+    setForm(prev => ({ ...prev, illustration: null }));
+    setImageDeleted(true);
+  };
+
   const handleSubmit = async () => {
     if (!isValid) {
       toastError("Campos incompletos", "Completá tipo, nombre y descripción");
@@ -47,18 +74,29 @@ export default function ExerciseFormModal({ visible, onClose, initialData, onSav
       return;
     }
     setSubmitting(true);
+
+    const formData = new FormData();
+    formData.append("type", form.type);
+    formData.append("name", form.name.trim());
+    formData.append("description", form.description.trim());
+
+    if (newImage) {
+      formData.append("illustration", {
+        uri: newImage.uri,
+        type: newImage.type || 'image/jpeg',
+        name: newImage.fileName || 'image.jpg',
+      });
+    } else if (imageDeleted && isEdit) {
+      formData.append("illustration", "");
+    }
+
     try {
       if (isEdit) {
         const resp = await fetchWithAuth(
           `/admin/training-plans/exercises/update/${initialData.id}/`,
           {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              type: form.type,
-              name: form.name.trim(),
-              description: form.description.trim(),
-            }),
+            body: formData,
           }
         );
         if (resp.ok) {
@@ -73,17 +111,11 @@ export default function ExerciseFormModal({ visible, onClose, initialData, onSav
           toastError("Error", "No se pudo actualizar");
         }
       } else {
-        // POST /create/
         const resp = await fetchWithAuth(
           `/admin/training-plans/exercises/create/`,
           {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              type: form.type,
-              name: form.name.trim(),
-              description: form.description.trim(),
-            }),
+            body: formData,
           }
         );
         if (resp.ok || resp.status === 201) {
@@ -127,8 +159,23 @@ export default function ExerciseFormModal({ visible, onClose, initialData, onSav
       padding: 10,
       marginBottom: 12,
     },
+    imagePreview: {
+      width: '100%',
+      height: 250,
+      borderRadius: 12,
+      marginBottom: 10,
+      resizeMode: 'contain',
+    },
+    imageActions: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 12,
+      gap: 8,
+    },
     actionsRow: { flexDirection: "row", justifyContent: "flex-end", marginTop: 8, gap: 8 },
   });
+
+  const displayImageUri = newImage ? newImage.uri : form.illustration;
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -165,13 +212,28 @@ export default function ExerciseFormModal({ visible, onClose, initialData, onSav
             multiline
           />
 
+          {displayImageUri ? (
+            <View>
+              <Image source={{ uri: displayImageUri }} style={styles.imagePreview} />
+              <View style={styles.imageActions}>
+                <TouchableButton title="Cambiar" onPress={handleSelectImage} style={{ flex: 1 }} />
+                <TouchableButton title="Eliminar" onPress={handleRemoveImage} variant="error" style={{ flex: 1 }} />
+              </View>
+            </View>
+          ) : (
+            <TouchableButton
+              title="Agregar Imagen"
+              onPress={handleSelectImage}
+              style={{ marginBottom: 12 }}
+            />
+          )}
+
           <View style={styles.actionsRow}>
             <TouchableButton title="Cancelar" onPress={onClose} disabled={submitting} />
             <TouchableButton
               title={isEdit ? "Guardar" : "Crear"}
               onPress={handleSubmit}
               disabled={submitting}
-              style={{ marginLeft: 8 }}
             />
           </View>
         </View>

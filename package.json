@@ -19,6 +19,8 @@
     "react-native-draggable-flatlist": "^4.0.3",
     "react-native-feather": "^1.1.2",
     "react-native-gesture-handler": "^2.31.0",
+    "react-native-image-picker": "^8.2.1",
+    "react-native-image-viewing": "^0.2.2",
     "react-native-reanimated": "^3.18.0",
     "react-native-safe-area-context": "^5.5.0",
     "react-native-screens": "^4.11.1",

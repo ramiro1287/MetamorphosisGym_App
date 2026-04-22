@@ -12,12 +12,14 @@ import { getThemeColors, getCommonStyles } from "../../../constants/UI/theme";
 import { formatDate, formatExerciseType } from "../../../utils/formatters";
 import TouchableButton from "../../../components/Buttons/TouchableButton";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import ImageViewing from "react-native-image-viewing";
 
 export default function TraineePlans() {
   const [trainingPlan, setTrainingPlan] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
   const { isDarkMode } = useContext(GymContext);
 
@@ -148,7 +150,7 @@ export default function TraineePlans() {
                     ]}
                     textButtonStyle={[
                       { fontSize: 14 },
-                      selectedDay === intDay ? {color: buttonTextConfirmDark} : {}
+                      selectedDay === intDay ? { color: buttonTextConfirmDark } : {}
                     ]}
                   />
                 );
@@ -212,7 +214,7 @@ export default function TraineePlans() {
             borderRadius: 20,
             padding: 20,
             width: "85%",
-            maxHeight: "70%",
+            maxHeight: "90%",
           }}>
             <ScrollContainer style={{ alignItems: "flex-start" }}>
               <Text style={[common.titleText, { marginVertical: 20, marginBottom: 0, fontSize: 20 }]}>
@@ -242,15 +244,31 @@ export default function TraineePlans() {
                   </Text>
                 </>
               ) : null}
+              {selectedExercise?.exercise?.illustration ? (
+                <TouchableButton
+                  title="Mostrar Ejercicio"
+                  onPress={() => setIsImageViewerVisible(true)}
+                  style={{ marginTop: 20, alignSelf: "center", width: "100%" }}
+                />
+              ) : null}
               <TouchableButton
                 title="Cerrar"
                 onPress={() => setModalVisible(false)}
-                style={{ marginTop: 15, alignSelf: "center" }}
+                style={{ marginTop: 10, alignSelf: "center", width: "100%" }}
               />
             </ScrollContainer>
           </View>
         </View>
       </Modal>
+
+      {selectedExercise?.exercise?.illustration ? (
+        <ImageViewing
+          images={[{ uri: selectedExercise.exercise.illustration }]}
+          imageIndex={0}
+          visible={isImageViewerVisible}
+          onRequestClose={() => setIsImageViewerVisible(false)}
+        />
+      ) : null}
     </View>
   );
 }

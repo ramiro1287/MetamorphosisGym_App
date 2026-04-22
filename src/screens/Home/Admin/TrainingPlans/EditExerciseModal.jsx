@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { View, Text, Modal, TextInput, StyleSheet } from "react-native";
+import { View, Text, Modal, TextInput, StyleSheet, ScrollView } from "react-native";
 import PickerSelect from "../../../../components/Picker/PickerSelect";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import { GymContext } from "../../../../context/GymContext";
@@ -96,6 +96,7 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
       borderRadius: 16,
       padding: 20,
       width: "90%",
+      maxHeight: "90%",
     },
     cardTitle: {
       fontSize: 20,
@@ -126,54 +127,56 @@ export default function EditExerciseModal({ exercise, onClose, reload }) {
           <Text style={[styles.cardTitle, { fontSize: 18 }]}>Editar ejercicio</Text>
           <Text style={[styles.cardTitle, { marginBottom: 15 }]}>{exercise.exercise.name}</Text>
 
-          <Text style={styles.cardInputLabel}>Descripción (opcional)</Text>
-          <TextInput
-            value={formData.description}
-            onChangeText={(txt) => handleChange("description", txt)}
-            multiline
-            style={styles.cardInput}
-            placeholder="N/A"
-            placeholderTextColor={t.text}
-          />
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <Text style={styles.cardInputLabel}>Descripción (opcional)</Text>
+            <TextInput
+              value={formData.description}
+              onChangeText={(txt) => handleChange("description", txt)}
+              multiline
+              style={[styles.cardInput, { maxHeight: 150 }]}
+              placeholder="N/A"
+              placeholderTextColor={t.text}
+            />
 
-          <Text style={styles.cardInputLabel}>Día de la semana</Text>
-          <PickerSelect
-            value={formData.week_day}
-            onValueChange={(value) => handleChange("week_day", value)}
-            items={weekdayOptions}
-          />
-          {errors.week_day && (<Text style={common.errorText}>{errors.week_day}</Text>)}
+            <Text style={styles.cardInputLabel}>Día de la semana</Text>
+            <PickerSelect
+              value={formData.week_day}
+              onValueChange={(value) => handleChange("week_day", value)}
+              items={weekdayOptions}
+            />
+            {errors.week_day && (<Text style={common.errorText}>{errors.week_day}</Text>)}
 
-          <Text style={styles.cardInputLabel}>Series</Text>
-          <TextInput
-            value={formData.sets}
-            onChangeText={(text) => handleChange("sets", text)}
-            keyboardType="numeric"
-            style={styles.cardInput}
-            placeholder="Cantidad de series"
-            placeholderTextColor={t.text}
-          />
-          {errors.sets && (<Text style={common.errorText}>{errors.sets}</Text>)}
+            <Text style={styles.cardInputLabel}>Series</Text>
+            <TextInput
+              value={formData.sets}
+              onChangeText={(text) => handleChange("sets", text)}
+              keyboardType="numeric"
+              style={styles.cardInput}
+              placeholder="Cantidad de series"
+              placeholderTextColor={t.text}
+            />
+            {errors.sets && (<Text style={common.errorText}>{errors.sets}</Text>)}
 
-          <Text style={styles.cardInputLabel}>Repeticiones</Text>
-          <TextInput
-            value={formData.reps}
-            onChangeText={(text) => handleChange("reps", text)}
-            style={styles.cardInput}
-            placeholder="N/A"
-            placeholderTextColor={t.text}
-          />
-          {errors.reps && (<Text style={common.errorText}>{errors.reps}</Text>)}
+            <Text style={styles.cardInputLabel}>Repeticiones</Text>
+            <TextInput
+              value={formData.reps}
+              onChangeText={(text) => handleChange("reps", text)}
+              style={styles.cardInput}
+              placeholder="N/A"
+              placeholderTextColor={t.text}
+            />
+            {errors.reps && (<Text style={common.errorText}>{errors.reps}</Text>)}
 
-          <Text style={styles.cardInputLabel}>Descanso</Text>
-          <TextInput
-            value={formData.rest}
-            onChangeText={(text) => handleChange("rest", text)}
-            style={styles.cardInput}
-            placeholder="N/A"
-            placeholderTextColor={t.text}
-          />
-          {errors.rest && (<Text style={common.errorText}>{errors.rest}</Text>)}
+            <Text style={styles.cardInputLabel}>Descanso</Text>
+            <TextInput
+              value={formData.rest}
+              onChangeText={(text) => handleChange("rest", text)}
+              style={styles.cardInput}
+              placeholder="N/A"
+              placeholderTextColor={t.text}
+            />
+            {errors.rest && (<Text style={common.errorText}>{errors.rest}</Text>)}
+          </ScrollView>
 
           <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 20 }}>
             <TouchableButton title="Cancelar" onPress={onClose} />
