@@ -1,14 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { BaseServerUrl, ExpiresIn } from "../constants/environment";
-
-let refreshTimer = null;
+import { BaseServerUrl } from "../constants/environment";
 
 export const saveToken = async (access_token, refresh_token) => {
   await AsyncStorage.setItem("access_token", access_token);
   await AsyncStorage.setItem("refresh_token", refresh_token);
-  scheduleTokenRefresh(parseInt(ExpiresIn, 10));
 };
-
 
 export const refreshAccessToken = async () => {
   try {
@@ -30,14 +26,6 @@ export const refreshAccessToken = async () => {
     return null;
   }
 };
-
-
-const scheduleTokenRefresh = (expires_in) => {
-  if (refreshTimer) clearTimeout(refreshTimer);
-  const refreshTime = (expires_in - 30) * 1000; 
-  refreshTimer = setTimeout(refreshAccessToken, refreshTime);
-};
-
 
 export const fetchWithAuth = async (url, options = {}) => {
   let token = await AsyncStorage.getItem("access_token");
@@ -69,9 +57,7 @@ export const fetchWithAuth = async (url, options = {}) => {
   return response;
 };
 
-
 export const logout = async () => {
-  if (refreshTimer) clearTimeout(refreshTimer);
   await AsyncStorage.removeItem("access_token");
   await AsyncStorage.removeItem("refresh_token");
 };
