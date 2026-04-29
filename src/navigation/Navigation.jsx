@@ -19,6 +19,7 @@ import Home from "../screens/Home/Home";
 // Trainee Screens
 import TraineePayments from "../screens/Home/Trainee/TraineePayments";
 import TraineePlans from "../screens/Home/Trainee/TraineePlans";
+import TraineeExerciseDetail from "../screens/Home/Trainee/TraineeExerciseDetail";
 import PaymentDetail from "../screens/Home/Trainee/PaymentDetail";
 // Admin Users Screens
 import AdminUsers from "../screens/Home/Admin/Users/AdminUsers";
@@ -85,6 +86,7 @@ export default function Navigation() {
         {/* Trainee Families Screens */}
         <Stack.Screen name="TraineePayments" component={TraineePayments} />
         <Stack.Screen name="TraineePlans" component={TraineePlans} />
+        <Stack.Screen name="TraineeExerciseDetail" component={TraineeExerciseDetail} />
         <Stack.Screen name="PaymentDetail" component={PaymentDetail} />
         {/* Admin Users Screens */}
         <Stack.Screen name="AdminUsers" component={AdminUsers} />

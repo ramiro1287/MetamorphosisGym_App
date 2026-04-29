@@ -1,6 +1,6 @@
 import React, { useContext, useState, useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
-import { Text, StyleSheet, View, Modal, TouchableOpacity } from "react-native";
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { Text, StyleSheet, View, TouchableOpacity } from "react-native";
 import { GymContext } from "../../../context/GymContext";
 import ScrollContainer from "../../../components/Containers/ScrollContainer";
 import { fetchWithAuth } from "../../../services/authService";
@@ -9,19 +9,16 @@ import NoConnectionScreen from "../../../components/NoConnection/NoConnectionScr
 import { WeekDaysMap } from "../../../constants/trainingPlans";
 import { buttonTextConfirmDark } from "../../../constants/UI/colors";
 import { getThemeColors, getCommonStyles } from "../../../constants/UI/theme";
-import { formatDate, formatExerciseType } from "../../../utils/formatters";
+import { formatDate } from "../../../utils/formatters";
 import TouchableButton from "../../../components/Buttons/TouchableButton";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import ImageViewing from "react-native-image-viewing";
 
 export default function TraineePlans() {
   const [trainingPlan, setTrainingPlan] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
-  const [selectedExercise, setSelectedExercise] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
   const { isDarkMode } = useContext(GymContext);
+  const navigation = useNavigation();
 
   useFocusEffect(
     useCallback(() => {
@@ -163,8 +160,7 @@ export default function TraineePlans() {
                 activeOpacity={0.6}
                 style={[common.cardContainer, styles.exerciseCard]}
                 onPress={() => {
-                  setSelectedExercise(ex);
-                  setModalVisible(true);
+                  navigation.navigate("TraineeExerciseDetail", { exercise: ex });
                 }}
               >
                 <View style={styles.exerciseCardContent}>
@@ -197,78 +193,6 @@ export default function TraineePlans() {
           <Text style={[common.titleText, { marginVertical: 20, marginBottom: 0 }]}>Sin plan...</Text>
         )}
       </ScrollContainer>
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "rgba(0,0,0,0.5)"
-        }}>
-          <View style={{
-            backgroundColor: t.secondBackground,
-            borderRadius: 20,
-            padding: 20,
-            width: "85%",
-            maxHeight: "90%",
-          }}>
-            <ScrollContainer style={{ alignItems: "flex-start" }}>
-              <Text style={[common.titleText, { marginVertical: 20, marginBottom: 0, fontSize: 20 }]}>
-                {selectedExercise?.exercise.name}
-              </Text>
-              <Text style={styles.exerciseDetail}>
-                Grupo muscular: {formatExerciseType(selectedExercise?.exercise.type)}
-              </Text>
-              <Text style={styles.exerciseDetail}>
-                Series: {selectedExercise?.sets ? selectedExercise?.sets : "N/A"}
-              </Text>
-              <Text style={styles.exerciseDetail}>
-                Repeticiones: {selectedExercise?.reps || "N/A"}
-              </Text>
-              <Text style={styles.exerciseDetail}>
-                Descanso: {selectedExercise?.rest || "N/A"}
-              </Text>
-              <Text style={[styles.label, { marginTop: 10 }]}>Descripción:</Text>
-              <Text style={styles.exerciseDetail}>
-                {selectedExercise?.exercise.description}
-              </Text>
-              {selectedExercise?.description ? (
-                <>
-                  <Text style={[styles.label, { marginTop: 10 }]}>Anotaciones del entrenador:</Text>
-                  <Text style={styles.exerciseDetail}>
-                    {selectedExercise.description}
-                  </Text>
-                </>
-              ) : null}
-              {selectedExercise?.exercise?.illustration ? (
-                <TouchableButton
-                  title="Mostrar Ejercicio"
-                  onPress={() => setIsImageViewerVisible(true)}
-                  style={{ marginTop: 20, alignSelf: "center", width: "100%" }}
-                />
-              ) : null}
-              <TouchableButton
-                title="Cerrar"
-                onPress={() => setModalVisible(false)}
-                style={{ marginTop: 10, alignSelf: "center", width: "100%" }}
-              />
-            </ScrollContainer>
-          </View>
-        </View>
-      </Modal>
-
-      {selectedExercise?.exercise?.illustration ? (
-        <ImageViewing
-          images={[{ uri: selectedExercise.exercise.illustration }]}
-          imageIndex={0}
-          visible={isImageViewerVisible}
-          onRequestClose={() => setIsImageViewerVisible(false)}
-        />
-      ) : null}
     </View>
   );
 }
