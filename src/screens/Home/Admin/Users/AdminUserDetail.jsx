@@ -44,9 +44,9 @@ export default function AdminUserDetail() {
     }, [])
   );
 
-  const loadUser = async () => {
+  const loadUser = async (overrideId = null) => {
     try {
-      const { idNumber } = route.params || {};
+      const idNumber = overrideId || route.params?.idNumber;
       const response = await fetchWithAuth(`/admin/users/detail/${idNumber}/`);
       if (response.ok) {
         const { data } = await response.json();
@@ -177,7 +177,12 @@ export default function AdminUserDetail() {
 
       if (response.ok) {
         toastSuccess("Campo actualizado correctamente");
-        loadUser();
+        if (editField === "id_number") {
+          navigation.setParams({ idNumber: editValue });
+          loadUser(editValue);
+        } else {
+          loadUser();
+        }
         return;
       } if (response.status === 400) {
         const { data } = await response.json();
@@ -198,6 +203,7 @@ export default function AdminUserDetail() {
     if (field === "is_retired") return "si es jubilado";
     if (field === "phone") return "teléfono";
     if (field === "plan") return "tipo de plan";
+    if (field === "id_number") return "DNI";
     return field;
   };
 
@@ -281,7 +287,21 @@ export default function AdminUserDetail() {
             ) : null
           }
         </View>
-        <Text style={styles.userId}>{userDetail.id_number}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20 }}>
+          <Text style={[styles.userId, { marginBottom: 0 }]}>{userDetail.id_number}</Text>
+          {
+            (user.role === CoachRole && userDetail.role === TraineeRole)
+              || user.role === AdminRole ? (
+              <Icon
+                name="edit"
+                size={22}
+                color={t.icon}
+                onPress={() => handleEditionModal("id_number")}
+                style={[common.touchableIconContainer, { marginLeft: 10, padding: 5 }]}
+              />
+            ) : null
+          }
+        </View>
         <View style={common.infoRow}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={common.label}>Apodo</Text>
