@@ -92,6 +92,28 @@ export default function Profile() {
     });
   };
 
+  const handleDeleteAccount = async () => {
+    const confirm = await showConfirmModalAlert(
+      "¿Estás seguro de que quieres eliminar tu cuenta? Esta acción es irreversible."
+    );
+    if (!confirm) return;
+
+    try {
+      const response = await fetchWithAuth("/users/delete/", {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        toastSuccess("Cuenta eliminada correctamente");
+        handleLogout();
+      } else {
+        toastError("Error", "No se pudo eliminar la cuenta");
+      }
+    } catch (error) {
+      toastError("Error", "Error de conexión");
+    }
+  };
+
   const styles = StyleSheet.create({
     userName: {
       fontSize: 24,
@@ -208,6 +230,13 @@ export default function Profile() {
           title="Cambiar contraseña"
           onPress={handleChangePassword}
           style={{ marginTop: 15 }}
+        />
+
+        <TouchableButton
+          title="Eliminar cuenta"
+          onPress={handleDeleteAccount}
+          style={{ marginTop: 15 }}
+          variant="error"
         />
       </View>
 
