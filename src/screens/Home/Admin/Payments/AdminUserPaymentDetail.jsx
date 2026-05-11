@@ -6,8 +6,7 @@ import {
   View,
   Modal,
   TextInput,
-  TouchableOpacity,
-  Linking,
+  TouchableOpacity
 } from "react-native";
 import PickerSelect from "../../../../components/Picker/PickerSelect";
 import DatePickerModal from "../../../../components/Picker/DatePickerModal";

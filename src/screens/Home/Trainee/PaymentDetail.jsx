@@ -19,7 +19,7 @@ export default function PaymentDetail() {
   const [payment, setPayment] = useState(null);
   const [connectionError, setConnectionError] = useState(false);
   const [isProcessingPay, setIsProcessingPay] = useState(false);
-  const { isDarkMode, user } = useContext(GymContext);
+  const { isDarkMode, user, gymInfo } = useContext(GymContext);
   const route = useRoute();
 
   const t = getThemeColors(isDarkMode);
@@ -136,7 +136,7 @@ export default function PaymentDetail() {
           <Text style={[common.cardRowText, styles.cardRowText]}>{getMonth(payment.created_at)}</Text>
         </View>
 
-        {(payment.status === PayStatusPending || payment.status === PayStatusProcessing) && (
+        {(gymInfo.mercadopago_checkout_enabled && (payment.status === PayStatusPending || payment.status === PayStatusProcessing)) && (
           <View style={styles.cardRowContainer}>
             <TouchableButton
               title={(payment.payment_url && payment.status === PayStatusProcessing) ? "Continuar con el pago" : "Pagar cuota"}
