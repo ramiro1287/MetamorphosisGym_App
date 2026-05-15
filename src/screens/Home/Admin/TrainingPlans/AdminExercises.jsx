@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useCallback } from "react";
-import { View, Text, TextInput, StyleSheet } from "react-native";
+import { View, Text, TextInput, StyleSheet, ActivityIndicator } from "react-native";
 import debounce from "lodash.debounce";
 import PickerSelect from "../../../../components/Picker/PickerSelect";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -14,6 +14,8 @@ import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme"
 import { ExercisesMap } from "../../../../constants/trainingPlans";
 import ExerciseFormModal from "./ExerciseFormModal";
 
+const PAGE_SIZE = 10;
+
 export default function AadminExercises() {
   const { isDarkMode, gymInfo } = useContext(GymContext);
   const [filters, setFilters] = useState({ type: "", name: "" });
@@ -21,38 +23,60 @@ export default function AadminExercises() {
   const [showFormModal, setShowFormModal] = useState(false);
   const [editingExercise, setEditingExercise] = useState(null);
   const [connectionError, setConnectionError] = useState(false);
+
+  const [nextUrl, setNextUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   const t = getThemeColors(isDarkMode);
   const common = getCommonStyles(isDarkMode);
 
-  const debouncedSearch = useCallback(
-    debounce(() => { loadExercises(); }, 400),
-    [filters]
-  );
+  const buildQuery = useCallback(() => {
+    const q = new URLSearchParams();
+    q.append("page_size", String(PAGE_SIZE));
+    if (filters.type) q.append("type", filters.type);
+    if (filters.name) q.append("name", filters.name);
+    return q.toString();
+  }, [filters.type, filters.name]);
 
-  useEffect(() => {
-    debouncedSearch();
-    return () => debouncedSearch.cancel();
-  }, [filters]);
-
-  const loadExercises = async () => {
+  const fetchPage = useCallback(async ({ url, append = false } = {}) => {
     try {
-      const query = new URLSearchParams();
-      if (filters.type) query.append("type", filters.type);
-      if (filters.name) query.append("name", filters.name);
-      const response = await fetchWithAuth(`/admin/training-plans/exercises/?${query.toString()}`);
-      if (response.ok) {
-        const { data } = await response.json();
-        setExercises(data);
-        setConnectionError(false);
-      } else {
-        toastError("Error", "No se pudo obtener ejercicios");
-      }
+      const finalUrl = url ?? `/admin/training-plans/exercises/?${buildQuery()}`;
+      const response = await fetchWithAuth(finalUrl);
+      if (!response.ok) throw new Error("Network");
+
+      const { data } = await response.json();
+      setNextUrl(data.next ?? null);
+      setExercises(prev => (append ? [...prev, ...data.results] : data.results));
+      setConnectionError(false);
     } catch (error) {
-      if (error.message === 'Network request failed') {
+      if (error.message === 'Network request failed' || error.message === 'Network') {
         setConnectionError(true);
       } else {
         toastError("Error", "Error de conexión");
       }
+    }
+  }, [buildQuery]);
+
+  useEffect(() => {
+    setNextUrl(null);
+    const debounced = debounce(async () => {
+      setLoading(true);
+      try { await fetchPage({ append: false }); }
+      finally { setLoading(false); }
+    }, 400);
+
+    debounced();
+    return () => debounced.cancel();
+  }, [filters, fetchPage]);
+
+  const loadMore = async () => {
+    if (loadingMore || !nextUrl) return;
+    setLoadingMore(true);
+    try {
+      await fetchPage({ url: nextUrl, append: true });
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -83,7 +107,7 @@ export default function AadminExercises() {
       );
       if (response.ok) {
         toastSuccess("Ejercicio eliminado");
-        loadExercises();
+        fetchPage({ append: false });
       } else if (response.status === 404) {
         toastError("", "Ejercicio no encontrado");
       } else {
@@ -132,9 +156,11 @@ export default function AadminExercises() {
     text: { color: t.text, marginBottom: 5 },
   });
 
-  const handleRetry = () => {
+  const handleRetry = async () => {
     setConnectionError(false);
-    loadExercises();
+    setLoading(true);
+    try { await fetchPage({ append: false }); }
+    finally { setLoading(false); }
   };
 
   if (connectionError) return <NoConnectionScreen onRetry={handleRetry} />;
@@ -164,8 +190,15 @@ export default function AadminExercises() {
         onChangeText={(text) => handleChange("name", text)}
       />
 
-      <ScrollContainer>
-        {exercises.length > 0 ? exercises.map((ex) => (
+      <ScrollContainer
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.5}
+        loadingMore={loadingMore}
+        ListFooterComponent={loadingMore ? <ActivityIndicator /> : null}
+      >
+        {loading && !exercises.length ? (
+          <ActivityIndicator />
+        ) : exercises.length > 0 ? exercises.map((ex) => (
           <View key={ex.id} style={common.cardContainerBordered}>
             <View style={styles.cardTitleRow}>
               <Text style={styles.cardTitle}>{ex.name}</Text>
@@ -201,7 +234,7 @@ export default function AadminExercises() {
           initialData={editingExercise}
           onSaved={() => {
             setShowFormModal(false);
-            loadExercises();
+            fetchPage({ append: false });
           }}
         />
       )}

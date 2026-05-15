@@ -9,7 +9,7 @@ import { toastError, toastSuccess } from "../../../../components/Toast/Toast";
 import { showConfirmModalAlert } from "../../../../components/Alerts/ConfirmModalAlert";
 import TouchableButton from "../../../../components/Buttons/TouchableButton";
 import { getThemeColors, getCommonStyles } from "../../../../constants/UI/theme";
-import { ExercisesMap } from "../../../../constants/trainingPlans";
+import { ExercisesMap, WeekDaysMap } from "../../../../constants/trainingPlans";
 
 export default function AddExerciseModal({ planId, onClose, reload, setSelectedExercise }) {
   const { isDarkMode, gymInfo } = useContext(GymContext);
@@ -17,28 +17,49 @@ export default function AddExerciseModal({ planId, onClose, reload, setSelectedE
   const common = getCommonStyles(isDarkMode);
   const [filters, setFilters] = useState({ type: "", name: "" });
   const [exercises, setExercises] = useState([]);
+  const [nextUrl, setNextUrl] = useState(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [selectedDay, setSelectedDay] = useState(1);
 
-  const debouncedSearch = useCallback(debounce(() => {
-    loadExercises();
-  }, 400), [filters]);
+  const buildQuery = useCallback(() => {
+    const q = new URLSearchParams();
+    q.append("page_size", "10");
+    if (filters.type) q.append("type", filters.type);
+    if (filters.name) q.append("name", filters.name);
+    return q.toString();
+  }, [filters.type, filters.name]);
 
-  useEffect(() => {
-    debouncedSearch();
-    return () => debouncedSearch.cancel();
-  }, [filters]);
-
-  const loadExercises = async () => {
+  const fetchPage = useCallback(async ({ url, append = false } = {}) => {
     try {
-      const query = new URLSearchParams();
-      if (filters.type) query.append("type", filters.type);
-      if (filters.name) query.append("name", filters.name);
-      const response = await fetchWithAuth(`/admin/training-plans/exercises/?${query.toString()}`);
+      const finalUrl = url ?? `/admin/training-plans/exercises/?${buildQuery()}`;
+      const response = await fetchWithAuth(finalUrl);
       if (response.ok) {
         const { data } = await response.json();
-        setExercises(data);
+        setNextUrl(data.next ?? null);
+        setExercises(prev => (append ? [...prev, ...data.results] : data.results));
       }
     } catch (error) {
       toastError("Error", "Error de conexión");
+    }
+  }, [buildQuery]);
+
+  const debouncedSearch = useCallback(debounce(() => {
+    fetchPage({ append: false });
+  }, 400), [fetchPage]);
+
+  useEffect(() => {
+    setNextUrl(null);
+    debouncedSearch();
+    return () => debouncedSearch.cancel();
+  }, [filters, debouncedSearch]);
+
+  const loadMore = async () => {
+    if (loadingMore || !nextUrl) return;
+    setLoadingMore(true);
+    try {
+      await fetchPage({ url: nextUrl, append: true });
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -57,7 +78,7 @@ export default function AddExerciseModal({ planId, onClose, reload, setSelectedE
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ plan_id: planId, exercise_id: exerciseId }),
+          body: JSON.stringify({ plan_id: planId, exercise_id: exerciseId, week_day: selectedDay }),
         }
       );
 
@@ -142,7 +163,11 @@ export default function AddExerciseModal({ planId, onClose, reload, setSelectedE
             onChangeText={(text) => handleChange("name", text)}
           />
 
-          <ScrollContainer>
+          <ScrollContainer
+            onEndReached={loadMore}
+            onEndReachedThreshold={0.5}
+            loadingMore={loadingMore}
+          >
             {exercises.length > 0 ? exercises.map((ex) => (
               <View key={ex.id} style={styles.card}>
                 <Text style={styles.title}>{ex.name}</Text>
@@ -159,7 +184,17 @@ export default function AddExerciseModal({ planId, onClose, reload, setSelectedE
             )}
           </ScrollContainer>
 
-          <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 15 }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 15 }}>
+            <View style={{ flex: 1, marginRight: 15 }}>
+              <PickerSelect
+                value={selectedDay}
+                onValueChange={(val) => setSelectedDay(parseInt(val))}
+                items={Object.entries(WeekDaysMap).map(([day, label]) => ({
+                  label,
+                  value: parseInt(day),
+                }))}
+              />
+            </View>
             <TouchableButton title="Cerrar" onPress={onClose} />
           </View>
         </View>
